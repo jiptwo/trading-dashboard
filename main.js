@@ -16,7 +16,7 @@ const chart = LightweightCharts.createChart(
   }
 );
 
-const series = chart.addCandlestickSeries();
+const series = chart.addSeries(LightweightCharts.CandlestickSeries);
 
 series.setData([
   { time: "2024-01-01", open: 100, high: 105, low: 95, close: 102 },
