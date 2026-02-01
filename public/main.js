@@ -16,7 +16,17 @@ const chart = LightweightCharts.createChart(
   }
 );
 
-const series = chart.addCandlestickSeries();
+// ✅ NEW API (v4+)
+const series = chart.addSeries(
+  LightweightCharts.CandlestickSeries,
+  {
+    upColor: "#26a69a",
+    downColor: "#ef5350",
+    borderVisible: false,
+    wickUpColor: "#26a69a",
+    wickDownColor: "#ef5350",
+  }
+);
 
 series.setData([
   { time: "2024-01-01", open: 100, high: 110, low: 95, close: 105 },
