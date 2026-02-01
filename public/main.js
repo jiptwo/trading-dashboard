@@ -26,7 +26,8 @@ const chart = LightweightCharts.createChart(container, {
   },
 });
 
-const series = chart.addCandlestickSeries({
+// ✅ API V5+ CORRECTE
+const series = chart.addSeries(LightweightCharts.CandlestickSeries, {
   upColor: "#26a69a",
   downColor: "#ef5350",
   borderUpColor: "#26a69a",
@@ -44,3 +45,4 @@ series.setData([
 window.addEventListener("resize", () => {
   chart.resize(window.innerWidth, window.innerHeight);
 });
+
