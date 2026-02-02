@@ -9,9 +9,9 @@
 
 body {
   margin: 0;
-  font-family: Inter, system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
 }
 
 #top-bar {
@@ -25,13 +25,11 @@ body {
 
 .logo {
   font-weight: bold;
-  margin-right: 12px;
 }
 
 .symbol-search {
   display: flex;
   align-items: center;
-  background: #0d1117;
   border: 1px solid var(--border);
   border-radius: 6px;
 }
@@ -41,13 +39,12 @@ body {
   border: none;
   color: var(--text);
   padding: 6px;
-  width: 90px;
+  width: 80px;
 }
 
 .toolbar {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-left: auto;
 }
 
@@ -63,10 +60,6 @@ body {
   cursor: pointer;
 }
 
-.btn:hover {
-  background: #161b22;
-}
-
 .icon {
   width: 16px;
   height: 16px;
@@ -77,11 +70,12 @@ body {
   color: var(--muted);
 }
 
-.text-btn {
-  padding: 6px 10px;
+.favorites {
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
 }
 
-/* DROPDOWN */
 .dropdown {
   position: relative;
 }
@@ -102,13 +96,6 @@ body {
   display: block;
 }
 
-.dropdown-section {
-  padding: 6px 10px;
-  font-size: 11px;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
-}
-
 .dropdown-item {
   padding: 8px 10px;
   cursor: pointer;
@@ -118,57 +105,10 @@ body {
   background: #21262d;
 }
 
-/* LAYOUT */
-#ai-bar {
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--border);
-  background: #0d1117;
-  font-size: 12px;
-}
-
-#main-layout {
-  display: grid;
-  grid-template-columns: 48px 1fr 48px;
-  height: calc(100vh - 96px);
-}
-
-#left-bar,
-#right-bar {
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px;
-  gap: 8px;
-}
-
-#right-bar {
-  border-left: 1px solid var(--border);
-  border-right: none;
-}
-
 #chart-area {
-  background: #0d1117;
+  height: calc(100vh - 48px);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-#bottom-bar {
-  height: 32px;
-  border-top: 1px solid var(--border);
-  background: var(--panel);
-}
-
-.tooltip {
-  position: fixed;
-  transform: translateX(-50%);
-  background: black;
-  color: white;
-  font-size: 11px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  pointer-events: none;
-  z-index: 1000;
+  background: #0d1117;
 }
