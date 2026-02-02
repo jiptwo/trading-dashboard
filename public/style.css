@@ -1,136 +1,174 @@
-* {
-  box-sizing: border-box;
+:root {
+  --bg: #0e1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #3fb950;
+}
+
+body {
   margin: 0;
-  padding: 0;
-  font-family: system-ui, Arial, sans-serif;
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  background: #0b0e11;
-  color: #e0e0e0;
-}
-
-/* TOP BAR */
 #top-bar {
-  height: 56px;
-  background: #131722;
   display: flex;
   align-items: center;
-  padding: 0 12px;
   gap: 12px;
-  border-bottom: 1px solid #2a2e39;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
 }
 
 .logo {
   font-weight: bold;
+  margin-right: 12px;
 }
 
-.icon {
-  width: 18px;
-  height: 18px;
-  filter: brightness(0) invert(1);
-}
-
-.light .icon {
-  filter: none;
-}
-
-/* SYMBOL SEARCH */
 .symbol-search {
   display: flex;
   align-items: center;
-  background: #0b0e11;
-  border: 1px solid #2a2e39;
-  padding: 4px 8px;
-  gap: 6px;
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 .symbol-search input {
-  background: transparent;
+  background: none;
   border: none;
-  color: white;
-  width: 80px;
+  color: var(--text);
+  padding: 6px;
+  width: 90px;
 }
 
-/* BUTTONS */
-.top-buttons {
-  margin-left: auto;
+.toolbar {
   display: flex;
+  align-items: center;
   gap: 6px;
+  margin-left: auto;
 }
 
 .btn {
-  background: #1e222d;
-  border: none;
-  color: white;
-  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0d1117;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 8px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
+.btn:hover {
+  background: #161b22;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
 .arrow {
-  margin-left: 4px;
+  font-size: 10px;
+  color: var(--muted);
 }
 
-.avatar {
-  background: #2a2e39;
+.text-btn {
   padding: 6px 10px;
-  border-radius: 50%;
 }
 
-/* AI BAR */
+/* DROPDOWN */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-width: 160px;
+  z-index: 10;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-section {
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-item {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #21262d;
+}
+
+/* LAYOUT */
 #ai-bar {
-  height: 40px;
-  background: #10131a;
-  padding: 8px 12px;
-  font-size: 13px;
-  border-bottom: 1px solid #2a2e39;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  background: #0d1117;
+  font-size: 12px;
 }
 
-/* MAIN */
 #main-layout {
-  display: flex;
-  height: calc(100vh - 56px - 40px - 36px);
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  height: calc(100vh - 96px);
 }
 
-/* LEFT */
-#left-bar {
-  width: 48px;
-  background: #131722;
+#left-bar,
+#right-bar {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 10px;
-  gap: 10px;
+  padding: 6px;
+  gap: 8px;
 }
 
-/* CHART */
+#right-bar {
+  border-left: 1px solid var(--border);
+  border-right: none;
+}
+
 #chart-area {
-  flex: 1;
-  background: #0b0e11;
+  background: #0d1117;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #555;
 }
 
-/* RIGHT */
-#right-bar {
-  width: 16%;
-  max-width: 260px;
-  background: #131722;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* BOTTOM */
 #bottom-bar {
-  height: 36px;
-  background: #131722;
-  border-top: 1px solid #2a2e39;
-  padding: 8px 12px;
-  font-size: 13px;
+  height: 32px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.tooltip {
+  position: fixed;
+  transform: translateX(-50%);
+  background: black;
+  color: white;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1000;
 }
