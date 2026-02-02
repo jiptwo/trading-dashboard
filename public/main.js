@@ -1,8 +1,13 @@
 console.log("MAIN.JS LOADED");
 
-/* =========================
-   STATE (source of truth)
-========================= */
+/* ===== DATA ===== */
+
+const chartTypes = [
+  { label: "Bars", icon: "bars.svg", favorite: false },
+  { label: "Candles", icon: "candles.svg", favorite: true },
+  { label: "Heikin Ashi", icon: "heikin.svg", favorite: true },
+  { label: "Line", icon: "line.svg", favorite: false },
+];
 
 const timeframes = [
   { label: "1s", favorite: true },
@@ -12,42 +17,17 @@ const timeframes = [
   { label: "1h", favorite: false },
   { label: "D", favorite: false },
   { label: "W", favorite: false },
-  { label: "M", favorite: false },
 ];
 
-const chartTypes = [
-  { label: "Candles", icon: "candles.svg", favorite: true },
-  { label: "Bars", icon: "candles.svg", favorite: false },
-  { label: "Heikin Ashi", icon: "heikin.svg", favorite: true },
-  { label: "Line", icon: "candles.svg", favorite: false },
-];
+/* ===== HELPERS ===== */
 
-/* =========================
-   RENDER FUNCTIONS
-========================= */
-
-function renderTimeframes() {
-  const favs = document.getElementById("tf-favorites");
-  const menu = document.getElementById("tf-menu");
-
-  favs.innerHTML = "";
-  menu.innerHTML = "";
-
-  timeframes.forEach(tf => {
-    if (tf.favorite) {
-      const btn = document.createElement("button");
-      btn.className = "btn fav-btn";
-      btn.textContent = tf.label;
-      favs.appendChild(btn);
-    }
-
-    const item = document.createElement("div");
-    item.className = "item";
-    item.textContent = tf.label + (tf.favorite ? " ⭐" : "");
-    item.onclick = () => toggleFavorite(timeframes, tf.label, renderTimeframes);
-    menu.appendChild(item);
-  });
+function toggleFavorite(list, label, rerender) {
+  const item = list.find(i => i.label === label);
+  if (item) item.favorite = !item.favorite;
+  rerender();
 }
+
+/* ===== RENDER ===== */
 
 function renderChartTypes() {
   const favs = document.getElementById("chart-favorites");
@@ -59,34 +39,50 @@ function renderChartTypes() {
   chartTypes.forEach(ct => {
     if (ct.favorite) {
       const btn = document.createElement("button");
-      btn.className = "btn icon-btn";
-      btn.innerHTML = `<img src="./icons/${ct.icon}" title="${ct.label}" />`;
+      btn.className = "btn";
+      btn.innerHTML = `<img src="./icons/${ct.icon}" class="icon" />`;
       favs.appendChild(btn);
     }
 
     const item = document.createElement("div");
-    item.className = "item";
-    item.textContent = ct.label + (ct.favorite ? " ⭐" : "");
+    item.className = "chart-item";
+    item.innerHTML = `
+      <img src="./icons/${ct.icon}" class="menu-icon" />
+      <span>${ct.label}</span>
+      <span class="star">${ct.favorite ? "⭐" : ""}</span>
+    `;
     item.onclick = () => toggleFavorite(chartTypes, ct.label, renderChartTypes);
     menu.appendChild(item);
   });
 }
 
-/* =========================
-   LOGIC
-========================= */
+function renderTimeframes() {
+  const favs = document.getElementById("timeframe-favorites");
+  const menu = document.getElementById("timeframe-menu");
 
-function toggleFavorite(list, label, rerender) {
-  const item = list.find(i => i.label === label);
-  item.favorite = !item.favorite;
-  rerender();
+  favs.innerHTML = "";
+  menu.innerHTML = "";
+
+  timeframes.forEach(tf => {
+    if (tf.favorite) {
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.textContent = tf.label;
+      favs.appendChild(btn);
+    }
+
+    const item = document.createElement("div");
+    item.className = "timeframe-item";
+    item.innerHTML = `
+      <span>${tf.label}</span>
+      <span class="star">${tf.favorite ? "⭐" : ""}</span>
+    `;
+    item.onclick = () => toggleFavorite(timeframes, tf.label, renderTimeframes);
+    menu.appendChild(item);
+  });
 }
 
-/* =========================
-   INIT
-========================= */
+/* ===== INIT ===== */
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderTimeframes();
-  renderChartTypes();
-});
+renderChartTypes();
+renderTimeframes();
