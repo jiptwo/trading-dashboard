@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Trading Platform</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="./style.css" />
@@ -11,60 +10,79 @@
 
 <body>
 
-  <!-- TOP HEADER -->
-  <header id="top-bar">
-    <div class="logo">LOGO</div>
+<header id="top-bar">
 
-    <div class="search">
-      <input type="text" placeholder="Search symbol (AAPL, TSLA...)" />
-    </div>
+  <!-- LOGO -->
+  <div class="logo">LOGO</div>
 
-    <div class="top-actions">
-      <button>TF</button>
-      <button>Candles</button>
-      <button>Indicators</button>
-      <button>Compare</button>
-      <button>Settings</button>
-      <div class="avatar">👤</div>
-    </div>
-  </header>
-
-  <!-- AI BAR -->
-  <section id="ai-bar">
-    AI insights will appear here
-  </section>
-
-  <!-- MAIN AREA -->
-  <div id="main-layout">
-
-    <!-- LEFT TOOLBAR -->
-    <aside id="left-bar">
-      <button>✏️</button>
-      <button>📐</button>
-      <button>📊</button>
-    </aside>
-
-    <!-- CHART ZONE -->
-    <main id="chart-area">
-      Chart area
-    </main>
-
-    <!-- RIGHT PANEL -->
-    <aside id="right-bar">
-      <button>Watchlist</button>
-      <button>Alerts</button>
-      <button>Chat</button>
-      <button>Calendar</button>
-    </aside>
-
+  <!-- SYMBOL SEARCH -->
+  <div class="symbol-search">
+    <span class="icon">📈</span>
+    <input type="text" value="AAPL" />
   </div>
 
-  <!-- BOTTOM BAR -->
-  <footer id="bottom-bar">
-    Bottom tools / strategy / logs
-  </footer>
+  <!-- TOP BUTTONS -->
+  <div class="top-buttons">
 
-  <script src="./main.js"></script>
+    <!-- CANDLE TYPE -->
+    <button class="btn">
+      🕯️
+      <span class="arrow">▾</span>
+    </button>
+
+    <!-- TIMEFRAME -->
+    <button class="btn">⏱️</button>
+
+    <!-- INDICATORS -->
+    <button class="btn">📊</button>
+
+    <!-- COMPARE -->
+    <button class="btn">➕▢</button>
+
+    <!-- SETTINGS -->
+    <button class="btn">⚙️</button>
+
+    <!-- USER -->
+    <div class="avatar">👤</div>
+  </div>
+
+</header>
+
+<!-- AI BAR -->
+<section id="ai-bar">
+  AI section (future)
+</section>
+
+<!-- MAIN LAYOUT -->
+<div id="main-layout">
+
+  <!-- LEFT DRAWING TOOLS -->
+  <aside id="left-bar">
+    ✏️
+    📐
+    📉
+  </aside>
+
+  <!-- CHART -->
+  <main id="chart-area">
+    Chart Area
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside id="right-bar">
+    <button>📄 Watchlist</button>
+    <button>⏰ Alerts</button>
+    <button>💬 Chat</button>
+    <button>📅 Calendar</button>
+  </aside>
+
+</div>
+
+<footer id="bottom-bar">
+  Bottom tools
+</footer>
+
+<script src="./main.js"></script>
 </body>
 </html>
 
