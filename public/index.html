@@ -9,23 +9,25 @@
 
 <body class="dark">
 
+<!-- ================= TOP BAR ================= -->
 <header id="top-bar">
 
   <div class="logo">LOGO</div>
 
   <!-- SYMBOL SEARCH -->
   <div class="symbol-search">
-    <button class="btn icon-btn">
+    <button class="btn icon-btn" title="Search symbol">
       <img src="./icons/search.svg" class="icon" />
     </button>
     <input type="text" value="AAPL" />
   </div>
 
+  <!-- TOOLBAR -->
   <div class="toolbar">
 
     <!-- CHART TYPE -->
     <div class="dropdown" id="chartType">
-      <button class="btn icon-btn">
+      <button class="btn icon-btn" title="Chart type">
         <img src="./icons/candles.svg" class="icon" />
         <div class="favorites" id="chartTypeFavorites"></div>
         <span class="arrow">▾</span>
@@ -42,7 +44,7 @@
 
     <!-- TIMEFRAME -->
     <div class="dropdown" id="timeframe">
-      <button class="btn icon-btn">
+      <button class="btn icon-btn" title="Timeframe">
         <img src="./icons/timeframe.svg" class="icon" />
         <div class="favorites" id="timeframeFavorites"></div>
         <span class="arrow">▾</span>
@@ -58,14 +60,68 @@
     </div>
 
     <!-- INDICATORS -->
-    <button class="btn text-btn">Indicators</button>
+    <button class="btn text-btn" title="Indicators">Indicators</button>
+
+    <!-- COMPARE -->
+    <button class="btn icon-btn" title="Compare">
+      <img src="./icons/compare.svg" class="icon" />
+    </button>
+
+    <!-- SETTINGS -->
+    <button class="btn icon-btn" title="Settings">
+      <img src="./icons/settings.svg" class="icon" />
+    </button>
+
+    <!-- USER -->
+    <button class="btn icon-btn" title="User">
+      <img src="./icons/user.svg" class="icon" />
+    </button>
 
   </div>
 </header>
 
-<main id="chart-area">
-  Chart Area
-</main>
+<!-- ================= AI BAR ================= -->
+<section id="ai-bar">
+  AI assistant (future)
+</section>
+
+<!-- ================= MAIN LAYOUT ================= -->
+<div id="main-layout">
+
+  <!-- LEFT BAR -->
+  <aside id="left-bar">
+    <button class="tool-btn">✏️</button>
+    <button class="tool-btn">📐</button>
+    <button class="tool-btn">📊</button>
+  </aside>
+
+  <!-- CHART -->
+  <main id="chart-area">
+    Chart Area
+  </main>
+
+  <!-- RIGHT BAR -->
+  <aside id="right-bar">
+    <button class="btn icon-btn" title="Watchlist">
+      <img src="./icons/watchlist.svg" class="icon" />
+    </button>
+    <button class="btn icon-btn" title="Alerts">
+      <img src="./icons/alert.svg" class="icon" />
+    </button>
+    <button class="btn icon-btn" title="Chat">
+      <img src="./icons/chat.svg" class="icon" />
+    </button>
+    <button class="btn icon-btn" title="Calendar">
+      <img src="./icons/calendar.svg" class="icon" />
+    </button>
+  </aside>
+
+</div>
+
+<!-- ================= BOTTOM BAR ================= -->
+<footer id="bottom-bar">
+  Bottom tools
+</footer>
 
 <script src="./main.js"></script>
 </body>
