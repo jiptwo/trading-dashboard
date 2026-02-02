@@ -2,19 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Trading Dashboard</title>
+  <title>Trading Platform</title>
 
-  <!-- Lightweight Charts (DOIT être chargé AVANT main.js) -->
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- CSS -->
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-  <div id="chart"></div>
 
-  <!-- MAIN JS (chargé APRÈS la librairie) -->
+  <!-- TOP HEADER -->
+  <header id="top-bar">
+    <div class="logo">LOGO</div>
+
+    <div class="search">
+      <input type="text" placeholder="Search symbol (AAPL, TSLA...)" />
+    </div>
+
+    <div class="top-actions">
+      <button>TF</button>
+      <button>Candles</button>
+      <button>Indicators</button>
+      <button>Compare</button>
+      <button>Settings</button>
+      <div class="avatar">👤</div>
+    </div>
+  </header>
+
+  <!-- AI BAR -->
+  <section id="ai-bar">
+    AI insights will appear here
+  </section>
+
+  <!-- MAIN AREA -->
+  <div id="main-layout">
+
+    <!-- LEFT TOOLBAR -->
+    <aside id="left-bar">
+      <button>✏️</button>
+      <button>📐</button>
+      <button>📊</button>
+    </aside>
+
+    <!-- CHART ZONE -->
+    <main id="chart-area">
+      Chart area
+    </main>
+
+    <!-- RIGHT PANEL -->
+    <aside id="right-bar">
+      <button>Watchlist</button>
+      <button>Alerts</button>
+      <button>Chat</button>
+      <button>Calendar</button>
+    </aside>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <footer id="bottom-bar">
+    Bottom tools / strategy / logs
+  </footer>
+
   <script src="./main.js"></script>
 </body>
 </html>
+
