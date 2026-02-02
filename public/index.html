@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <title>Trading Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body class="dark">
+<body>
 
 <header id="top-bar">
 
@@ -16,68 +17,64 @@
 
   <!-- SYMBOL SEARCH -->
   <div class="symbol-search">
-    <button class="btn icon-btn" title="Search">
-      <img src="./icons/search.svg" />
+    <button class="btn">
+      <img src="./icons/search.svg" class="icon" />
     </button>
     <input type="text" value="AAPL" />
   </div>
 
   <!-- COMPARE -->
-  <button class="btn icon-btn" title="Compare">
-    <img src="./icons/compare.svg" />
+  <button class="btn" title="Compare">
+    <img src="./icons/compare.svg" class="icon" />
   </button>
 
-  <!-- TIMEFRAME FAVORITES (JS) -->
-  <div class="favorites" id="tf-favorites"></div>
+  <!-- FAVORITES CHART TYPES -->
+  <div id="chart-favorites"></div>
 
-  <!-- TIMEFRAME MENU -->
+  <!-- CHART TYPE DROPDOWN -->
   <div class="dropdown">
-    <button class="btn dropdown-btn" title="Timeframes">
-      <span class="arrow">▾</span>
-    </button>
-    <div class="dropdown-menu" id="tf-menu"></div>
-  </div>
-
-  <!-- CHART TYPE FAVORITES (JS) -->
-  <div class="favorites" id="chart-favorites"></div>
-
-  <!-- CHART TYPE MENU -->
-  <div class="dropdown">
-    <button class="btn dropdown-btn" title="Chart type">
-      <img src="./icons/candles.svg" />
+    <button class="btn dropdown-btn">
+      Chart
       <span class="arrow">▾</span>
     </button>
     <div class="dropdown-menu" id="chart-menu"></div>
   </div>
 
-  <!-- INDICATORS -->
-  <button class="btn text-btn">Indicators</button>
+  <!-- FAVORITES TIMEFRAMES -->
+  <div id="timeframe-favorites"></div>
 
-  <!-- RIGHT SIDE -->
-  <div class="right-actions">
-    <button class="btn icon-btn" title="Settings">
-      <img src="./icons/settings.svg" />
+  <!-- TIMEFRAME DROPDOWN -->
+  <div class="dropdown">
+    <button class="btn dropdown-btn">
+      Timeframe
+      <span class="arrow">▾</span>
     </button>
-    <button class="btn icon-btn" title="User">
-      <img src="./icons/user.svg" />
+    <div class="dropdown-menu" id="timeframe-menu"></div>
+  </div>
+
+  <!-- INDICATORS -->
+  <button class="btn">Indicators</button>
+
+  <!-- RIGHT ACTIONS -->
+  <div class="right-actions">
+    <button class="btn">
+      <img src="./icons/settings.svg" class="icon" />
+    </button>
+    <button class="btn">
+      <img src="./icons/user.svg" class="icon" />
     </button>
   </div>
 
 </header>
 
 <!-- AI BAR -->
-<section id="ai-bar">
-  AI assistant (future)
-</section>
+<section id="ai-bar">AI assistant (future)</section>
 
-<!-- MAIN -->
 <div id="main-layout">
 
-  <!-- LEFT TOOLS -->
+  <!-- LEFT BAR -->
   <aside id="left-bar">
-    <button class="tool">✏️</button>
-    <button class="tool">📐</button>
-    <button class="tool">📉</button>
+    tools
   </aside>
 
   <!-- CHART -->
@@ -87,18 +84,10 @@
 
   <!-- RIGHT BAR -->
   <aside id="right-bar">
-    <button class="btn icon-btn">
-      <img src="./icons/watchlist.svg" />
-    </button>
-    <button class="btn icon-btn">
-      <img src="./icons/alert.svg" />
-    </button>
-    <button class="btn icon-btn">
-      <img src="./icons/chat.svg" />
-    </button>
-    <button class="btn icon-btn">
-      <img src="./icons/calendar.svg" />
-    </button>
+    <button class="btn"><img src="./icons/watchlist.svg" class="icon" /></button>
+    <button class="btn"><img src="./icons/alert.svg" class="icon" /></button>
+    <button class="btn"><img src="./icons/chat.svg" class="icon" /></button>
+    <button class="btn"><img src="./icons/calendar.svg" class="icon" /></button>
   </aside>
 
 </div>
