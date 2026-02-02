@@ -22,42 +22,24 @@
     <input type="text" value="AAPL" />
   </div>
 
-  <!-- FAVORITES (TIMEFRAMES) -->
-  <div class="favorites" id="tf-favorites">
-    <button class="btn fav-btn">1m</button>
-    <button class="btn fav-btn active">5m</button>
-    <button class="btn fav-btn">4h</button>
-    <button class="btn fav-btn">D</button>
-    <button class="btn fav-btn">W</button>
-    <button class="btn fav-btn">M</button>
-  </div>
+  <!-- COMPARE -->
+  <button class="btn icon-btn" title="Compare">
+    <img src="./icons/compare.svg" />
+  </button>
+
+  <!-- TIMEFRAME FAVORITES (JS) -->
+  <div class="favorites" id="tf-favorites"></div>
 
   <!-- TIMEFRAME MENU -->
   <div class="dropdown">
     <button class="btn dropdown-btn" title="Timeframes">
-      ⏱️ <span class="arrow">▾</span>
+      <span class="arrow">▾</span>
     </button>
-    <div class="dropdown-menu">
-      <div class="item">1s ⭐</div>
-      <div class="item">1m ⭐</div>
-      <div class="item">5m ⭐</div>
-      <div class="item">15m</div>
-      <div class="item">1h</div>
-      <div class="item">D</div>
-      <div class="item">W</div>
-      <div class="item">M</div>
-    </div>
+    <div class="dropdown-menu" id="tf-menu"></div>
   </div>
 
-  <!-- FAVORITES (CHART TYPE) -->
-  <div class="favorites" id="chart-favorites">
-    <button class="btn icon-btn" title="Candles">
-      <img src="./icons/candles.svg" />
-    </button>
-    <button class="btn icon-btn" title="Heikin Ashi">
-      <img src="./icons/heikin.svg" />
-    </button>
-  </div>
+  <!-- CHART TYPE FAVORITES (JS) -->
+  <div class="favorites" id="chart-favorites"></div>
 
   <!-- CHART TYPE MENU -->
   <div class="dropdown">
@@ -65,33 +47,21 @@
       <img src="./icons/candles.svg" />
       <span class="arrow">▾</span>
     </button>
-    <div class="dropdown-menu">
-      <div class="item">Candles ⭐</div>
-      <div class="item">Bars</div>
-      <div class="item">Heikin Ashi ⭐</div>
-      <div class="item">Line</div>
-      <div class="item">Area</div>
-      <div class="item">Renko</div>
-    </div>
+    <div class="dropdown-menu" id="chart-menu"></div>
   </div>
 
   <!-- INDICATORS -->
   <button class="btn text-btn">Indicators</button>
 
-  <!-- COMPARE -->
-  <button class="btn icon-btn" title="Compare">
-    <img src="./icons/compare.svg" />
-  </button>
-
-  <!-- SETTINGS -->
-  <button class="btn icon-btn" title="Settings">
-    <img src="./icons/settings.svg" />
-  </button>
-
-  <!-- USER -->
-  <button class="btn icon-btn" title="User">
-    <img src="./icons/user.svg" />
-  </button>
+  <!-- RIGHT SIDE -->
+  <div class="right-actions">
+    <button class="btn icon-btn" title="Settings">
+      <img src="./icons/settings.svg" />
+    </button>
+    <button class="btn icon-btn" title="User">
+      <img src="./icons/user.svg" />
+    </button>
+  </div>
 
 </header>
 
@@ -117,16 +87,16 @@
 
   <!-- RIGHT BAR -->
   <aside id="right-bar">
-    <button class="btn icon-btn" title="Watchlist">
+    <button class="btn icon-btn">
       <img src="./icons/watchlist.svg" />
     </button>
-    <button class="btn icon-btn" title="Alerts">
+    <button class="btn icon-btn">
       <img src="./icons/alert.svg" />
     </button>
-    <button class="btn icon-btn" title="Chat">
+    <button class="btn icon-btn">
       <img src="./icons/chat.svg" />
     </button>
-    <button class="btn icon-btn" title="Calendar">
+    <button class="btn icon-btn">
       <img src="./icons/calendar.svg" />
     </button>
   </aside>
