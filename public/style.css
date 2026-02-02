@@ -1,12 +1,107 @@
-html, body {
+/* RESET */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+/* BASE */
+html, body {
   width: 100%;
   height: 100%;
   background: #0b0e11;
+  color: #e0e0e0;
 }
 
-#chart {
-  width: 100vw;
-  height: 100vh;
+/* TOP BAR */
+#top-bar {
+  height: 56px;
+  background: #131722;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+}
+
+.logo {
+  font-weight: bold;
+}
+
+.search input {
+  background: #0b0e11;
+  border: 1px solid #2a2e39;
+  color: white;
+  padding: 6px 10px;
+  width: 220px;
+}
+
+.top-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.top-actions button,
+.avatar {
+  background: #1e222d;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+/* AI BAR */
+#ai-bar {
+  height: 40px;
+  background: #10131a;
+  border-bottom: 1px solid #2a2e39;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* MAIN LAYOUT */
+#main-layout {
+  display: flex;
+  height: calc(100vh - 56px - 40px - 36px);
+}
+
+/* LEFT BAR */
+#left-bar {
+  width: 48px;
+  background: #131722;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  gap: 10px;
+}
+
+/* CHART AREA */
+#chart-area {
+  flex: 1;
+  background: #0b0e11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+}
+
+/* RIGHT BAR */
+#right-bar {
+  width: 220px;
+  background: #131722;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 10px;
+}
+
+/* BOTTOM BAR */
+#bottom-bar {
+  height: 36px;
+  background: #131722;
+  border-top: 1px solid #2a2e39;
+  padding: 8px 12px;
+  font-size: 13px;
 }
