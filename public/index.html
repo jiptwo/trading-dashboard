@@ -5,10 +5,11 @@
   <title>Trading Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- STYLES -->
   <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body>
+<body class="dark">
 
 <header id="top-bar">
 
@@ -17,57 +18,98 @@
 
   <!-- SYMBOL SEARCH -->
   <div class="symbol-search">
-   <button class="btn">
-  <img src="./icons/search.svg" class="icon" />
-  </button>
+    <button class="btn icon-btn" data-tooltip="Search symbol">
+      <img src="./icons/search.svg" class="icon" />
+    </button>
     <input type="text" value="AAPL" />
   </div>
 
-  <!-- TOP BUTTONS -->
-  <div class="top-buttons">
+  <!-- TOOLBAR -->
+  <div class="toolbar">
 
     <!-- CANDLE TYPE -->
-   <button class="btn">
-  <img src="./icons/candles.svg" class="icon" />
-     <span class="arrow">▾</span>
-   </button>
+    <div class="dropdown">
+      <button class="btn icon-btn" data-tooltip="Chart type">
+        <img src="./icons/candles.svg" class="icon" />
+        <span class="arrow">▾</span>
+      </button>
+      <div class="dropdown-menu">
+        <div class="dropdown-section">Chart Type</div>
+        <div class="dropdown-item">Candles ⭐</div>
+        <div class="dropdown-item">Bars</div>
+        <div class="dropdown-item">Heikin Ashi</div>
+        <div class="dropdown-item">Line</div>
+        <div class="dropdown-item">Volume Candles</div>
+      </div>
+    </div>
 
     <!-- TIMEFRAME -->
-    <button class="btn">⏱️</button>
+    <div class="dropdown">
+      <button class="btn timeframe-btn" data-tooltip="Timeframe">
+        5m <span class="arrow">▾</span>
+      </button>
+      <div class="dropdown-menu">
+        <div class="dropdown-section">Seconds</div>
+        <div class="dropdown-item">1s</div>
+
+        <div class="dropdown-section">Minutes</div>
+        <div class="dropdown-item">1m</div>
+        <div class="dropdown-item">5m ⭐</div>
+        <div class="dropdown-item">10m</div>
+
+        <div class="dropdown-section">Hours</div>
+        <div class="dropdown-item">1h</div>
+
+        <div class="dropdown-section">Days</div>
+        <div class="dropdown-item">D</div>
+        <div class="dropdown-item">W</div>
+        <div class="dropdown-item">M</div>
+
+        <div class="dropdown-section">Range</div>
+        <div class="dropdown-item">1R</div>
+        <div class="dropdown-item">10R</div>
+      </div>
+    </div>
 
     <!-- INDICATORS -->
-    <button class="btn">📊</button>
+    <button class="btn text-btn" data-tooltip="Indicators">
+      Indicators
+    </button>
 
     <!-- COMPARE -->
-    <button class="btn">
-  <img src="./icons/compare.svg" class="icon" />
-</button>
+    <button class="btn icon-btn" data-tooltip="Compare symbol">
+      <img src="./icons/compare.svg" class="icon" />
+    </button>
 
     <!-- SETTINGS -->
-    <button class="btn">
-  <img src="./icons/settings.svg" class="icon" />
-   </button>
+    <button class="btn icon-btn" data-tooltip="Settings">
+      <img src="./icons/settings.svg" class="icon" />
+    </button>
 
     <!-- USER -->
-    <button class="btn">
-  <img src="./icons/user.svg" class="icon" />
-</button>
+    <button class="btn icon-btn" data-tooltip="User profile">
+      <img src="./icons/user.svg" class="icon" />
+    </button>
 
+  </div>
 </header>
 
 <!-- AI BAR -->
 <section id="ai-bar">
-  AI section (future)
+  AI assistant (future)
 </section>
 
 <!-- MAIN LAYOUT -->
 <div id="main-layout">
 
-  <!-- LEFT DRAWING TOOLS -->
+  <!-- LEFT TOOLS -->
   <aside id="left-bar">
-    ✏️
-    📐
-    📉
+    <button class="btn icon-btn" data-tooltip="Draw">
+      <img src="./icons/draw.svg" class="icon" />
+    </button>
+    <button class="btn icon-btn" data-tooltip="Measure">
+      <img src="./icons/measure.svg" class="icon" />
+    </button>
   </aside>
 
   <!-- CHART -->
@@ -77,18 +119,18 @@
 
   <!-- RIGHT PANEL -->
   <aside id="right-bar">
-    <button class="btn">
-  <img src="./icons/watchlist.svg" class="icon" />
-</button>
-    <button class="btn">
-  <img src="./icons/alert.svg" class="icon" />
-</button>
-   <button class="btn">
-  <img src="./icons/chat.svg" class="icon" />
-</button>
-    <button class="btn">
-  <img src="./icons/calendar.svg" class="icon" />
-</button>
+    <button class="btn icon-btn" data-tooltip="Watchlist">
+      <img src="./icons/watchlist.svg" class="icon" />
+    </button>
+    <button class="btn icon-btn" data-tooltip="Alerts">
+      <img src="./icons/alert.svg" class="icon" />
+    </button>
+    <button class="btn icon-btn" data-tooltip="Chat">
+      <img src="./icons/chat.svg" class="icon" />
+    </button>
+    <button class="btn icon-btn" data-tooltip="Calendar">
+      <img src="./icons/calendar.svg" class="icon" />
+    </button>
   </aside>
 
 </div>
@@ -100,4 +142,4 @@
 <script src="./main.js"></script>
 </body>
 </html>
-
+    
