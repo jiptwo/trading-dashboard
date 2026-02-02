@@ -1,22 +1,39 @@
-console.log("UI layout ready – no logic attached yet");
+function setupFavorites(dropdownId, favoritesId, defaultValues = []) {
+  const dropdown = document.getElementById(dropdownId);
+  const favoritesContainer = document.getElementById(favoritesId);
+  const items = dropdown.querySelectorAll(".dropdown-item");
 
-document.querySelectorAll("[data-tooltip]").forEach(el => {
-  el.addEventListener("mouseenter", e => {
-    const tip = document.createElement("div");
-    tip.className = "tooltip";
-    tip.innerText = el.dataset.tooltip;
-    document.body.appendChild(tip);
+  let favorites = [...defaultValues];
 
-    const rect = el.getBoundingClientRect();
-    tip.style.left = rect.left + rect.width / 2 + "px";
-    tip.style.top = rect.top - 30 + "px";
+  function render() {
+    favoritesContainer.innerHTML = "";
+    favorites.forEach(v => {
+      const span = document.createElement("span");
+      span.textContent = v;
+      favoritesContainer.appendChild(span);
+    });
+  }
 
-    el._tooltip = tip;
+  items.forEach(item => {
+    const value = item.dataset.value;
+
+    item.addEventListener("click", e => {
+      e.stopPropagation();
+
+      if (favorites.includes(value)) {
+        favorites = favorites.filter(v => v !== value);
+      } else {
+        favorites.push(value);
+      }
+
+      render();
+    });
   });
 
-  el.addEventListener("mouseleave", () => {
-    el._tooltip?.remove();
-  });
-});
+  render();
+}
 
+// Defaults
+setupFavorites("timeframe", "timeframeFavorites", ["5m"]);
+setupFavorites("chartType", "chartTypeFavorites", ["candles"]);
 
