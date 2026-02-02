@@ -27,6 +27,16 @@ html, body {
   font-weight: bold;
 }
 
+.icon {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+}
+
+.light .icon {
+  filter: none;
+}
+
 /* SYMBOL SEARCH */
 .symbol-search {
   display: flex;
