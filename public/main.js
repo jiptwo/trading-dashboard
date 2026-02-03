@@ -2,19 +2,29 @@ console.log("MAIN.JS LOADED");
 
 /* ================= DROPDOWNS ================= */
 
-document.addEventListener("click", () => {
-  document
-    .querySelectorAll(".dropdown-menu.open")
-    .forEach(m => m.classList.remove("open"));
+/* Close dropdowns only when clicking OUTSIDE */
+document.addEventListener("click", (e) => {
+  document.querySelectorAll(".dropdown-menu.open").forEach(menu => {
+    const btn = document.querySelector(
+      `.dropdown-btn[data-dropdown="${menu.id}"]`
+    );
+
+    if (
+      !menu.contains(e.target) &&
+      (!btn || !btn.contains(e.target))
+    ) {
+      menu.classList.remove("open");
+    }
+  });
 });
 
+/* Toggle dropdowns */
 document.querySelectorAll(".dropdown-btn").forEach(btn => {
   btn.addEventListener("click", e => {
     e.stopPropagation();
 
     const id = btn.dataset.dropdown;
     const menu = document.getElementById(id);
-
     if (!menu) return;
 
     const isOpen = menu.classList.contains("open");
@@ -114,8 +124,13 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
     star.addEventListener("click", e => {
       e.stopPropagation();
 
-      const label = item.dataset.type || item.textContent.replace("☆", "").replace("★", "").trim();
-      const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
+      const label =
+        item.dataset.type ||
+        item.textContent.replace("☆", "").replace("★", "").trim();
+
+      const existing = favoritesBar.querySelector(
+        `[data-label="${label}"]`
+      );
 
       if (existing) {
         existing.remove();
@@ -143,7 +158,7 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
   });
 }
 
-/* Init */
+/* Init favorites */
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
 
@@ -170,14 +185,15 @@ if (tableToggle) {
 }
 
 /* Column visibility */
-document.querySelectorAll("#columns-menu input[data-col]").forEach(cb => {
-  cb.addEventListener("change", () => {
-    const selector = columnMap[cb.dataset.col];
-    if (!selector) return;
+document
+  .querySelectorAll("#columns-menu input[data-col]")
+  .forEach(cb => {
+    cb.addEventListener("change", () => {
+      const selector = columnMap[cb.dataset.col];
+      if (!selector) return;
 
-    document.querySelectorAll(selector).forEach(el => {
-      el.style.display = cb.checked ? "" : "none";
+      document.querySelectorAll(selector).forEach(el => {
+        el.style.display = cb.checked ? "" : "none";
+      });
     });
   });
-});
-
