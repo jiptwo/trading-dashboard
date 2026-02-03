@@ -2,15 +2,31 @@ console.log("MAIN.JS LOADED");
 
 /* ================= DROPDOWNS ================= */
 
-document.addEventListener("click", e => {
-  document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("open"));
+document.addEventListener("click", () => {
+  document
+    .querySelectorAll(".dropdown-menu.open")
+    .forEach(m => m.classList.remove("open"));
+});
 
-  const btn = e.target.closest(".dropdown-btn");
-  if (!btn) return;
+document.querySelectorAll(".dropdown-btn").forEach(btn => {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
 
-  e.stopPropagation();
-  const id = btn.dataset.dropdown;
-  document.getElementById(id).classList.toggle("open");
+    const id = btn.dataset.dropdown;
+    const menu = document.getElementById(id);
+
+    if (!menu) return;
+
+    const isOpen = menu.classList.contains("open");
+
+    document
+      .querySelectorAll(".dropdown-menu.open")
+      .forEach(m => m.classList.remove("open"));
+
+    if (!isOpen) {
+      menu.classList.add("open");
+    }
+  });
 });
 
 /* ================= RESIZERS ================= */
