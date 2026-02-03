@@ -2,23 +2,18 @@ console.log("MAIN.JS LOADED");
 
 /* ================= DROPDOWNS ================= */
 
-/* Close dropdowns only when clicking OUTSIDE */
 document.addEventListener("click", (e) => {
   document.querySelectorAll(".dropdown-menu.open").forEach(menu => {
     const btn = document.querySelector(
       `.dropdown-btn[data-dropdown="${menu.id}"]`
     );
 
-    if (
-      !menu.contains(e.target) &&
-      (!btn || !btn.contains(e.target))
-    ) {
+    if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
       menu.classList.remove("open");
     }
   });
 });
 
-/* Toggle dropdowns */
 document.querySelectorAll(".dropdown-btn").forEach(btn => {
   btn.addEventListener("click", e => {
     e.stopPropagation();
@@ -33,9 +28,7 @@ document.querySelectorAll(".dropdown-btn").forEach(btn => {
       .querySelectorAll(".dropdown-menu.open")
       .forEach(m => m.classList.remove("open"));
 
-    if (!isOpen) {
-      menu.classList.add("open");
-    }
+    if (!isOpen) menu.classList.add("open");
   });
 });
 
@@ -45,12 +38,10 @@ const rightBar = document.getElementById("right-bar");
 const resizerV = document.getElementById("resizer-vertical");
 const resizerH = document.getElementById("resizer-horizontal");
 const zone1 = document.getElementById("zone-1");
-const zone2 = document.getElementById("zone-2");
 
 let resizingV = false;
 let resizingH = false;
 
-/* Vertical (chart / right) */
 resizerV.addEventListener("mousedown", () => resizingV = true);
 document.addEventListener("mouseup", () => resizingV = false);
 document.addEventListener("mousemove", e => {
@@ -59,7 +50,6 @@ document.addEventListener("mousemove", e => {
   if (w > 260 && w < 600) rightBar.style.width = w + "px";
 });
 
-/* Horizontal (zone 1 / zone 2) */
 resizerH.addEventListener("mousedown", () => resizingH = true);
 document.addEventListener("mouseup", () => resizingH = false);
 document.addEventListener("mousemove", e => {
@@ -77,7 +67,7 @@ document.addEventListener("mousemove", e => {
   }
 });
 
-/* ================= FAVORITES (CHART & TIMEFRAME) ================= */
+/* ================= FAVORITES ================= */
 
 const chartTypes = {
   "Candles": "./icons/candles.svg",
@@ -86,7 +76,6 @@ const chartTypes = {
   "Heikin Ashi": "./icons/heikin.svg"
 };
 
-/* Inject chart menu with icons */
 const chartMenu = document.getElementById("chart-menu");
 if (chartMenu) {
   chartMenu.innerHTML = "";
@@ -94,12 +83,7 @@ if (chartMenu) {
     const item = document.createElement("div");
     item.className = "menu-item";
     item.dataset.type = name;
-
-    item.innerHTML = `
-      <span>${name}</span>
-      <img src="${chartTypes[name]}" class="icon" />
-    `;
-
+    item.innerHTML = `<span>${name}</span><img src="${chartTypes[name]}" class="icon" />`;
     chartMenu.appendChild(item);
   });
 }
@@ -116,21 +100,13 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
     star.className = "star";
     star.textContent = "☆";
 
-    item.style.display = "flex";
-    item.style.alignItems = "center";
-    item.style.justifyContent = "space-between";
     item.appendChild(star);
 
     star.addEventListener("click", e => {
       e.stopPropagation();
 
-      const label =
-        item.dataset.type ||
-        item.textContent.replace("☆", "").replace("★", "").trim();
-
-      const existing = favoritesBar.querySelector(
-        `[data-label="${label}"]`
-      );
+      const label = item.dataset.type || item.textContent.trim();
+      const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
 
       if (existing) {
         existing.remove();
@@ -158,33 +134,41 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
   });
 }
 
-/* Init favorites */
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
 
 /* ================= CUSTOMIZE COLUMNS ================= */
 
-const watchlistBody = document.querySelector(".watchlist-body");
 const tableToggle = document.getElementById("table-toggle");
 
+/* Colonnes CUSTOM seulement (Symbol n’est PAS ici) */
 const columnMap = {
   last: ".price",
   change: ".pos",
-  changePct: ".pos",
+  changePct: ".change-pct",
   volume: ".volume",
   extended: ".extended",
   aiCote: ".ai-cote",
   aiProb: ".ai-prob"
 };
 
-/* Table view ON / OFF */
-if (tableToggle) {
-  tableToggle.addEventListener("change", () => {
-    watchlistBody.style.display = tableToggle.checked ? "block" : "none";
+/* Helper */
+function setColumnsVisible(visible) {
+  Object.values(columnMap).forEach(selector => {
+    document.querySelectorAll(selector).forEach(el => {
+      el.style.display = visible ? "" : "none";
+    });
   });
 }
 
-/* Column visibility */
+/* Table view ON / OFF */
+if (tableToggle) {
+  tableToggle.addEventListener("change", () => {
+    setColumnsVisible(tableToggle.checked);
+  });
+}
+
+/* Checkbox colonne individuelle */
 document
   .querySelectorAll("#columns-menu input[data-col]")
   .forEach(cb => {
@@ -193,7 +177,12 @@ document
       if (!selector) return;
 
       document.querySelectorAll(selector).forEach(el => {
-        el.style.display = cb.checked ? "" : "none";
+        el.style.display =
+          tableToggle && !tableToggle.checked
+            ? "none"
+            : cb.checked
+            ? ""
+            : "none";
       });
     });
   });
