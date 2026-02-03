@@ -171,3 +171,31 @@ html, body {
 .star.active {
   color: #facc15; /* jaune */
 }
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.menu-row input {
+  cursor: pointer;
+}
+
+.menu-title {
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.menu-separator {
+  height: 1px;
+  background: #1f2937;
+  margin: 6px 0;
+}
+
