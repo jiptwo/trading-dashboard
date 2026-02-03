@@ -69,48 +69,80 @@ document.addEventListener("mousemove", e => {
 
 /* ================= FAVORITES (CHART & TIMEFRAME) ================= */
 
-function initFavorites(menuId, favoritesContainerId) {
+const chartTypes = {
+  "Candles": "./icons/candles.svg",
+  "Bars": "./icons/bars.svg",
+  "Line": "./icons/line.svg",
+  "Heikin Ashi": "./icons/heikin.svg"
+};
+
+/* Inject chart menu with icons */
+const chartMenu = document.getElementById("chart-menu");
+if (chartMenu) {
+  chartMenu.innerHTML = "";
+  Object.keys(chartTypes).forEach(name => {
+    const item = document.createElement("div");
+    item.className = "menu-item";
+    item.dataset.type = name;
+
+    item.innerHTML = `
+      <span>${name}</span>
+      <img src="${chartTypes[name]}" class="icon" />
+    `;
+
+    chartMenu.appendChild(item);
+  });
+}
+
+function initFavorites(menuId, favoritesContainerId, iconMode = false) {
   const menu = document.getElementById(menuId);
   const favoritesBar = document.getElementById(favoritesContainerId);
-
   if (!menu || !favoritesBar) return;
 
   menu.querySelectorAll(".menu-item").forEach(item => {
-
-    // éviter double init
     if (item.querySelector(".star")) return;
 
     const star = document.createElement("span");
     star.className = "star";
     star.textContent = "☆";
-    star.style.marginLeft = "auto";
-    star.style.cursor = "pointer";
 
     item.style.display = "flex";
+    item.style.alignItems = "center";
     item.style.justifyContent = "space-between";
     item.appendChild(star);
 
     star.addEventListener("click", e => {
       e.stopPropagation();
 
-      const label = item.textContent.replace("☆", "").replace("★", "").trim();
+      const label = item.dataset.type || item.textContent.replace("☆", "").replace("★", "").trim();
       const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
 
       if (existing) {
         existing.remove();
         star.textContent = "☆";
+        star.classList.remove("active");
       } else {
         const btn = document.createElement("button");
         btn.className = "btn";
-        btn.textContent = label;
         btn.dataset.label = label;
+
+        if (iconMode && chartTypes[label]) {
+          const img = document.createElement("img");
+          img.src = chartTypes[label];
+          img.className = "icon";
+          btn.appendChild(img);
+        } else {
+          btn.textContent = label;
+        }
+
         favoritesBar.appendChild(btn);
         star.textContent = "★";
+        star.classList.add("active");
       }
     });
   });
 }
 
-/* Init favorites */
-initFavorites("chart-menu", "chart-favorites");
+/* Init */
+initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
