@@ -76,14 +76,21 @@ const chartTypes = {
   "Heikin Ashi": "./icons/heikin.svg"
 };
 
+/* Chart menu : ICON → TEXT → STAR */
 const chartMenu = document.getElementById("chart-menu");
 if (chartMenu) {
   chartMenu.innerHTML = "";
+
   Object.keys(chartTypes).forEach(name => {
     const item = document.createElement("div");
     item.className = "menu-item";
     item.dataset.type = name;
-    item.innerHTML = `<span>${name}</span><img src="${chartTypes[name]}" class="icon" />`;
+
+    item.innerHTML = `
+      <img src="${chartTypes[name]}" class="icon" />
+      <span class="menu-label">${name}</span>
+    `;
+
     chartMenu.appendChild(item);
   });
 }
@@ -141,7 +148,7 @@ initFavorites("timeframe-menu", "timeframe-favorites");
 
 const tableToggle = document.getElementById("table-toggle");
 
-/* Colonnes CUSTOM seulement (Symbol n’est PAS ici) */
+/* Colonnes custom (Symbol EXCLU volontairement) */
 const columnMap = {
   last: ".price",
   change: ".pos",
@@ -152,37 +159,30 @@ const columnMap = {
   aiProb: ".ai-prob"
 };
 
-/* Helper */
-function setColumnsVisible(visible) {
-  Object.values(columnMap).forEach(selector => {
+/* Affichage colonnes */
+function updateColumns() {
+  Object.entries(columnMap).forEach(([key, selector]) => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
+    const visible = tableToggle.checked && cb && cb.checked;
+
     document.querySelectorAll(selector).forEach(el => {
       el.style.display = visible ? "" : "none";
+      el.classList.toggle("col-active", visible);
     });
   });
 }
 
-/* Table view ON / OFF */
+/* Table view */
 if (tableToggle) {
-  tableToggle.addEventListener("change", () => {
-    setColumnsVisible(tableToggle.checked);
-  });
+  tableToggle.addEventListener("change", updateColumns);
 }
 
-/* Checkbox colonne individuelle */
+/* Checkboxes colonnes */
 document
   .querySelectorAll("#columns-menu input[data-col]")
   .forEach(cb => {
-    cb.addEventListener("change", () => {
-      const selector = columnMap[cb.dataset.col];
-      if (!selector) return;
-
-      document.querySelectorAll(selector).forEach(el => {
-        el.style.display =
-          tableToggle && !tableToggle.checked
-            ? "none"
-            : cb.checked
-            ? ""
-            : "none";
-      });
-    });
+    cb.addEventListener("change", updateColumns);
   });
+
+/* Init */
+updateColumns();
