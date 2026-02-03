@@ -26,20 +26,32 @@
 
   <div id="chart-favorites"></div>
 
+  <!-- CHART DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="chart-menu">
       Chart <span class="arrow">▾</span>
     </button>
-    <div class="dropdown-menu" id="chart-menu"></div>
+    <div class="dropdown-menu" id="chart-menu">
+      <div class="menu-item">Candlestick</div>
+      <div class="menu-item">Bar</div>
+      <div class="menu-item">Line</div>
+    </div>
   </div>
 
   <div id="timeframe-favorites"></div>
 
+  <!-- TIMEFRAME DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="timeframe-menu">
       Timeframe <span class="arrow">▾</span>
     </button>
-    <div class="dropdown-menu" id="timeframe-menu"></div>
+    <div class="dropdown-menu" id="timeframe-menu">
+      <div class="menu-item">1m</div>
+      <div class="menu-item">5m</div>
+      <div class="menu-item">15m</div>
+      <div class="menu-item">1h</div>
+      <div class="menu-item">1D</div>
+    </div>
   </div>
 
   <button class="btn" title="Indicators">Indicators</button>
@@ -70,11 +82,12 @@
 
     <div class="right-panels">
 
-      <!-- ZONE 1 : WATCHLIST -->
+      <!-- ================= ZONE 1 : WATCHLIST ================= -->
       <div id="zone-1">
 
         <div class="watchlist-header">
 
+          <!-- WATCHLIST NAME DROPDOWN -->
           <div class="watchlist-left dropdown">
             <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu">
               <span class="wl-color red"></span>
@@ -94,6 +107,7 @@
             </div>
           </div>
 
+          <!-- ACTIONS TOP RIGHT -->
           <div class="watchlist-actions">
             <button class="icon-btn" title="Add symbol">+</button>
             <button class="icon-btn" title="Advanced view">⛶</button>
@@ -113,16 +127,17 @@
 
       </div>
 
-      <!-- RESIZER ZONE 1 / 2 -->
+      <!-- RESIZER ZONE 1 / ZONE 2 -->
       <div id="resizer-horizontal"></div>
 
-      <!-- ZONE 2 -->
+      <!-- ================= ZONE 2 ================= -->
       <div id="zone-2">
         Zone 2
       </div>
 
     </div>
 
+    <!-- RIGHT ICON BAR -->
     <div class="right-icons">
       <button class="btn active" title="Watchlist">
         <img src="./icons/watchlist.svg" class="icon" />
