@@ -66,3 +66,51 @@ document.addEventListener("mousemove", e => {
     zone1.style.height = y + "px";
   }
 });
+
+/* ================= FAVORITES (CHART & TIMEFRAME) ================= */
+
+function initFavorites(menuId, favoritesContainerId) {
+  const menu = document.getElementById(menuId);
+  const favoritesBar = document.getElementById(favoritesContainerId);
+
+  if (!menu || !favoritesBar) return;
+
+  menu.querySelectorAll(".menu-item").forEach(item => {
+
+    // éviter double init
+    if (item.querySelector(".star")) return;
+
+    const star = document.createElement("span");
+    star.className = "star";
+    star.textContent = "☆";
+    star.style.marginLeft = "auto";
+    star.style.cursor = "pointer";
+
+    item.style.display = "flex";
+    item.style.justifyContent = "space-between";
+    item.appendChild(star);
+
+    star.addEventListener("click", e => {
+      e.stopPropagation();
+
+      const label = item.textContent.replace("☆", "").replace("★", "").trim();
+      const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
+
+      if (existing) {
+        existing.remove();
+        star.textContent = "☆";
+      } else {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.textContent = label;
+        btn.dataset.label = label;
+        favoritesBar.appendChild(btn);
+        star.textContent = "★";
+      }
+    });
+  });
+}
+
+/* Init favorites */
+initFavorites("chart-menu", "chart-favorites");
+initFavorites("timeframe-menu", "timeframe-favorites");
