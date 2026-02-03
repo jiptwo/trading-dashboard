@@ -1,6 +1,15 @@
 console.log("MAIN.JS LOADED");
 
-/* ===== DATA ===== */
+/* ===== WATCHLIST TOGGLE ===== */
+
+const btnWatchlist = document.getElementById("btn-watchlist");
+const watchlistPanel = document.getElementById("watchlist-panel");
+
+btnWatchlist.addEventListener("click", () => {
+  watchlistPanel.classList.toggle("hidden");
+});
+
+/* ===== EXISTING DATA ===== */
 
 const chartTypes = [
   { label: "Bars", icon: "bars.svg", favorite: false },
