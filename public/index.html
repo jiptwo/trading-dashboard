@@ -10,129 +10,119 @@
 <body>
 
 <header id="top-bar">
-
   <div class="logo">LOGO</div>
 
   <div class="symbol-search">
-    <button class="btn">
-      <img src="./icons/search.svg" class="icon" />
-    </button>
+    <button class="btn"><img src="./icons/search.svg" class="icon" /></button>
     <input type="text" value="AAPL" />
   </div>
 
-  <button class="btn" title="Compare">
-    <img src="./icons/compare.svg" class="icon" />
-  </button>
+  <button class="btn"><img src="./icons/compare.svg" class="icon" /></button>
 
   <div id="chart-favorites"></div>
 
   <div class="dropdown">
-    <button class="btn dropdown-btn">
-      Chart <span class="arrow">▾</span>
-    </button>
+    <button class="btn">Chart ▾</button>
     <div class="dropdown-menu" id="chart-menu"></div>
   </div>
 
   <div id="timeframe-favorites"></div>
 
   <div class="dropdown">
-    <button class="btn dropdown-btn">
-      Timeframe <span class="arrow">▾</span>
-    </button>
+    <button class="btn">Timeframe ▾</button>
     <div class="dropdown-menu" id="timeframe-menu"></div>
   </div>
 
   <button class="btn">Indicators</button>
 
   <div class="right-actions">
-    <button class="btn">
-      <img src="./icons/settings.svg" class="icon" />
-    </button>
-    <button class="btn">
-      <img src="./icons/user.svg" class="icon" />
-    </button>
+    <button class="btn"><img src="./icons/settings.svg" class="icon" /></button>
+    <button class="btn"><img src="./icons/user.svg" class="icon" /></button>
   </div>
-
 </header>
 
 <section id="ai-bar">AI assistant (future)</section>
 
 <div id="main-layout">
 
-  <aside id="left-bar">
-    tools
-  </aside>
+  <aside id="left-bar">tools</aside>
 
-  <main id="chart-area">
-    Chart Area
-  </main>
+  <main id="chart-area">Chart Area</main>
 
   <!-- RIGHT BAR -->
   <aside id="right-bar">
 
-    <!-- TOP ICONS -->
-    <div class="right-top-icons">
-      <button class="btn" id="btn-watchlist">
-        <img src="./icons/watchlist.svg" class="icon" />
-      </button>
+    <!-- ICONS TOP -->
+    <div class="right-icons top">
+      <button class="btn active"><img src="./icons/watchlist.svg" class="icon" /></button>
     </div>
 
-    <!-- WATCHLIST PANEL -->
-    <div id="watchlist-panel" class="hidden">
+    <!-- CONTENT -->
+    <div id="right-content">
 
-      <div class="watchlist-header">
-        <div class="watchlist-title">
-          <span class="watchlist-color red"></span>
-          <span>Red list</span>
-          <span class="arrow">▾</span>
+      <!-- ZONE 1 -->
+      <div id="zone-1">
+        <div class="watchlist-header">
+          <div class="watchlist-title">
+            <span class="wl-color red"></span>
+            <span id="watchlist-name">Red list</span>
+            <span class="arrow">▾</span>
+          </div>
+          <div class="watchlist-actions">
+            <button class="btn small">+</button>
+            <button class="btn small">⛶</button>
+            <button class="btn small">⋯</button>
+          </div>
         </div>
 
-        <div class="watchlist-actions">
-          <button class="btn small">+</button>
-          <button class="btn small">⛶</button>
-          <button class="btn small">⋯</button>
+        <div class="watchlist-body">
+          <div class="watchlist-row">
+            <span class="dot red"></span>
+            <span>AAPL</span>
+            <span class="price">182.34</span>
+            <span class="pos">+0.42%</span>
+          </div>
+          <div class="watchlist-row">
+            <span class="dot red"></span>
+            <span>MSFT</span>
+            <span class="price">411.20</span>
+            <span class="neg">-0.18%</span>
+          </div>
+          <div class="watchlist-row">
+            <span class="dot red"></span>
+            <span>BTCUSD</span>
+            <span class="price">43,120</span>
+            <span class="pos">+1.24%</span>
+          </div>
         </div>
       </div>
 
-      <div class="watchlist-body">
-        <div class="watchlist-row">
-          <span class="dot red"></span>
-          <span>AAPL</span>
-          <span class="price">182.34</span>
-          <span class="change pos">+0.42%</span>
-        </div>
+      <!-- HORIZONTAL RESIZER -->
+      <div id="resizer-horizontal"></div>
 
-        <div class="watchlist-row">
-          <span class="dot red"></span>
-          <span>MSFT</span>
-          <span class="price">411.20</span>
-          <span class="change neg">-0.18%</span>
-        </div>
-
-        <div class="watchlist-row">
-          <span class="dot red"></span>
-          <span>BTCUSD</span>
-          <span class="price">43,120</span>
-          <span class="change pos">+1.24%</span>
-        </div>
+      <!-- ZONE 2 -->
+      <div id="zone-2">
+        <div class="zone-placeholder">Zone 2 (news / details / alerts)</div>
       </div>
 
     </div>
 
-    <!-- BOTTOM ICONS (future) -->
-    <div class="right-bottom-icons">
+    <!-- ICONS BOTTOM -->
+    <div class="right-icons bottom">
       <button class="btn"><img src="./icons/alert.svg" class="icon" /></button>
       <button class="btn"><img src="./icons/chat.svg" class="icon" /></button>
       <button class="btn"><img src="./icons/calendar.svg" class="icon" /></button>
+      <button class="btn"><img src="./icons/settings.svg" class="icon" /></button>
     </div>
+
+    <!-- VERTICAL RESIZER -->
+    <div id="resizer-vertical"></div>
 
   </aside>
 
 </div>
 
-<footer id="bottom-bar">
-  Bottom tools
-</footer>
+<footer id="bottom-bar">Bottom tools</footer>
 
 <script src="./main.js"></script>
 </body>
