@@ -199,3 +199,9 @@ html, body {
   margin: 6px 0;
 }
 
+/* FIX – Customize columns dropdown opens to the LEFT */
+#columns-menu {
+  right: auto;
+  left: -220px; /* ajuste si nécessaire selon largeur */
+}
+
