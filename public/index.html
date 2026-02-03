@@ -111,7 +111,55 @@
           <div class="watchlist-actions">
             <button class="icon-btn" title="Add symbol">+</button>
             <button class="icon-btn" title="Advanced view">⛶</button>
-            <button class="icon-btn" title="Customize columns">⋯</button>
+            <div class="dropdown">
+  <button class="icon-btn dropdown-btn"
+          data-dropdown="columns-menu"
+          title="Customize columns">
+    ⋯
+  </button>
+
+  <div class="dropdown-menu" id="columns-menu">
+
+    <div class="menu-row">
+      <span>Table view</span>
+      <input type="checkbox" id="table-toggle" checked />
+    </div>
+
+    <div class="menu-separator"></div>
+
+    <div class="menu-title">Customize columns</div>
+
+    <label class="menu-row">
+      <input type="checkbox" data-col="last" checked /> Last
+    </label>
+
+    <label class="menu-row">
+      <input type="checkbox" data-col="change" checked /> Change
+    </label>
+
+    <label class="menu-row">
+      <input type="checkbox" data-col="changePct" checked /> Change %
+    </label>
+
+    <label class="menu-row">
+      <input type="checkbox" data-col="volume" /> Volume
+    </label>
+
+    <label class="menu-row">
+      <input type="checkbox" data-col="extended" /> Extended Hours
+    </label>
+
+    <label class="menu-row">
+      <input type="checkbox" data-col="aiCote" /> Ai Cote
+    </label>
+
+    <label class="menu-row">
+      <input type="checkbox" data-col="aiProb" /> Ai Prob
+    </label>
+
+  </div>
+</div>
+
           </div>
 
         </div>
