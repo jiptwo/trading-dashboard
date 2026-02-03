@@ -130,7 +130,8 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
           img.className = "icon";
           btn.appendChild(img);
         } else {
-          btn.textContent = label;
+          // ✅ TIMEFRAME : texte seul (sans étoile)
+          btn.textContent = label.replace("★", "").replace("☆", "").trim();
         }
 
         favoritesBar.appendChild(btn);
@@ -159,17 +160,63 @@ const columnMap = {
   aiProb: ".ai-prob"
 };
 
+/* ===== WATCHLIST HEADER (NOMS DES COLONNES) ===== */
+
+function updateWatchlistHeader() {
+  let header = document.getElementById("watchlist-header");
+
+  if (!header) {
+    header = document.createElement("div");
+    header.id = "watchlist-header";
+    header.className = "watchlist-row header";
+    zone1.prepend(header);
+  }
+
+  header.innerHTML = "";
+
+  // Symbol (toujours visible)
+  const symbolCol = document.createElement("span");
+  symbolCol.className = "col symbol header-col";
+  symbolCol.textContent = "Symbol";
+  header.appendChild(symbolCol);
+
+  if (!tableToggle || !tableToggle.checked) return;
+
+  const labels = {
+    last: "Last",
+    change: "Change",
+    changePct: "Change %",
+    volume: "Volume",
+    extended: "Extended",
+    aiCote: "Ai Cote",
+    aiProb: "Ai Prob"
+  };
+
+  Object.keys(columnMap).forEach(key => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
+    if (!cb || !cb.checked) return;
+
+    const col = document.createElement("span");
+    col.className = "col header-col";
+    col.textContent = labels[key];
+
+    header.appendChild(col);
+  });
+}
+
 /* Affichage colonnes */
 function updateColumns() {
   Object.entries(columnMap).forEach(([key, selector]) => {
     const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
-    const visible = tableToggle.checked && cb && cb.checked;
+    const visible = tableToggle && tableToggle.checked && cb && cb.checked;
 
     document.querySelectorAll(selector).forEach(el => {
       el.style.display = visible ? "" : "none";
       el.classList.toggle("col-active", visible);
     });
   });
+
+  updateWatchlistHeader();
 }
 
 /* Table view */
