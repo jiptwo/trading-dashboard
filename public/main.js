@@ -130,7 +130,6 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
           img.className = "icon";
           btn.appendChild(img);
         } else {
-          // ✅ TIMEFRAME : texte seul (sans étoile)
           btn.textContent = label.replace("★", "").replace("☆", "").trim();
         }
 
@@ -148,8 +147,9 @@ initFavorites("timeframe-menu", "timeframe-favorites");
 /* ================= CUSTOMIZE COLUMNS ================= */
 
 const tableToggle = document.getElementById("table-toggle");
+const watchlistBody = document.querySelector(".watchlist-body");
 
-/* Colonnes custom (Symbol EXCLU volontairement) */
+/* Colonnes custom (Symbol exclu volontairement) */
 const columnMap = {
   last: ".price",
   change: ".pos",
@@ -160,46 +160,46 @@ const columnMap = {
   aiProb: ".ai-prob"
 };
 
-/* ===== WATCHLIST HEADER (NOMS DES COLONNES) ===== */
+const columnLabels = {
+  last: "Last",
+  change: "Change",
+  changePct: "Change %",
+  volume: "Volume",
+  extended: "Extended",
+  aiCote: "Ai Cote",
+  aiProb: "Ai Prob"
+};
 
-function updateWatchlistHeader() {
-  let header = document.getElementById("watchlist-header");
+/* ===== HEADER DE TABLE (DANS LA WATCHLIST) ===== */
+
+function updateTableHeader() {
+  if (!watchlistBody) return;
+
+  let header = watchlistBody.querySelector(".watchlist-table-header");
 
   if (!header) {
     header = document.createElement("div");
-    header.id = "watchlist-header";
-    header.className = "watchlist-row header";
-    zone1.prepend(header);
+    header.className = "watchlist-row watchlist-table-header";
+    watchlistBody.prepend(header);
   }
 
   header.innerHTML = "";
 
-  // Symbol (toujours visible)
+  /* Symbol — toujours visible */
   const symbolCol = document.createElement("span");
-  symbolCol.className = "col symbol header-col";
+  symbolCol.className = "symbol header-col";
   symbolCol.textContent = "Symbol";
   header.appendChild(symbolCol);
 
   if (!tableToggle || !tableToggle.checked) return;
-
-  const labels = {
-    last: "Last",
-    change: "Change",
-    changePct: "Change %",
-    volume: "Volume",
-    extended: "Extended",
-    aiCote: "Ai Cote",
-    aiProb: "Ai Prob"
-  };
 
   Object.keys(columnMap).forEach(key => {
     const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
     if (!cb || !cb.checked) return;
 
     const col = document.createElement("span");
-    col.className = "col header-col";
-    col.textContent = labels[key];
-
+    col.className = "header-col";
+    col.textContent = columnLabels[key];
     header.appendChild(col);
   });
 }
@@ -216,20 +216,17 @@ function updateColumns() {
     });
   });
 
-  updateWatchlistHeader();
+  updateTableHeader();
 }
 
-/* Table view */
+/* Events */
 if (tableToggle) {
   tableToggle.addEventListener("change", updateColumns);
 }
 
-/* Checkboxes colonnes */
 document
   .querySelectorAll("#columns-menu input[data-col]")
-  .forEach(cb => {
-    cb.addEventListener("change", updateColumns);
-  });
+  .forEach(cb => cb.addEventListener("change", updateColumns));
 
 /* Init */
 updateColumns();
