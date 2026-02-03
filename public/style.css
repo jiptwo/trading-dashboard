@@ -1,10 +1,30 @@
 html, body {
   margin: 0;
-  padding: 0;
   height: 100%;
   background: #0b0f14;
   color: #e6e6e6;
   font-family: Arial, sans-serif;
+}
+
+.btn {
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: white;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.btn.small {
+  padding: 2px 6px;
+}
+
+.btn.active {
+  background: #1f2937;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
 }
 
 #top-bar {
@@ -15,112 +35,14 @@ html, body {
   background: #0f1623;
 }
 
-.logo {
-  font-weight: bold;
-}
-
-.symbol-search {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.symbol-search input {
-  background: #111827;
-  border: none;
-  color: white;
-  padding: 6px;
-  width: 80px;
-}
-
-.btn {
-  background: #111827;
-  border: 1px solid #1f2937;
-  color: white;
-  padding: 6px 8px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background: #1f2937;
-}
-
-.icon {
-  width: 16px;
-  height: 16px;
-  opacity: 0.9;
-}
-
-.arrow {
-  margin-left: 4px;
-}
-
-.right-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 8px;
-}
-
-.dropdown {
-  position: relative;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: #111827;
-  border: 1px solid #1f2937;
-  display: none;
-  min-width: 180px;
-  z-index: 10;
-}
-
-.dropdown:hover .dropdown-menu {
-  display: block;
-}
-
-.chart-item,
-.timeframe-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px;
-  cursor: pointer;
-}
-
-.chart-item:hover,
-.timeframe-item:hover {
-  background: #1f2937;
-}
-
-.menu-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.star {
-  margin-left: auto;
-}
-
-#ai-bar {
-  padding: 6px;
-  background: #0f172a;
-}
-
 #main-layout {
   display: flex;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 100px);
 }
 
-#left-bar,
-#right-bar {
+#left-bar {
   width: 48px;
   background: #0f1623;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px;
 }
 
 #chart-area {
@@ -128,40 +50,49 @@ html, body {
   background: black;
 }
 
-#bottom-bar {
-  background: #0f1623;
-  padding: 6px;
-}
-
-/* ===== RIGHT BAR WATCHLIST ===== */
+/* ===== RIGHT BAR ===== */
 
 #right-bar {
-  justify-content: space-between;
+  width: 280px;
+  background: #0f1623;
+  display: flex;
+  position: relative;
 }
 
-.right-top-icons,
-.right-bottom-icons {
+.right-icons {
+  width: 48px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  padding: 6px;
   gap: 8px;
 }
 
-#watchlist-panel {
-  width: 260px;
-  background: #0b1220;
-  border-left: 1px solid #1f2937;
-  margin-top: 8px;
-  font-size: 13px;
+#right-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.hidden {
-  display: none;
+#zone-1, #zone-2 {
+  overflow: auto;
 }
+
+#zone-1 {
+  height: 60%;
+  background: #0b1220;
+}
+
+#zone-2 {
+  flex: 1;
+  background: #0a1020;
+}
+
+/* ===== WATCHLIST ===== */
 
 .watchlist-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 8px;
   border-bottom: 1px solid #1f2937;
 }
@@ -170,21 +101,16 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
 }
 
-.watchlist-actions {
-  display: flex;
-  gap: 4px;
+.wl-color, .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
-.btn.small {
-  padding: 2px 6px;
-  font-size: 12px;
-}
-
-.watchlist-body {
-  padding: 4px;
+.red {
+  background: #ef4444;
 }
 
 .watchlist-row {
@@ -192,7 +118,6 @@ html, body {
   grid-template-columns: 12px 1fr auto auto;
   gap: 6px;
   padding: 6px;
-  cursor: pointer;
 }
 
 .watchlist-row:hover {
@@ -204,21 +129,24 @@ html, body {
   text-align: right;
 }
 
-.change.pos {
-  color: #22c55e;
+.pos { color: #22c55e; }
+.neg { color: #ef4444; }
+
+/* ===== RESIZERS ===== */
+
+#resizer-vertical {
+  width: 4px;
+  cursor: col-resize;
+  background: #1f2937;
 }
 
-.change.neg {
-  color: #ef4444;
+#resizer-horizontal {
+  height: 4px;
+  cursor: row-resize;
+  background: #1f2937;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-top: 4px;
-}
-
-.red {
-  background: #ef4444;
+.zone-placeholder {
+  padding: 10px;
+  opacity: 0.6;
 }
