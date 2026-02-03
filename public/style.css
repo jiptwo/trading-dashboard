@@ -1,5 +1,6 @@
 html, body {
   margin: 0;
+  padding: 0;
   height: 100%;
   background: #0b0f14;
   color: #e6e6e6;
@@ -10,15 +11,11 @@ html, body {
   background: #111827;
   border: 1px solid #1f2937;
   color: white;
-  padding: 6px;
+  padding: 6px 8px;
   cursor: pointer;
 }
 
-.btn.small {
-  padding: 2px 6px;
-}
-
-.btn.active {
+.btn:hover {
   background: #1f2937;
 }
 
@@ -35,9 +32,20 @@ html, body {
   background: #0f1623;
 }
 
+.right-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+#ai-bar {
+  padding: 6px;
+  background: #0f172a;
+}
+
 #main-layout {
   display: flex;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 120px);
 }
 
 #left-bar {
@@ -50,10 +58,15 @@ html, body {
   background: black;
 }
 
+#bottom-bar {
+  background: #0f1623;
+  padding: 6px;
+}
+
 /* ===== RIGHT BAR ===== */
 
 #right-bar {
-  width: 280px;
+  width: 300px;
   background: #0f1623;
   display: flex;
   position: relative;
@@ -68,31 +81,34 @@ html, body {
   gap: 8px;
 }
 
-#right-content {
+.right-panels {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-#zone-1, #zone-2 {
-  overflow: auto;
-}
+/* ZONES */
 
 #zone-1 {
   height: 60%;
   background: #0b1220;
+  overflow: auto;
 }
 
 #zone-2 {
   flex: 1;
   background: #0a1020;
+  overflow: auto;
 }
 
-/* ===== WATCHLIST ===== */
+.zone-placeholder {
+  padding: 10px;
+  opacity: 0.6;
+}
+
+/* WATCHLIST */
 
 .watchlist-header {
-  display: flex;
-  justify-content: space-between;
   padding: 8px;
   border-bottom: 1px solid #1f2937;
 }
@@ -132,13 +148,7 @@ html, body {
 .pos { color: #22c55e; }
 .neg { color: #ef4444; }
 
-/* ===== RESIZERS ===== */
-
-#resizer-vertical {
-  width: 4px;
-  cursor: col-resize;
-  background: #1f2937;
-}
+/* RESIZERS */
 
 #resizer-horizontal {
   height: 4px;
@@ -146,7 +156,8 @@ html, body {
   background: #1f2937;
 }
 
-.zone-placeholder {
-  padding: 10px;
-  opacity: 0.6;
+#resizer-vertical {
+  width: 4px;
+  cursor: col-resize;
+  background: #1f2937;
 }
