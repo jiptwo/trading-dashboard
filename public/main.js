@@ -1,6 +1,6 @@
 console.log("MAIN.JS LOADED");
 
-/* ===== DATA ===== */
+/* ================= DATA ================= */
 
 const chartTypes = [
   { label: "Bars", icon: "bars.svg", favorite: false },
@@ -16,18 +16,17 @@ const timeframes = [
   { label: "15m", favorite: false },
   { label: "1h", favorite: false },
   { label: "D", favorite: false },
-  { label: "W", favorite: false },
 ];
 
-/* ===== HELPERS ===== */
+/* ================= FAVORITES ================= */
 
-function toggleFavorite(list, label, rerender) {
+function toggleFavorite(list, label, render) {
   const item = list.find(i => i.label === label);
   if (item) item.favorite = !item.favorite;
-  rerender();
+  render();
 }
 
-/* ===== RENDER CHART TYPES ===== */
+/* ================= RENDER ================= */
 
 function renderChartTypes() {
   const favs = document.getElementById("chart-favorites");
@@ -38,17 +37,16 @@ function renderChartTypes() {
 
   chartTypes.forEach(ct => {
     if (ct.favorite) {
-      const btn = document.createElement("button");
-      btn.className = "btn";
-      btn.title = ct.label;
-      btn.innerHTML = `<img src="./icons/${ct.icon}" class="icon" />`;
-      favs.appendChild(btn);
+      const b = document.createElement("button");
+      b.className = "btn";
+      b.innerHTML = `<img src="./icons/${ct.icon}" class="icon">`;
+      favs.appendChild(b);
     }
 
     const item = document.createElement("div");
     item.className = "chart-item";
     item.innerHTML = `
-      <img src="./icons/${ct.icon}" class="menu-icon" />
+      <img src="./icons/${ct.icon}" class="menu-icon">
       <span>${ct.label}</span>
       <span class="star">${ct.favorite ? "⭐" : ""}</span>
     `;
@@ -56,8 +54,6 @@ function renderChartTypes() {
     menu.appendChild(item);
   });
 }
-
-/* ===== RENDER TIMEFRAMES ===== */
 
 function renderTimeframes() {
   const favs = document.getElementById("timeframe-favorites");
@@ -68,11 +64,10 @@ function renderTimeframes() {
 
   timeframes.forEach(tf => {
     if (tf.favorite) {
-      const btn = document.createElement("button");
-      btn.className = "btn";
-      btn.textContent = tf.label;
-      btn.title = `Timeframe ${tf.label}`;
-      favs.appendChild(btn);
+      const b = document.createElement("button");
+      b.className = "btn";
+      b.textContent = tf.label;
+      favs.appendChild(b);
     }
 
     const item = document.createElement("div");
@@ -86,35 +81,35 @@ function renderTimeframes() {
   });
 }
 
-/* ===== RESIZERS ===== */
+/* ================= DROPDOWNS ================= */
+
+document.addEventListener("click", e => {
+  document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("open"));
+
+  const btn = e.target.closest(".dropdown-btn");
+  if (!btn) return;
+
+  e.stopPropagation();
+  const id = btn.dataset.dropdown;
+  document.getElementById(id).classList.toggle("open");
+});
+
+/* ================= RESIZERS ================= */
 
 const rightBar = document.getElementById("right-bar");
-const resizerV = document.getElementById("resizer-vertical");
-let resizingV = false;
+const vertical = document.getElementById("resizer-vertical");
 
-resizerV.addEventListener("mousedown", () => resizingV = true);
-document.addEventListener("mouseup", () => resizingV = false);
+let resizing = false;
+
+vertical.addEventListener("mousedown", () => resizing = true);
+document.addEventListener("mouseup", () => resizing = false);
 document.addEventListener("mousemove", e => {
-  if (!resizingV) return;
+  if (!resizing) return;
   const w = window.innerWidth - e.clientX;
-  if (w > 260 && w < 520) rightBar.style.width = w + "px";
+  if (w > 260 && w < 600) rightBar.style.width = w + "px";
 });
 
-const zone1 = document.getElementById("zone-1");
-const resizerH = document.getElementById("resizer-horizontal");
-let resizingH = false;
-
-resizerH.addEventListener("mousedown", () => resizingH = true);
-document.addEventListener("mouseup", () => resizingH = false);
-document.addEventListener("mousemove", e => {
-  if (!resizingH) return;
-  const rect = rightBar.getBoundingClientRect();
-  const h = e.clientY - rect.top;
-  if (h > 120 && h < rect.height - 120) zone1.style.height = h + "px";
-});
-
-/* ===== INIT ===== */
+/* ================= INIT ================= */
 
 renderChartTypes();
 renderTimeframes();
-
