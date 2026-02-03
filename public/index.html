@@ -24,23 +24,19 @@
     <img src="./icons/compare.svg" class="icon" />
   </button>
 
-  <!-- FAVORITES CHART TYPES -->
   <div id="chart-favorites"></div>
 
-  <!-- CHART TYPE DROPDOWN -->
   <div class="dropdown">
-    <button class="btn dropdown-btn" title="Chart type">
+    <button class="btn dropdown-btn" data-dropdown="chart-menu">
       Chart <span class="arrow">▾</span>
     </button>
     <div class="dropdown-menu" id="chart-menu"></div>
   </div>
 
-  <!-- FAVORITES TIMEFRAMES -->
   <div id="timeframe-favorites"></div>
 
-  <!-- TIMEFRAME DROPDOWN -->
   <div class="dropdown">
-    <button class="btn dropdown-btn" title="Timeframe">
+    <button class="btn dropdown-btn" data-dropdown="timeframe-menu">
       Timeframe <span class="arrow">▾</span>
     </button>
     <div class="dropdown-menu" id="timeframe-menu"></div>
@@ -52,7 +48,7 @@
     <button class="btn" title="Settings">
       <img src="./icons/settings.svg" class="icon" />
     </button>
-    <button class="btn" title="User menu">
+    <button class="btn" title="User">
       <img src="./icons/user.svg" class="icon" />
     </button>
   </div>
@@ -67,27 +63,26 @@
 
   <main id="chart-area">Chart Area</main>
 
-  <!-- RIGHT BAR -->
+  <!-- VERTICAL RESIZER -->
+  <div id="resizer-vertical"></div>
+
   <aside id="right-bar">
 
-    <!-- PANELS -->
     <div class="right-panels">
 
-      <!-- ZONE 1 : WATCHLIST -->
       <div id="zone-1">
 
         <div class="watchlist-header dropdown">
-          <div class="watchlist-title dropdown-btn" title="Watchlist menu">
+          <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu">
             <span class="wl-color red"></span>
             <span>Red list</span>
             <span class="arrow">▾</span>
-          </div>
+          </button>
 
-          <div class="dropdown-menu watchlist-menu">
+          <div class="dropdown-menu" id="watchlist-menu">
             <div class="menu-item">Rename</div>
             <div class="menu-item toggle">
-              Share list
-              <input type="checkbox" />
+              Share list <input type="checkbox">
             </div>
             <div class="menu-sep"></div>
             <div class="menu-item">Add alert on list</div>
@@ -96,8 +91,6 @@
             <div class="menu-item">Clear list</div>
             <div class="menu-item">Create new list</div>
             <div class="menu-item">Upload list</div>
-            <div class="menu-sep"></div>
-            <div class="menu-item muted">Switch list (coming)</div>
           </div>
         </div>
 
@@ -108,26 +101,18 @@
             <span class="price">182.34</span>
             <span class="pos">+0.42%</span>
           </div>
-          <div class="watchlist-row">
-            <span class="dot red"></span>
-            <span>BTCUSD</span>
-            <span class="price">43,120</span>
-            <span class="neg">-0.18%</span>
-          </div>
         </div>
 
       </div>
 
       <div id="resizer-horizontal"></div>
 
-      <!-- ZONE 2 -->
       <div id="zone-2">
-        <div class="zone-placeholder">Zone 2 (details / news / alerts)</div>
+        Zone 2
       </div>
 
     </div>
 
-    <!-- ICON BAR (À DROITE DES ZONES) -->
     <div class="right-icons">
       <button class="btn active" title="Watchlist">
         <img src="./icons/watchlist.svg" class="icon" />
@@ -139,8 +124,6 @@
         <img src="./icons/chat.svg" class="icon" />
       </button>
     </div>
-
-    <div id="resizer-vertical"></div>
 
   </aside>
 
