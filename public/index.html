@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Trading Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -12,10 +11,8 @@
 
 <header id="top-bar">
 
-  <!-- LOGO -->
   <div class="logo">LOGO</div>
 
-  <!-- SYMBOL SEARCH -->
   <div class="symbol-search">
     <button class="btn">
       <img src="./icons/search.svg" class="icon" />
@@ -23,39 +20,30 @@
     <input type="text" value="AAPL" />
   </div>
 
-  <!-- COMPARE -->
   <button class="btn" title="Compare">
     <img src="./icons/compare.svg" class="icon" />
   </button>
 
-  <!-- FAVORITES CHART TYPES -->
   <div id="chart-favorites"></div>
 
-  <!-- CHART TYPE DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn">
-      Chart
-      <span class="arrow">▾</span>
+      Chart <span class="arrow">▾</span>
     </button>
     <div class="dropdown-menu" id="chart-menu"></div>
   </div>
 
-  <!-- FAVORITES TIMEFRAMES -->
   <div id="timeframe-favorites"></div>
 
-  <!-- TIMEFRAME DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn">
-      Timeframe
-      <span class="arrow">▾</span>
+      Timeframe <span class="arrow">▾</span>
     </button>
     <div class="dropdown-menu" id="timeframe-menu"></div>
   </div>
 
-  <!-- INDICATORS -->
   <button class="btn">Indicators</button>
 
-  <!-- RIGHT ACTIONS -->
   <div class="right-actions">
     <button class="btn">
       <img src="./icons/settings.svg" class="icon" />
@@ -67,27 +55,77 @@
 
 </header>
 
-<!-- AI BAR -->
 <section id="ai-bar">AI assistant (future)</section>
 
 <div id="main-layout">
 
-  <!-- LEFT BAR -->
   <aside id="left-bar">
     tools
   </aside>
 
-  <!-- CHART -->
   <main id="chart-area">
     Chart Area
   </main>
 
   <!-- RIGHT BAR -->
   <aside id="right-bar">
-    <button class="btn"><img src="./icons/watchlist.svg" class="icon" /></button>
-    <button class="btn"><img src="./icons/alert.svg" class="icon" /></button>
-    <button class="btn"><img src="./icons/chat.svg" class="icon" /></button>
-    <button class="btn"><img src="./icons/calendar.svg" class="icon" /></button>
+
+    <!-- TOP ICONS -->
+    <div class="right-top-icons">
+      <button class="btn" id="btn-watchlist">
+        <img src="./icons/watchlist.svg" class="icon" />
+      </button>
+    </div>
+
+    <!-- WATCHLIST PANEL -->
+    <div id="watchlist-panel" class="hidden">
+
+      <div class="watchlist-header">
+        <div class="watchlist-title">
+          <span class="watchlist-color red"></span>
+          <span>Red list</span>
+          <span class="arrow">▾</span>
+        </div>
+
+        <div class="watchlist-actions">
+          <button class="btn small">+</button>
+          <button class="btn small">⛶</button>
+          <button class="btn small">⋯</button>
+        </div>
+      </div>
+
+      <div class="watchlist-body">
+        <div class="watchlist-row">
+          <span class="dot red"></span>
+          <span>AAPL</span>
+          <span class="price">182.34</span>
+          <span class="change pos">+0.42%</span>
+        </div>
+
+        <div class="watchlist-row">
+          <span class="dot red"></span>
+          <span>MSFT</span>
+          <span class="price">411.20</span>
+          <span class="change neg">-0.18%</span>
+        </div>
+
+        <div class="watchlist-row">
+          <span class="dot red"></span>
+          <span>BTCUSD</span>
+          <span class="price">43,120</span>
+          <span class="change pos">+1.24%</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM ICONS (future) -->
+    <div class="right-bottom-icons">
+      <button class="btn"><img src="./icons/alert.svg" class="icon" /></button>
+      <button class="btn"><img src="./icons/chat.svg" class="icon" /></button>
+      <button class="btn"><img src="./icons/calendar.svg" class="icon" /></button>
+    </div>
+
   </aside>
 
 </div>
