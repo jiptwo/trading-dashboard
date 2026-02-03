@@ -205,3 +205,9 @@ html, body {
   left: -220px; /* ajuste si nécessaire selon largeur */
 }
 
+.watchlist-table-header {
+  font-size: 11px;
+  color: #9ca3af;
+  border-bottom: 1px solid #1f2937;
+}
+
