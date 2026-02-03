@@ -146,3 +146,38 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
 /* Init */
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
+
+/* ================= CUSTOMIZE COLUMNS ================= */
+
+const watchlistBody = document.querySelector(".watchlist-body");
+const tableToggle = document.getElementById("table-toggle");
+
+const columnMap = {
+  last: ".price",
+  change: ".pos",
+  changePct: ".pos",
+  volume: ".volume",
+  extended: ".extended",
+  aiCote: ".ai-cote",
+  aiProb: ".ai-prob"
+};
+
+/* Table view ON / OFF */
+if (tableToggle) {
+  tableToggle.addEventListener("change", () => {
+    watchlistBody.style.display = tableToggle.checked ? "block" : "none";
+  });
+}
+
+/* Column visibility */
+document.querySelectorAll("#columns-menu input[data-col]").forEach(cb => {
+  cb.addEventListener("change", () => {
+    const selector = columnMap[cb.dataset.col];
+    if (!selector) return;
+
+    document.querySelectorAll(selector).forEach(el => {
+      el.style.display = cb.checked ? "" : "none";
+    });
+  });
+});
+
