@@ -161,3 +161,13 @@ html, body {
 .menu-item:hover {
   background: #1f2937;
 }
+
+.star {
+  color: #6b7280;
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+.star.active {
+  color: #facc15; /* jaune */
+}
