@@ -131,3 +131,33 @@ html, body {
   background: #0f1623;
   padding: 6px;
 }
+
+/* ================= DROPDOWNS ================= */
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  display: none;
+  z-index: 1000;
+}
+
+.dropdown-menu.open {
+  display: block;
+}
+
+.menu-item {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: #1f2937;
+}
