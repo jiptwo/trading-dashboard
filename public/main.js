@@ -179,17 +179,17 @@ function updateTableHeader() {
 
   if (!header) {
     header = document.createElement("div");
-    header.className = "watchlist-row watchlist-table-header";
+    header.className = "watchlist-table-header";
     watchlistBody.prepend(header);
   }
 
   header.innerHTML = "";
 
-  /* Symbol — toujours visible */
-  const symbolCol = document.createElement("span");
-  symbolCol.className = "symbol header-col";
-  symbolCol.textContent = "Symbol";
-  header.appendChild(symbolCol);
+  /* Symbol — toujours présent */
+  const symbol = document.createElement("span");
+  symbol.className = "col-symbol";
+  symbol.textContent = "Symbol";
+  header.appendChild(symbol);
 
   if (!tableToggle || !tableToggle.checked) return;
 
@@ -198,27 +198,25 @@ function updateTableHeader() {
     if (!cb || !cb.checked) return;
 
     const col = document.createElement("span");
-    col.className = "header-col";
+    col.className = `col ${key}`;
     col.textContent = columnLabels[key];
     header.appendChild(col);
   });
 }
 
-/* Affichage colonnes */
 function updateColumns() {
-  Object.entries(columnMap).forEach(([key, selector]) => {
-    const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
-    const visible = tableToggle && tableToggle.checked && cb && cb.checked;
+  /* lignes */
+  document.querySelectorAll(".watchlist-row").forEach(row => {
+    Object.entries(columnMap).forEach(([key, selector]) => {
+      const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
+      const visible = tableToggle && tableToggle.checked && cb && cb.checked;
 
-    /* cellules */
-    document.querySelectorAll(selector).forEach(el => {
-      el.classList.toggle("col-hidden", !visible);
+      const cell = row.querySelector(selector);
+      if (cell) cell.classList.toggle("col-hidden", !visible);
     });
-
-    /* header */
-    document.querySelectorAll(`.watchlist-table-header .${key}`)
-      .forEach(h => h.classList.toggle("col-hidden", !visible));
   });
+
+  updateTableHeader();
 }
 
 /* Events */
