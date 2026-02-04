@@ -210,13 +210,15 @@ function updateColumns() {
     const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
     const visible = tableToggle && tableToggle.checked && cb && cb.checked;
 
+    /* cellules */
     document.querySelectorAll(selector).forEach(el => {
-      el.style.display = visible ? "" : "none";
-      el.classList.toggle("col-active", visible);
+      el.classList.toggle("col-hidden", !visible);
     });
-  });
 
-  updateTableHeader();
+    /* header */
+    document.querySelectorAll(`.watchlist-table-header .${key}`)
+      .forEach(h => h.classList.toggle("col-hidden", !visible));
+  });
 }
 
 /* Events */
