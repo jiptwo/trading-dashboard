@@ -211,14 +211,14 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
-/* ================= WATCHLIST TABLE GRID ================= */
+/* ================= WATCHLIST TABLE GRID (FIXED) ================= */
 
 .watchlist-body {
   display: flex;
   flex-direction: column;
 }
 
-/* Grille commune header + rows */
+/* Grille FIXE : correspond exactement au Google Sheet */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
@@ -227,11 +227,52 @@ html, body {
     90px    /* Last */
     90px    /* Change */
     90px    /* Change % */
-    1fr;    /* extensible (future columns) */
+    90px    /* Volume */
+    90px    /* Extended */
+    90px    /* Ai Cote */
+    90px;   /* Ai Prob */
 
   align-items: center;
-  column-gap: 8px;
   padding: 4px 8px;
+}
+
+/* Header plus pâle et plus petit */
+.watchlist-table-header {
+  font-size: 11px;
+  color: #9ca3af;
+  border-bottom: 1px solid #1f2937;
+}
+
+/* Ligne data */
+.watchlist-row {
+  font-size: 13px;
+}
+
+/* Séparateurs verticaux (comme Excel / TradingView) */
+.watchlist-table-header > span:not(:last-child),
+.watchlist-row > span:not(:last-child) {
+  border-right: 1px solid rgba(255,255,255,0.05);
+  padding-right: 6px;
+}
+
+/* Colonnes */
+.symbol {
+  font-weight: 600;
+}
+
+.price,
+.pos,
+.change-pct,
+.volume,
+.extended,
+.ai-cote,
+.ai-prob {
+  text-align: right;
+}
+
+/* Colonnes masquées (ON GARDE LA PLACE) */
+.col-hidden {
+  visibility: hidden;
 }
 
 /* Header */
