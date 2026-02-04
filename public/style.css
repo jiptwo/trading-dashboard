@@ -211,68 +211,23 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
-/* ================= WATCHLIST TABLE GRID (FIXED) ================= */
+/* ================= WATCHLIST TABLE GRID (PRO / TRADINGVIEW) ================= */
 
 .watchlist-body {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
-/* Grille FIXE : correspond exactement au Google Sheet */
+/* Header + rows = même grille fluide */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
-  grid-template-columns:
-    120px   /* Symbol */
-    90px    /* Last */
-    90px    /* Change */
-    90px    /* Change % */
-    90px    /* Volume */
-    90px    /* Extended */
-    90px    /* Ai Cote */
-    90px;   /* Ai Prob */
-
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(70px, auto);
   align-items: center;
-  padding: 4px 8px;
-}
-
-/* Header plus pâle et plus petit */
-.watchlist-table-header {
-  font-size: 11px;
-  color: #9ca3af;
-  border-bottom: 1px solid #1f2937;
-}
-
-/* Ligne data */
-.watchlist-row {
-  font-size: 13px;
-}
-
-/* Séparateurs verticaux (comme Excel / TradingView) */
-.watchlist-table-header > span:not(:last-child),
-.watchlist-row > span:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.05);
-  padding-right: 6px;
-}
-
-/* Colonnes */
-.symbol {
-  font-weight: 600;
-}
-
-.price,
-.pos,
-.change-pct,
-.volume,
-.extended,
-.ai-cote,
-.ai-prob {
-  text-align: right;
-}
-
-/* Colonnes masquées (ON GARDE LA PLACE) */
-.col-hidden {
-  visibility: hidden;
+  padding: 4px 6px;
+  width: 100%;
 }
 
 /* Header */
@@ -282,28 +237,30 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
-/* Valeurs */
+/* Lignes */
 .watchlist-row {
   font-size: 13px;
 }
 
-/* Séparateurs verticaux (pâles, optionnels mais utiles) */
-.watchlist-table-header > span:not(:last-child),
-.watchlist-row > span:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.05);
-  padding-right: 6px;
-}
-
-/* Colonnes spécifiques */
-.watchlist-row .symbol {
+/* Colonnes */
+.col-symbol {
+  min-width: 110px;
   font-weight: 600;
 }
 
-.watchlist-row .price {
+.col {
   text-align: right;
+  white-space: nowrap;
 }
 
-.watchlist-row .pos {
-  text-align: right;
+/* Séparateurs verticaux (TradingView style) */
+.watchlist-table-header > span:not(:last-child),
+.watchlist-row > span:not(:last-child) {
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding-right: 6px;
 }
 
+/* Colonnes masquées */
+.col-hidden {
+  display: none;
+}
