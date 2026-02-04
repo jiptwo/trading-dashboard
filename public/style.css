@@ -211,3 +211,58 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
+/* ================= WATCHLIST TABLE GRID ================= */
+
+.watchlist-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Grille commune header + rows */
+.watchlist-table-header,
+.watchlist-row {
+  display: grid;
+  grid-template-columns:
+    120px   /* Symbol */
+    90px    /* Last */
+    90px    /* Change */
+    90px    /* Change % */
+    1fr;    /* extensible (future columns) */
+
+  align-items: center;
+  column-gap: 8px;
+  padding: 4px 8px;
+}
+
+/* Header */
+.watchlist-table-header {
+  font-size: 11px;
+  color: #9ca3af;
+  border-bottom: 1px solid #1f2937;
+}
+
+/* Valeurs */
+.watchlist-row {
+  font-size: 13px;
+}
+
+/* Séparateurs verticaux (pâles, optionnels mais utiles) */
+.watchlist-table-header > span:not(:last-child),
+.watchlist-row > span:not(:last-child) {
+  border-right: 1px solid rgba(255,255,255,0.05);
+  padding-right: 6px;
+}
+
+/* Colonnes spécifiques */
+.watchlist-row .symbol {
+  font-weight: 600;
+}
+
+.watchlist-row .price {
+  text-align: right;
+}
+
+.watchlist-row .pos {
+  text-align: right;
+}
+
