@@ -106,6 +106,14 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
+.watchlist-title{
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: white;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
 .watchlist-actions { display: flex; gap: 6px; }
 
 .icon-btn {
@@ -118,7 +126,7 @@ html, body {
 
 .icon-btn:hover { color: white; }
 
-.wl-color { width: 8px; height: 8px; border-radius: 50%; }
+.wl-color { width: 8px; height: 8px; border-radius: 50%; display:inline-block; margin-right:6px; }
 .red { background: #ef4444; }
 
 /* ================= DROPDOWNS ================= */
@@ -175,7 +183,7 @@ html, body {
 
 #columns-menu { left: -220px; }
 
-/* ================= WATCHLIST TABLE (TIGHT + RESIZABLE) ================= */
+/* ================= WATCHLIST TABLE ================= */
 
 .watchlist-body {
   display: flex;
@@ -188,8 +196,8 @@ html, body {
   display: grid;
   grid-template-columns: var(--wl-cols);
   align-items: center;
-  column-gap: 8px;      /* ✅ compact */
-  padding: 4px 6px;     /* ✅ compact */
+  column-gap: 8px;
+  padding: 4px 6px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -220,7 +228,7 @@ html, body {
 
 .col-hidden { display: none; }
 
-/* ✅ Drag handle (TradingView vibe) */
+/* Drag handle (header) */
 .watchlist-table-header > span{
   position: relative;
   user-select: none;
@@ -245,10 +253,113 @@ html, body {
   background: rgba(0, 153, 255, 0.0);
 }
 
-/* pendant drag: on montre une ligne bleue discrète */
 body.resizing-cols .col-resizer::after{
   background: rgba(0, 153, 255, 0.55);
 }
+
+/* ROW HOVER ACTIONS (trash + move) */
+.row-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.watchlist-row:hover .row-actions{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.row-actions .mini-btn{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8);
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.row-actions .mini-btn:hover{
+  border-color: rgba(255,255,255,0.28);
+  color: white;
+}
+
+/* Move menu */
+.move-menu{
+  position: absolute;
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  padding: 6px;
+  z-index: 2000;
+  min-width: 160px;
+  display: none;
+}
+.move-menu.open{ display:block; }
+.move-item{
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.move-item:hover{ background:#1f2937; }
+
+/* Modal */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+.modal-overlay.open{ display:flex; }
+
+.modal{
+  width: 420px;
+  max-width: calc(100vw - 24px);
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  padding: 12px;
+}
+.modal-title{
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.modal-row{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.modal-input{
+  flex: 1;
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: white;
+  padding: 8px 10px;
+}
+.modal-hint{
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+}
+
+/* Tooltip */
+.symbol-tooltip{
+  position: fixed;
+  display: none;
+  z-index: 4000;
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  padding: 8px 10px;
+  font-size: 12px;
+  max-width: 260px;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+.symbol-tooltip.open{ display:block; }
+.tooltip-title{ font-weight: 700; margin-bottom: 4px; }
+.tooltip-muted{ color: rgba(255,255,255,0.65); }
 
 #bottom-bar {
   background: #0f1623;
