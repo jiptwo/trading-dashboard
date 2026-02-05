@@ -1,5 +1,5 @@
 :root{
-  --wl-cols: 12px 120px 70px 70px 78px 78px 90px 70px 70px;
+  --wl-cols: 12px 96px 70px 70px 78px 78px 90px 70px 70px;
 }
 
 html, body {
@@ -175,7 +175,7 @@ html, body {
 
 #columns-menu { left: -220px; }
 
-/* ================= WATCHLIST TABLE (COMPACT + ALIGNED) ================= */
+/* ================= WATCHLIST TABLE (TIGHT + RESIZABLE) ================= */
 
 .watchlist-body {
   display: flex;
@@ -188,8 +188,8 @@ html, body {
   display: grid;
   grid-template-columns: var(--wl-cols);
   align-items: center;
-  column-gap: 8px;     /* ✅ moins d'espace */
-  padding: 4px 6px;    /* ✅ moins d'espace */
+  column-gap: 8px;      /* ✅ compact */
+  padding: 4px 6px;     /* ✅ compact */
   width: 100%;
   box-sizing: border-box;
 }
@@ -219,6 +219,36 @@ html, body {
 .price, .chg, .change-pct, .volume, .extended, .ai-cote, .ai-prob { text-align: right; }
 
 .col-hidden { display: none; }
+
+/* ✅ Drag handle (TradingView vibe) */
+.watchlist-table-header > span{
+  position: relative;
+  user-select: none;
+}
+
+.col-resizer{
+  position: absolute;
+  right: -6px;
+  top: 0;
+  width: 12px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.col-resizer::after{
+  content: "";
+  position: absolute;
+  right: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: rgba(0, 153, 255, 0.0);
+}
+
+/* pendant drag: on montre une ligne bleue discrète */
+body.resizing-cols .col-resizer::after{
+  background: rgba(0, 153, 255, 0.55);
+}
 
 #bottom-bar {
   background: #0f1623;
