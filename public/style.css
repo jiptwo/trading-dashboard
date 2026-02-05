@@ -1,9 +1,6 @@
 :root{
-  --rightbar-min: 260px;
-  --rightbar-max: 600px;
-
-  /* Grille watchlist calculée par JS */
-  --wl-cols: 14px minmax(90px, 1.4fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(80px, 1fr);
+  /* La grille est définie en JS selon colonnes visibles */
+  --wl-cols: 14px 150px 90px 90px 90px 90px 110px 90px 90px;
 }
 
 html, body {
@@ -14,18 +11,14 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* ✅ TOP BAR = 100% (on annule le “calc” qui a empiré) */
 #top-bar {
-  width: 100%;
-  box-sizing: border-box;
-
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px;
-
   background: #0f1623;
-  border-bottom: 1px solid #1f2937;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn {
@@ -51,14 +44,11 @@ html, body {
   gap: 8px;
 }
 
-/* ✅ AI BAR = 100% aussi */
 #ai-bar {
-  width: 100%;
-  box-sizing: border-box;
-
   background: #0f172a;
   padding: 6px;
-  border-bottom: 1px solid #1f2937;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #main-layout {
@@ -70,8 +60,9 @@ html, body {
   width: 48px;
   background: #0f1623;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  padding: 6px;
 }
 
 #chart-area {
@@ -79,27 +70,24 @@ html, body {
   background: black;
 }
 
-/* ✅ Resizer vertical */
 #resizer-vertical {
   width: 4px;
   background: #1f2937;
   cursor: ew-resize;
 }
 
-/* ✅ Right bar : min/max -> permet de réduire/agrandir proprement */
 #right-bar {
   width: 360px;
-  min-width: var(--rightbar-min);
-  max-width: var(--rightbar-max);
-
   display: flex;
+  min-width: 260px;
+  max-width: 600px;
 }
 
 .right-panels {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* important pour éviter débordements */
+  min-width: 0;
 }
 
 #zone-1, #zone-2 {
@@ -147,8 +135,7 @@ html, body {
   color: white;
 }
 
-.wl-color,
-.dot {
+.wl-color {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -215,43 +202,38 @@ html, body {
   margin: 6px 0;
 }
 
-/* ✅ Customize columns menu s'ouvre vers la gauche */
-#columns-menu {
-  right: auto;
-  left: -220px;
-}
+/* Customize columns s'ouvre vers la gauche */
+#columns-menu { left: -220px; }
 
-/* ================= WATCHLIST TABLE (✅ ALIGNÉ PRO) ================= */
+/* ================= WATCHLIST TABLE (ALIGN PRO) ================= */
 
 .watchlist-body {
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-width: 0;
 }
 
-/* Header + rows = même grille, calculée par JS */
+/* Header + rows partagent EXACTEMENT la même grille */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
   grid-template-columns: var(--wl-cols);
   align-items: center;
-  column-gap: 10px;
-
+  column-gap: 12px;
   padding: 6px 8px;
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Header (petit, pâle) */
-.watchlist-table-header{
+/* Header: petit + pâle */
+.watchlist-table-header {
   font-size: 11px;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.60);
   border-bottom: 1px solid #1f2937;
 }
 
-/* Ligne data */
-.watchlist-row{
+/* Row */
+.watchlist-row {
   font-size: 13px;
 }
 
@@ -259,18 +241,27 @@ html, body {
 .watchlist-table-header > span:not(:last-child),
 .watchlist-row > span:not(:last-child){
   border-right: 1px solid rgba(255,255,255,0.06);
-  padding-right: 8px;
+  padding-right: 10px;
 }
 
-/* Cellules */
-.symbol { font-weight: 600; }
-.price, .change, .change-pct, .volume, .extended, .ai-cote, .ai-prob { text-align: right; }
+/* Dot */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  justify-self: center;
+}
 
-/* Masquage réel (et JS recalcule la grille, donc plus de “vide”) */
+/* Alignements texte */
+.symbol { font-weight: 600; }
+.price, .chg, .change-pct, .volume, .extended, .ai-cote, .ai-prob { text-align: right; }
+
+/* Masquage colonnes */
 .col-hidden { display: none; }
 
 #bottom-bar {
   background: #0f1623;
   padding: 6px;
-  border-top: 1px solid #1f2937;
+  width: 100%;
+  box-sizing: border-box;
 }
