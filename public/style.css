@@ -59,7 +59,7 @@ html, body {
 }
 
 #right-bar {
-  width: 520px; /* tu peux ajuster */
+  width: 520px;
   display: flex;
   min-width: 320px;
 }
@@ -68,7 +68,7 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* important pour éviter overflow bizarre */
+  min-width: 0;
 }
 
 #zone-1, #zone-2 {
@@ -123,6 +123,9 @@ html, body {
 }
 
 .red { background: #ef4444; }
+.blue { background: #3b82f6; }
+.green { background: #22c55e; }
+.orange { background: #f97316; }
 
 #bottom-bar {
   background: #0f1623;
@@ -203,11 +206,9 @@ html, body {
   width: 100%;
   display: flex;
   flex-direction: column;
-}
 
-/* Variables de colonnes (compactes) */
-.watchlist-body {
-  --c-symbol: 150px;
+  /* widths (modifiable by JS resizers) */
+  --c-symbol: 140px;
   --c-last: 74px;
   --c-change: 74px;
   --c-changePct: 86px;
@@ -218,7 +219,7 @@ html, body {
   --c-actions: 64px;
 }
 
-/* Header + row = EXACTEMENT la même grille */
+/* Header + row = same grid */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
@@ -235,11 +236,10 @@ html, body {
 
   align-items: center;
   width: 100%;
-  min-width: max-content; /* permet scroll horizontal propre */
+  min-width: max-content;
   box-sizing: border-box;
 }
 
-/* Header (compact, pale) */
 .watchlist-table-header {
   font-size: 11px;
   color: rgba(255,255,255,0.55);
@@ -247,11 +247,10 @@ html, body {
   padding: 6px 8px;
 }
 
-/* Rows (compact) */
 .watchlist-row {
   font-size: 13px;
   padding: 4px 8px;
-  height: 28px;          /* compact comme TradingView */
+  height: 28px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
@@ -264,6 +263,40 @@ html, body {
 .watchlist-row > span:not(:last-child) {
   border-right: 1px solid rgba(255,255,255,0.06);
   padding-right: 8px;
+}
+
+/* header cells need position relative for resizer handles */
+.watchlist-table-header > span {
+  position: relative;
+}
+
+/* column resizer handle */
+.col-resizer {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 12px;
+  height: calc(100% + 12px);
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+
+.col-resizer::before {
+  content: "";
+  width: 2px;
+  height: 16px;
+  background: rgba(59,130,246,0.0); /* invisible by default */
+}
+
+.watchlist-table-header > span:hover .col-resizer {
+  opacity: 1;
+}
+
+.watchlist-table-header > span:hover .col-resizer::before {
+  background: rgba(59,130,246,0.65); /* “ligne bleue” */
 }
 
 /* Symbol cell */
@@ -281,13 +314,12 @@ html, body {
   text-overflow: ellipsis;
 }
 
-/* numeric columns right aligned */
-.col, .cell {
+.cell {
   text-align: right;
   white-space: nowrap;
 }
 
-/* row actions aligned right column */
+/* actions column */
 .row-actions {
   display: flex;
   justify-content: flex-end;
@@ -312,9 +344,7 @@ html, body {
 .row-btn:hover { background: #1f2937; }
 
 /* hidden columns */
-.col-hidden {
-  display: none !important;
-}
+.col-hidden { display: none !important; }
 
 /* ================= MODAL ================= */
 
@@ -391,7 +421,7 @@ html, body {
   border-radius: 10px;
   padding: 6px;
   display: none;
-  min-width: 170px;
+  min-width: 230px;
 }
 
 .row-menu.open { display: block; }
@@ -405,7 +435,47 @@ html, body {
   padding: 8px 10px;
   cursor: pointer;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .row-menu-item:hover { background: #1f2937; }
 .row-menu-item.danger { color: #fca5a5; }
+
+.has-submenu { position: relative; }
+.row-menu-arrow { opacity: 0.8; }
+
+.row-submenu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 6px;
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 190px;
+  display: none;
+}
+
+.has-submenu:hover .row-submenu {
+  display: block;
+}
+
+.submenu-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.submenu-item:hover { background: #1f2937; }
