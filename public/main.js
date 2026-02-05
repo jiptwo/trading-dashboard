@@ -35,17 +35,12 @@ const zone1 = document.getElementById("zone-1");
 let resizingV = false;
 let resizingH = false;
 
-const RIGHT_MIN = 260;
-const RIGHT_MAX = 600;
-
 resizerV.addEventListener("mousedown", () => resizingV = true);
 document.addEventListener("mouseup", () => resizingV = false);
 document.addEventListener("mousemove", e => {
   if (!resizingV) return;
   const w = window.innerWidth - e.clientX;
-  if (w >= RIGHT_MIN && w <= RIGHT_MAX) {
-    rightBar.style.width = w + "px";
-  }
+  if (w >= 260 && w <= 600) rightBar.style.width = w + "px";
 });
 
 resizerH.addEventListener("mousedown", () => resizingH = true);
@@ -128,7 +123,7 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
           img.className = "icon";
           btn.appendChild(img);
         } else {
-          btn.textContent = label; // ✅ timeframe = juste “5m” (pas d’étoile)
+          btn.textContent = label; // timeframe => juste “5m”
         }
 
         favoritesBar.appendChild(btn);
@@ -142,25 +137,25 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
 
-/* ================= CUSTOMIZE COLUMNS (✅ TABLE PRO) ================= */
+/* ================= CUSTOMIZE COLUMNS (ALIGN TABLE) ================= */
 
 const tableToggle = document.getElementById("table-toggle");
 const watchlistBody = document.querySelector(".watchlist-body");
 
-/* mapping : checkbox -> class de cellule */
-const columnConfig = [
-  { key: "last",      label: "Last",      cls: ".price",      width: "minmax(70px, 1fr)" },
-  { key: "change",    label: "Change",    cls: ".change",     width: "minmax(70px, 1fr)" },
-  { key: "changePct", label: "Change %",  cls: ".change-pct", width: "minmax(80px, 1fr)" },
-  { key: "volume",    label: "Volume",    cls: ".volume",     width: "minmax(80px, 1fr)" },
-  { key: "extended",  label: "Extended",  cls: ".extended",   width: "minmax(100px, 1fr)" },
-  { key: "aiCote",    label: "Ai Cote",   cls: ".ai-cote",    width: "minmax(80px, 1fr)" },
-  { key: "aiProb",    label: "Ai Prob",   cls: ".ai-prob",    width: "minmax(80px, 1fr)" },
+/* Largeurs fixes style TradingView */
+const columns = [
+  { key: "last",      label: "Last",      cls: ".price",      width: "90px"  },
+  { key: "change",    label: "Change",    cls: ".chg",        width: "90px"  },
+  { key: "changePct", label: "Change %",  cls: ".change-pct", width: "90px"  },
+  { key: "volume",    label: "Volume",    cls: ".volume",     width: "90px"  },
+  { key: "extended",  label: "Extended",  cls: ".extended",   width: "110px" },
+  { key: "aiCote",    label: "Ai Cote",   cls: ".ai-cote",    width: "90px"  },
+  { key: "aiProb",    label: "Ai Prob",   cls: ".ai-prob",    width: "90px"  },
 ];
 
-/* Header de table */
 function ensureHeader(){
   if (!watchlistBody) return null;
+
   let header = watchlistBody.querySelector(".watchlist-table-header");
   if (!header) {
     header = document.createElement("div");
@@ -170,64 +165,62 @@ function ensureHeader(){
   return header;
 }
 
-/* calcule colonnes visibles + grille */
 function getVisibleColumns(){
+  if (!tableToggle || !tableToggle.checked) return [];
+
   const visible = [];
-
-  if (!tableToggle || !tableToggle.checked) return visible;
-
-  columnConfig.forEach(col => {
+  columns.forEach(col => {
     const cb = document.querySelector(`#columns-menu input[data-col="${col.key}"]`);
     if (cb && cb.checked) visible.push(col);
   });
-
   return visible;
 }
 
-function updateWatchlistGrid(){
+function updateWatchlistTable(){
   const header = ensureHeader();
   if (!header) return;
 
-  const visibleCols = getVisibleColumns();
+  const visible = getVisibleColumns();
 
-  /* ✅ Grille = dot + symbol toujours, puis seulement colonnes visibles */
-  const parts = [
-    "14px",                    // dot
-    "minmax(90px, 1.4fr)"      // symbol
-  ];
+  // ✅ Même grille pour header + rows :
+  // dot (14px) + symbol (150px) + colonnes visibles (largeurs fixes)
+  const gridParts = ["14px", "150px", ...visible.map(c => c.width)];
+  document.documentElement.style.setProperty("--wl-cols", gridParts.join(" "));
 
-  visibleCols.forEach(c => parts.push(c.width));
-  document.documentElement.style.setProperty("--wl-cols", parts.join(" "));
-
-  /* Header contenu */
+  // ✅ Header: 1 cellule vide pour la pastille, ensuite Symbol, ensuite colonnes visibles
   header.innerHTML = "";
+
+  const emptyDot = document.createElement("span");
+  emptyDot.textContent = "";
+  header.appendChild(emptyDot);
+
   const hSymbol = document.createElement("span");
   hSymbol.textContent = "Symbol";
   header.appendChild(hSymbol);
 
-  visibleCols.forEach(c => {
+  visible.forEach(c => {
     const h = document.createElement("span");
     h.textContent = c.label;
     header.appendChild(h);
   });
 
-  /* Lignes : on cache/affiche les cellules (et comme la grille est recalculée -> plus de vide) */
+  // ✅ Rows : on affiche/cache les cellules, et comme la grille est recalculée => alignement parfait
   document.querySelectorAll(".watchlist-row").forEach(row => {
-    columnConfig.forEach(c => {
+    columns.forEach(c => {
       const cell = row.querySelector(c.cls);
       if (!cell) return;
 
-      const isVisible = visibleCols.some(v => v.key === c.key);
+      const isVisible = visible.some(v => v.key === c.key);
       cell.classList.toggle("col-hidden", !isVisible);
     });
   });
 }
 
-/* events */
-if (tableToggle) tableToggle.addEventListener("change", updateWatchlistGrid);
+/* Events */
+if (tableToggle) tableToggle.addEventListener("change", updateWatchlistTable);
 
 document.querySelectorAll("#columns-menu input[data-col]")
-  .forEach(cb => cb.addEventListener("change", updateWatchlistGrid));
+  .forEach(cb => cb.addEventListener("change", updateWatchlistTable));
 
-/* init */
-updateWatchlistGrid();
+/* Init */
+updateWatchlistTable();
