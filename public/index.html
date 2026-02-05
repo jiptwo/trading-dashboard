@@ -10,7 +10,6 @@
 <body>
 
 <header id="top-bar">
-
   <div class="logo">LOGO</div>
 
   <div class="symbol-search">
@@ -26,21 +25,15 @@
 
   <div id="chart-favorites"></div>
 
-  <!-- CHART DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="chart-menu">
       Chart <span class="arrow">▾</span>
     </button>
-    <div class="dropdown-menu" id="chart-menu">
-      <div class="menu-item">Candlestick</div>
-      <div class="menu-item">Bar</div>
-      <div class="menu-item">Line</div>
-    </div>
+    <div class="dropdown-menu" id="chart-menu"></div>
   </div>
 
   <div id="timeframe-favorites"></div>
 
-  <!-- TIMEFRAME DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="timeframe-menu">
       Timeframe <span class="arrow">▾</span>
@@ -54,165 +47,96 @@
     </div>
   </div>
 
-  <button class="btn" title="Indicators">Indicators</button>
+  <button class="btn">Indicators</button>
 
   <div class="right-actions">
-    <button class="btn" title="Settings">
-      <img src="./icons/settings.svg" class="icon" />
-    </button>
-    <button class="btn" title="User">
-      <img src="./icons/user.svg" class="icon" />
-    </button>
+    <button class="btn"><img src="./icons/settings.svg" class="icon" /></button>
+    <button class="btn"><img src="./icons/user.svg" class="icon" /></button>
   </div>
-
 </header>
 
 <section id="ai-bar">AI assistant (future)</section>
 
 <div id="main-layout">
-
   <aside id="left-bar">tools</aside>
-
   <main id="chart-area">Chart Area</main>
-
-  <!-- RESIZER CHART / RIGHT -->
   <div id="resizer-vertical"></div>
 
   <aside id="right-bar">
-
     <div class="right-panels">
 
-      <!-- ================= ZONE 1 : WATCHLIST ================= -->
+      <!-- ================= ZONE 1 ================= -->
       <div id="zone-1">
 
         <div class="watchlist-header">
-
-          <!-- WATCHLIST NAME DROPDOWN -->
           <div class="watchlist-left dropdown">
             <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu">
               <span class="wl-color red"></span>
               <span class="wl-name">Red list</span>
               <span class="arrow">▾</span>
             </button>
+            <div class="dropdown-menu" id="watchlist-menu"></div>
+          </div>
 
-            <div class="dropdown-menu" id="watchlist-menu">
-              <div class="menu-item">Rename</div>
-              <div class="menu-item">Share list</div>
-              <div class="menu-item">Add alert on list</div>
-              <div class="menu-item">Make a copy</div>
-              <div class="menu-item">Add section</div>
-              <div class="menu-item">Clear list</div>
-              <div class="menu-item">Create new list</div>
-              <div class="menu-item">Upload list</div>
+          <div class="watchlist-actions">
+            <button class="icon-btn">+</button>
+            <button class="icon-btn">⛶</button>
+
+            <div class="dropdown">
+              <button class="icon-btn dropdown-btn" data-dropdown="columns-menu">⋯</button>
+
+              <div class="dropdown-menu" id="columns-menu">
+                <div class="menu-row">
+                  <span>Table view</span>
+                  <input type="checkbox" id="table-toggle" checked />
+                </div>
+
+                <div class="menu-separator"></div>
+                <div class="menu-title">Customize columns</div>
+
+                <label class="menu-row"><input type="checkbox" data-col="last" checked /> Last</label>
+                <label class="menu-row"><input type="checkbox" data-col="change" checked /> Change</label>
+                <label class="menu-row"><input type="checkbox" data-col="changePct" checked /> Change %</label>
+                <label class="menu-row"><input type="checkbox" data-col="volume" /> Volume</label>
+                <label class="menu-row"><input type="checkbox" data-col="extended" /> Extended Hours</label>
+                <label class="menu-row"><input type="checkbox" data-col="aiCote" /> Ai Cote</label>
+                <label class="menu-row"><input type="checkbox" data-col="aiProb" /> Ai Prob</label>
+              </div>
             </div>
           </div>
-
-          <!-- ACTIONS TOP RIGHT -->
-          <div class="watchlist-actions">
-            <button class="icon-btn" title="Add symbol">+</button>
-            <button class="icon-btn" title="Advanced view">⛶</button>
-            <div class="dropdown">
-  <button class="icon-btn dropdown-btn"
-          data-dropdown="columns-menu"
-          title="Customize columns">
-    ⋯
-  </button>
-
-  <div class="dropdown-menu" id="columns-menu">
-
-    <div class="menu-row">
-      <span>Table view</span>
-      <input type="checkbox" id="table-toggle" checked />
-    </div>
-
-    <div class="menu-separator"></div>
-
-    <div class="menu-title">Customize columns</div>
-
-    <label class="menu-row">
-      <input type="checkbox" data-col="last" checked /> Last
-    </label>
-
-    <label class="menu-row">
-      <input type="checkbox" data-col="change" checked /> Change
-    </label>
-
-    <label class="menu-row">
-      <input type="checkbox" data-col="changePct" checked /> Change %
-    </label>
-
-    <label class="menu-row">
-      <input type="checkbox" data-col="volume" /> Volume
-    </label>
-
-    <label class="menu-row">
-      <input type="checkbox" data-col="extended" /> Extended Hours
-    </label>
-
-    <label class="menu-row">
-      <input type="checkbox" data-col="aiCote" /> Ai Cote
-    </label>
-
-    <label class="menu-row">
-      <input type="checkbox" data-col="aiProb" /> Ai Prob
-    </label>
-
-  </div>
-</div>
-
-          </div>
-
         </div>
 
         <div class="watchlist-body">
-          <div class="watchlist-row">
-  <span class="col-symbol">
-    <span class="dot red"></span>
-    AAPL
-  </span>
 
-  <span class="col last price">182.34</span>
-  <span class="col change">+0.76</span>
-  <span class="col changePct pos">+0.42%</span>
-  <span class="col volume col-hidden">—</span>
-  <span class="col extended col-hidden">—</span>
-  <span class="col ai-cote col-hidden">—</span>
-  <span class="col ai-prob col-hidden">—</span>
-</div>
+          <!-- HEADER GÉNÉRÉ PAR JS -->
+
+          <div class="watchlist-row">
+            <span class="col-symbol">
+              <span class="dot red"></span>
+              <span class="symbol">AAPL</span>
+            </span>
+
+            <span class="col last">182.34</span>
+            <span class="col change">+0.76</span>
+            <span class="col changePct">+0.42%</span>
+            <span class="col volume">—</span>
+            <span class="col extended">—</span>
+            <span class="col ai-cote">—</span>
+            <span class="col ai-prob">—</span>
+          </div>
 
         </div>
-
       </div>
 
-      <!-- RESIZER ZONE 1 / ZONE 2 -->
       <div id="resizer-horizontal"></div>
-
-      <!-- ================= ZONE 2 ================= -->
-      <div id="zone-2">
-        Zone 2
-      </div>
-
+      <div id="zone-2">Zone 2</div>
     </div>
 
-    <!-- RIGHT ICON BAR -->
-    <div class="right-icons">
-      <button class="btn active" title="Watchlist">
-        <img src="./icons/watchlist.svg" class="icon" />
-      </button>
-      <button class="btn" title="Calendar">
-        <img src="./icons/calendar.svg" class="icon" />
-      </button>
-      <button class="btn" title="Chat">
-        <img src="./icons/chat.svg" class="icon" />
-      </button>
-    </div>
-
+    <div class="right-icons"></div>
   </aside>
-
 </div>
 
 <footer id="bottom-bar">Bottom tools</footer>
-
 <script src="./main.js"></script>
 </body>
 </html>
