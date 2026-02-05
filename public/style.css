@@ -1,3 +1,11 @@
+:root{
+  --rightbar-min: 260px;
+  --rightbar-max: 600px;
+
+  /* Grille watchlist calculée par JS */
+  --wl-cols: 14px minmax(90px, 1.4fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(80px, 1fr);
+}
+
 html, body {
   margin: 0;
   height: 100%;
@@ -6,15 +14,15 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
+/* ✅ TOP BAR = 100% (on annule le “calc” qui a empiré) */
 #top-bar {
+  width: 100%;
+  box-sizing: border-box;
+
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px;
-
-  /* ALIGNEMENT PARFAIT AVEC LE CONTENU */
-  width: calc(100% - 360px);
-  box-sizing: border-box;
 
   background: #0f1623;
   border-bottom: 1px solid #1f2937;
@@ -43,9 +51,14 @@ html, body {
   gap: 8px;
 }
 
+/* ✅ AI BAR = 100% aussi */
 #ai-bar {
+  width: 100%;
+  box-sizing: border-box;
+
   background: #0f172a;
   padding: 6px;
+  border-bottom: 1px solid #1f2937;
 }
 
 #main-layout {
@@ -53,19 +66,32 @@ html, body {
   height: calc(100vh - 120px);
 }
 
+#left-bar{
+  width: 48px;
+  background: #0f1623;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #chart-area {
   flex: 1;
   background: black;
 }
 
+/* ✅ Resizer vertical */
 #resizer-vertical {
   width: 4px;
   background: #1f2937;
   cursor: ew-resize;
 }
 
+/* ✅ Right bar : min/max -> permet de réduire/agrandir proprement */
 #right-bar {
   width: 360px;
+  min-width: var(--rightbar-min);
+  max-width: var(--rightbar-max);
+
   display: flex;
 }
 
@@ -73,10 +99,12 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0; /* important pour éviter débordements */
 }
 
 #zone-1, #zone-2 {
   overflow: auto;
+  min-width: 0;
 }
 
 #resizer-horizontal {
@@ -92,6 +120,8 @@ html, body {
   flex-direction: column;
   align-items: center;
 }
+
+/* ================= WATCHLIST HEADER ================= */
 
 .watchlist-header {
   display: flex;
@@ -110,6 +140,7 @@ html, body {
   border: none;
   color: #ccc;
   cursor: pointer;
+  padding: 4px 6px;
 }
 
 .icon-btn:hover {
@@ -127,22 +158,9 @@ html, body {
   background: #ef4444;
 }
 
-.watchlist-row {
-  display: flex;
-  gap: 8px;
-  padding: 6px;
-}
-
-#bottom-bar {
-  background: #0f1623;
-  padding: 6px;
-}
-
 /* ================= DROPDOWNS ================= */
 
-.dropdown {
-  position: relative;
-}
+.dropdown { position: relative; }
 
 .dropdown-menu {
   position: absolute;
@@ -155,18 +173,14 @@ html, body {
   z-index: 1000;
 }
 
-.dropdown-menu.open {
-  display: block;
-}
+.dropdown-menu.open { display: block; }
 
 .menu-item {
   padding: 8px 10px;
   cursor: pointer;
 }
 
-.menu-item:hover {
-  background: #1f2937;
-}
+.menu-item:hover { background: #1f2937; }
 
 .star {
   color: #6b7280;
@@ -174,9 +188,7 @@ html, body {
   margin-left: 8px;
 }
 
-.star.active {
-  color: #facc15; /* jaune */
-}
+.star.active { color: #facc15; }
 
 .menu-row {
   display: flex;
@@ -188,9 +200,7 @@ html, body {
   cursor: pointer;
 }
 
-.menu-row input {
-  cursor: pointer;
-}
+.menu-row input { cursor: pointer; }
 
 .menu-title {
   padding: 6px 8px;
@@ -205,73 +215,62 @@ html, body {
   margin: 6px 0;
 }
 
-/* FIX – Customize columns dropdown opens to the LEFT */
+/* ✅ Customize columns menu s'ouvre vers la gauche */
 #columns-menu {
   right: auto;
-  left: -220px; /* ajuste si nécessaire selon largeur */
+  left: -220px;
 }
 
-.watchlist-table-header {
-  font-size: 11px;
-  color: #9ca3af;
-  border-bottom: 1px solid #1f2937;
-}
-
-/* ================= WATCHLIST TABLE (FIX PRO) ================= */
+/* ================= WATCHLIST TABLE (✅ ALIGNÉ PRO) ================= */
 
 .watchlist-body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0;
 }
 
-/* UNE SEULE GRILLE SYNCHRONISÉE */
+/* Header + rows = même grille, calculée par JS */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
-  grid-template-columns:
-    140px   /* Symbol */
-    80px    /* Last */
-    80px    /* Change */
-    90px    /* Change % */
-    90px    /* Volume */
-    110px   /* Extended */
-    80px    /* Ai Cote */
-    80px;   /* Ai Prob */
-
+  grid-template-columns: var(--wl-cols);
   align-items: center;
-  padding: 4px 6px;
+  column-gap: 10px;
+
+  padding: 6px 8px;
   width: 100%;
+  box-sizing: border-box;
 }
 
-.watchlist-table-header {
+/* Header (petit, pâle) */
+.watchlist-table-header{
   font-size: 11px;
   color: rgba(255,255,255,0.55);
   border-bottom: 1px solid #1f2937;
 }
 
-.watchlist-row {
+/* Ligne data */
+.watchlist-row{
   font-size: 13px;
 }
 
-.col-symbol {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
+/* Traits verticaux subtils */
+.watchlist-table-header > span:not(:last-child),
+.watchlist-row > span:not(:last-child){
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding-right: 8px;
 }
 
-.col {
-  text-align: right;
-  white-space: nowrap;
-}
+/* Cellules */
+.symbol { font-weight: 600; }
+.price, .change, .change-pct, .volume, .extended, .ai-cote, .ai-prob { text-align: right; }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
+/* Masquage réel (et JS recalcule la grille, donc plus de “vide”) */
+.col-hidden { display: none; }
 
-.red {
-  background: #ef4444;
+#bottom-bar {
+  background: #0f1623;
+  padding: 6px;
+  border-top: 1px solid #1f2937;
 }
