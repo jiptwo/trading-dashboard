@@ -1,7 +1,3 @@
-:root{
-  --wl-cols: 12px 96px 70px 70px 78px 78px 90px 70px 70px;
-}
-
 html, body {
   margin: 0;
   height: 100%;
@@ -16,8 +12,6 @@ html, body {
   gap: 8px;
   padding: 8px;
   background: #0f1623;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .btn {
@@ -28,9 +22,14 @@ html, body {
   cursor: pointer;
 }
 
-.btn:hover { background: #1f2937; }
+.btn:hover {
+  background: #1f2937;
+}
 
-.icon { width: 16px; height: 16px; }
+.icon {
+  width: 16px;
+  height: 16px;
+}
 
 .right-actions {
   margin-left: auto;
@@ -41,8 +40,6 @@ html, body {
 #ai-bar {
   background: #0f172a;
   padding: 6px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 #main-layout {
@@ -50,16 +47,10 @@ html, body {
   height: calc(100vh - 120px);
 }
 
-#left-bar{
-  width: 48px;
-  background: #0f1623;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px;
+#chart-area {
+  flex: 1;
+  background: black;
 }
-
-#chart-area { flex: 1; background: black; }
 
 #resizer-vertical {
   width: 4px;
@@ -68,20 +59,22 @@ html, body {
 }
 
 #right-bar {
-  width: 360px;
+  width: 520px; /* tu peux ajuster */
   display: flex;
-  min-width: 260px;
-  max-width: 600px;
+  min-width: 320px;
 }
 
 .right-panels {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-width: 0; /* important pour éviter overflow bizarre */
 }
 
-#zone-1, #zone-2 { overflow: auto; min-width: 0; }
+#zone-1, #zone-2 {
+  overflow: auto;
+  min-width: 0;
+}
 
 #resizer-horizontal {
   height: 4px;
@@ -97,8 +90,6 @@ html, body {
   align-items: center;
 }
 
-/* ================= WATCHLIST HEADER ================= */
-
 .watchlist-header {
   display: flex;
   justify-content: space-between;
@@ -106,15 +97,11 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
-.watchlist-title{
-  background: #111827;
-  border: 1px solid #1f2937;
-  color: white;
-  padding: 6px 8px;
-  cursor: pointer;
+.watchlist-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
-
-.watchlist-actions { display: flex; gap: 6px; }
 
 .icon-btn {
   background: none;
@@ -124,10 +111,23 @@ html, body {
   padding: 4px 6px;
 }
 
-.icon-btn:hover { color: white; }
+.icon-btn:hover {
+  color: white;
+}
 
-.wl-color { width: 8px; height: 8px; border-radius: 50%; display:inline-block; margin-right:6px; }
+.wl-color,
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
 .red { background: #ef4444; }
+
+#bottom-bar {
+  background: #0f1623;
+  padding: 6px;
+}
 
 /* ================= DROPDOWNS ================= */
 
@@ -146,14 +146,24 @@ html, body {
 
 .dropdown-menu.open { display: block; }
 
-.menu-item { padding: 8px 10px; cursor: pointer; }
+.menu-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .menu-item:hover { background: #1f2937; }
+
+.menu-item.danger { color: #fca5a5; }
 
 .star {
   color: #6b7280;
   font-size: 14px;
   margin-left: 8px;
 }
+
 .star.active { color: #facc15; }
 
 .menu-row {
@@ -181,228 +191,107 @@ html, body {
   margin: 6px 0;
 }
 
-#columns-menu { left: -220px; }
+/* Customize columns dropdown opens to the LEFT */
+#columns-menu {
+  right: auto;
+  left: -240px;
+}
 
 /* ================= WATCHLIST TABLE ================= */
 
 .watchlist-body {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  width: 100%;
 }
 
+/* Variables de colonnes (compactes) */
+.watchlist-body {
+  --c-symbol: 150px;
+  --c-last: 74px;
+  --c-change: 74px;
+  --c-changePct: 86px;
+  --c-volume: 86px;
+  --c-extended: 92px;
+  --c-aiCote: 76px;
+  --c-aiProb: 76px;
+  --c-actions: 64px;
+}
+
+/* Header + row = EXACTEMENT la même grille */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
-  grid-template-columns: var(--wl-cols);
+  grid-template-columns:
+    var(--c-symbol)
+    var(--c-last)
+    var(--c-change)
+    var(--c-changePct)
+    var(--c-volume)
+    var(--c-extended)
+    var(--c-aiCote)
+    var(--c-aiProb)
+    var(--c-actions);
+
   align-items: center;
-  column-gap: 8px;
-  padding: 4px 6px;
   width: 100%;
+  min-width: max-content; /* permet scroll horizontal propre */
   box-sizing: border-box;
 }
 
+/* Header (compact, pale) */
 .watchlist-table-header {
   font-size: 11px;
-  color: rgba(255,255,255,0.60);
+  color: rgba(255,255,255,0.55);
   border-bottom: 1px solid #1f2937;
+  padding: 6px 8px;
 }
 
-.watchlist-row { font-size: 13px; }
+/* Rows (compact) */
+.watchlist-row {
+  font-size: 13px;
+  padding: 4px 8px;
+  height: 28px;          /* compact comme TradingView */
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
 
+.watchlist-row:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+/* vertical separators */
 .watchlist-table-header > span:not(:last-child),
-.watchlist-row > span:not(:last-child){
+.watchlist-row > span:not(:last-child) {
   border-right: 1px solid rgba(255,255,255,0.06);
   padding-right: 8px;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  justify-self: center;
-}
-
-.symbol { font-weight: 600; }
-.price, .chg, .change-pct, .volume, .extended, .ai-cote, .ai-prob { text-align: right; }
-
-.col-hidden { display: none; }
-
-/* Drag handle (header) */
-.watchlist-table-header > span{
-  position: relative;
-  user-select: none;
-}
-
-.col-resizer{
-  position: absolute;
-  right: -6px;
-  top: 0;
-  width: 12px;
-  height: 100%;
-  cursor: col-resize;
-}
-
-.col-resizer::after{
-  content: "";
-  position: absolute;
-  right: 5px;
-  top: 6px;
-  bottom: 6px;
-  width: 1px;
-  background: rgba(0, 153, 255, 0.0);
-}
-
-body.resizing-cols .col-resizer::after{
-  background: rgba(0, 153, 255, 0.55);
-}
-
-/* ROW HOVER ACTIONS (trash + move) */
-.row-actions{
+/* Symbol cell */
+.col-symbol {
   display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.watchlist-row:hover .row-actions{
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.row-actions .mini-btn{
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.8);
-  padding: 2px 6px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.row-actions .mini-btn:hover{
-  border-color: rgba(255,255,255,0.28);
-  color: white;
-}
-
-/* Move menu */
-.move-menu{
-  position: absolute;
-  background: #0f1623;
-  border: 1px solid #1f2937;
-  padding: 6px;
-  z-index: 2000;
-  min-width: 160px;
-  display: none;
-}
-.move-menu.open{ display:block; }
-.move-item{
-  padding: 6px 8px;
-  cursor: pointer;
-  font-size: 13px;
-}
-.move-item:hover{ background:#1f2937; }
-
-/* Modal */
-.modal-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  display: none;
   align-items: center;
-  justify-content: center;
-  z-index: 3000;
-}
-.modal-overlay.open{ display:flex; }
-
-.modal{
-  width: 420px;
-  max-width: calc(100vw - 24px);
-  background: #0f1623;
-  border: 1px solid #1f2937;
-  padding: 12px;
-}
-.modal-title{
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-.modal-row{
-  display: flex;
   gap: 8px;
-  align-items: center;
-}
-.modal-input{
-  flex: 1;
-  background: #111827;
-  border: 1px solid #1f2937;
-  color: white;
-  padding: 8px 10px;
-}
-.modal-hint{
-  margin-top: 8px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.55);
-}
-
-/* Tooltip */
-.symbol-tooltip{
-  position: fixed;
-  display: none;
-  z-index: 4000;
-  background: #0f1623;
-  border: 1px solid #1f2937;
-  padding: 8px 10px;
-  font-size: 12px;
-  max-width: 260px;
-  pointer-events: none;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
-}
-.symbol-tooltip.open{ display:block; }
-.tooltip-title{ font-weight: 700; margin-bottom: 4px; }
-.tooltip-muted{ color: rgba(255,255,255,0.65); }
-
-#bottom-bar {
-  background: #0f1623;
-  padding: 6px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* ================= WATCHLIST ROW PRO ================= */
-
-.watchlist-row {
-  display: grid;
-  grid-template-columns: 14px minmax(60px, auto) 1fr;
-  align-items: center;
-  padding: 4px 6px;
-  cursor: grab;
-}
-
-.watchlist-row:active {
-  cursor: grabbing;
+  font-weight: 600;
+  min-width: 0;
 }
 
 .symbol {
   white-space: nowrap;
- remember: overflow: hidden;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Drag handle */
-.drag-handle {
-  opacity: 0.4;
-  cursor: grab;
+/* numeric columns right aligned */
+.col, .cell {
+  text-align: right;
+  white-space: nowrap;
 }
 
-.watchlist-row:hover .drag-handle {
-  opacity: 1;
-}
-
-/* Actions */
+/* row actions aligned right column */
 .row-actions {
   display: flex;
-  gap: 6px;
   justify-content: flex-end;
+  gap: 6px;
   opacity: 0;
 }
 
@@ -410,36 +299,113 @@ body.resizing-cols .col-resizer::after{
   opacity: 1;
 }
 
-.row-actions button {
-  background: none;
-  border: none;
-  color: var(--icon-color, #ccc);
+.row-btn {
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
   cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
-/* Watchlist menu icons */
-.dropdown-menu .menu-item {
-  display: flex;
+.row-btn:hover { background: #1f2937; }
+
+/* hidden columns */
+.col-hidden {
+  display: none !important;
+}
+
+/* ================= MODAL ================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
   align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 12px;
+  width: 360px;
+}
+
+.modal-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.modal-row {
+  display: flex;
   gap: 8px;
 }
 
-.dropdown-menu .menu-item svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
+.modal-input {
+  flex: 1;
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
 }
 
-/* Danger */
-.menu-item.danger {
-  color: #ef4444;
+.modal-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
 }
 
-/* THEME READY */
-body.dark {
-  --icon-color: #fff;
+/* ================= TOOLTIP ================= */
+
+.symbol-tooltip {
+  position: fixed;
+  z-index: 3000;
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #e5e7eb;
+  display: none;
+  pointer-events: none;
+  max-width: 240px;
 }
 
-body.light {
-  --icon-color: #000;
+.symbol-tooltip.open { display: block; }
+
+/* ================= RIGHT CLICK MENU ================= */
+
+.row-menu {
+  position: fixed;
+  z-index: 4000;
+  background: #0f1623;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 6px;
+  display: none;
+  min-width: 170px;
 }
+
+.row-menu.open { display: block; }
+
+.row-menu-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.row-menu-item:hover { background: #1f2937; }
+.row-menu-item.danger { color: #fca5a5; }
