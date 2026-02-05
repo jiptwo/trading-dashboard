@@ -82,89 +82,164 @@
 
     <div class="right-panels">
 
-      <!-- ================= ZONE 1 : WATCHLIST ================= -->
-      <div id="zone-1">
+<!-- ================= ZONE 1 : WATCHLIST ================= -->
+<div id="zone-1">
 
-        <div class="watchlist-header">
+  <div class="watchlist-header">
 
-          <!-- WATCHLIST NAME DROPDOWN -->
-          <div class="watchlist-left dropdown">
-            <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu">
-              <span class="wl-color red"></span>
-              <span class="wl-name" id="active-watchlist-name">Red list</span>
-              <span class="arrow">▾</span>
-            </button>
+    <!-- WATCHLIST NAME DROPDOWN -->
+    <div class="watchlist-left dropdown">
+      <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu">
+        <span class="wl-color red"></span>
+        <span class="wl-name" id="active-watchlist-name">Red list</span>
+        <span class="arrow">▾</span>
+      </button>
 
-            <div class="dropdown-menu" id="watchlist-menu">
-              <div class="menu-item">Rename</div>
-              <div class="menu-item">Share list</div>
-              <div class="menu-item">Add alert on list</div>
-              <div class="menu-item">Make a copy</div>
-              <div class="menu-item">Add section</div>
-              <div class="menu-item">Clear list</div>
-              <div class="menu-item">Create new list</div>
-              <div class="menu-item">Upload list</div>
-            </div>
+      <div class="dropdown-menu" id="watchlist-menu">
+
+        <div class="menu-item">
+          <span class="menu-icon">✎</span>
+          <span>Rename</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">⇪</span>
+          <span>Share list</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">🔔</span>
+          <span>Add alert on list</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">⧉</span>
+          <span>Make a copy</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">＋</span>
+          <span>Add section</span>
+        </div>
+
+        <div class="menu-separator"></div>
+
+        <div class="menu-item danger">
+          <span class="menu-icon">🗑</span>
+          <span>Clear list</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">▦</span>
+          <span>Create new list</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">⬆</span>
+          <span>Upload list</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACTIONS TOP RIGHT -->
+    <div class="watchlist-actions">
+      <button class="icon-btn" id="add-symbol-btn" title="Add symbol">+</button>
+      <button class="icon-btn" title="Advanced view">⛶</button>
+
+      <!-- CUSTOMIZE COLUMNS (3 dots) -->
+      <div class="dropdown">
+        <button class="icon-btn dropdown-btn"
+                data-dropdown="columns-menu"
+                title="Customize columns">⋯</button>
+
+        <div class="dropdown-menu" id="columns-menu">
+
+          <div class="menu-row" data-keepopen="true">
+            <span>Table view</span>
+            <input type="checkbox" id="table-toggle" checked />
           </div>
 
-          <!-- ACTIONS TOP RIGHT -->
-          <div class="watchlist-actions">
-            <button class="icon-btn" id="add-symbol-btn" title="Add symbol">+</button>
-            <button class="icon-btn" title="Advanced view">⛶</button>
+          <div class="menu-separator"></div>
+          <div class="menu-title">Customize columns</div>
 
-            <!-- Customize columns dropdown -->
-            <div class="dropdown">
-              <button class="icon-btn dropdown-btn"
-                      data-dropdown="columns-menu"
-                      title="Customize columns">
-                ⋯
-              </button>
+          <label class="menu-row" data-keepopen="true">
+            <input type="checkbox" data-col="last" checked /> Last
+          </label>
 
-              <div class="dropdown-menu" id="columns-menu">
+          <label class="menu-row" data-keepopen="true">
+            <input type="checkbox" data-col="change" checked /> Change
+          </label>
 
-                <div class="menu-row" data-keepopen="1">
-                  <span>Table view</span>
-                  <input type="checkbox" id="table-toggle" checked />
-                </div>
+          <label class="menu-row" data-keepopen="true">
+            <input type="checkbox" data-col="changePct" checked /> Change %
+          </label>
 
-                <div class="menu-separator"></div>
+          <label class="menu-row" data-keepopen="true">
+            <input type="checkbox" data-col="volume" /> Volume
+          </label>
 
-                <div class="menu-title">Customize columns</div>
+          <label class="menu-row" data-keepopen="true">
+            <input type="checkbox" data-col="extended" /> Extended Hours
+          </label>
 
-                <label class="menu-row" data-keepopen="1">
-                  <input type="checkbox" data-col="last" checked /> Last
-                </label>
+          <label class="menu-row" data-keepopen="true">
+            <input type="checkbox" data-col="aiCote" /> Ai Cote
+          </label>
 
-                <label class="menu-row" data-keepopen="1">
-                  <input type="checkbox" data-col="change" checked /> Change
-                </label>
-
-                <label class="menu-row" data-keepopen="1">
-                  <input type="checkbox" data-col="changePct" checked /> Change %
-                </label>
-
-                <label class="menu-row" data-keepopen="1">
-                  <input type="checkbox" data-col="volume" /> Volume
-                </label>
-
-                <label class="menu-row" data-keepopen="1">
-                  <input type="checkbox" data-col="extended" /> Extended Hours
-                </label>
-
-                <label class="menu-row" data-keepopen="1">
-                  <input type="checkbox" data-col="aiCote" /> Ai Cote
-                </label>
-
-                <label class="menu-row" data-keepopen="1">
-                  <input type="checkbox" data-col="aiProb" /> Ai Prob
-                </label>
-
-              </div>
-            </div>
-
-          </div>
+          <label class="menu-row" data-keepopen="true">
+            <input type="checkbox" data-col="aiProb" /> Ai Prob
+          </label>
 
         </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- WATCHLIST TABLE -->
+  <div class="watchlist-body" id="watchlist-body">
+
+    <!-- HEADER (généré/ajusté par JS si tu utilises updateTableHeader) -->
+    <div class="watchlist-table-header">
+      <span class="col-symbol">Symbol</span>
+      <span class="col last">Last</span>
+      <span class="col change">Change</span>
+      <span class="col changePct">Change %</span>
+      <span class="col volume col-hidden">Volume</span>
+      <span class="col extended col-hidden">Extended</span>
+      <span class="col aiCote col-hidden">Ai Cote</span>
+      <span class="col aiProb col-hidden">Ai Prob</span>
+    </div>
+
+    <!-- ROW EXAMPLE (JS pourra remplacer/ajouter des lignes) -->
+    <div class="watchlist-row" draggable="true" data-symbol="AAPL">
+
+      <span class="col-symbol">
+        <span class="drag-handle" title="Drag">⋮⋮</span>
+        <span class="dot red"></span>
+        <span class="symbol">AAPL</span>
+      </span>
+
+      <span class="price last">182.34</span>
+      <span class="pos change">+0.76</span>
+      <span class="change-pct changePct">+0.42%</span>
+      <span class="volume col-hidden">—</span>
+      <span class="extended col-hidden">—</span>
+      <span class="ai-cote col-hidden">—</span>
+      <span class="ai-prob col-hidden">—</span>
+
+      <!-- Actions hover (alignées à droite) -->
+      <span class="row-actions">
+        <button class="row-btn" title="Move to watchlist">⇄</button>
+        <button class="row-btn" title="Delete">🗑</button>
+      </span>
+    </div>
+
+  </div>
+
+</div>
+
 
         <!-- WATCHLIST TABLE -->
         <div class="watchlist-body" id="watchlist-body">
