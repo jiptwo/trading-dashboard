@@ -579,3 +579,56 @@ document.querySelectorAll("#columns-menu input[data-col]")
 /* ================= INIT ================= */
 
 renderWatchlist();
+
+/* ================= DRAG & DROP WATCHLIST ================= */
+
+let draggedRow = null;
+
+document.addEventListener("dragstart", e => {
+  const row = e.target.closest(".watchlist-row");
+  if (!row) return;
+  draggedRow = row;
+  row.classList.add("dragging");
+});
+
+document.addEventListener("dragend", e => {
+  if (draggedRow) draggedRow.classList.remove("dragging");
+  draggedRow = null;
+});
+
+document.addEventListener("dragover", e => {
+  e.preventDefault();
+  const row = e.target.closest(".watchlist-row");
+  if (!row || row === draggedRow) return;
+
+  const box = row.getBoundingClientRect();
+  const after = (e.clientY - box.top) > box.height / 2;
+
+  row.parentNode.insertBefore(
+    draggedRow,
+    after ? row.nextSibling : row
+  );
+});
+
+/* ================= MOVE WATCHLIST (COLOR CHANGE) ================= */
+
+function moveSymbol(symbol, targetList) {
+  const current = watchlistStore[activeWatchlistId];
+  const item = current.find(s => s.symbol === symbol);
+
+  watchlistStore[activeWatchlistId] =
+    current.filter(s => s.symbol !== symbol);
+
+  watchlistStore[targetList].push(item);
+  renderWatchlist();
+}
+
+/* ================= ICON COLOR AUTO ================= */
+
+function applyTheme(theme) {
+  document.body.classList.remove("dark", "light");
+  document.body.classList.add(theme);
+}
+
+// default
+applyTheme("dark");
