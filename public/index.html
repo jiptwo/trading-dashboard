@@ -112,6 +112,7 @@
             <button class="icon-btn" title="Add symbol">+</button>
             <button class="icon-btn" title="Advanced view">⛶</button>
 
+            <!-- Customize columns dropdown -->
             <div class="dropdown">
               <button class="icon-btn dropdown-btn"
                       data-dropdown="columns-menu"
@@ -160,25 +161,23 @@
 
               </div>
             </div>
-
           </div>
 
         </div>
 
+        <!-- Watchlist table -->
         <div class="watchlist-body">
-          <!-- Row = ordre FIXE pour que les colonnes s'alignent -->
+          <!-- HEADER sera injecté en JS (aligné avec la grille) -->
+
+          <!-- ROW (structure fixe : dot, symbol, last, change, change%, volume, extended, ai cote, ai prob) -->
           <div class="watchlist-row">
             <span class="dot red"></span>
-
             <span class="symbol">AAPL</span>
-
             <span class="price">182.34</span>
-            <span class="change">+0.76</span>
+            <span class="chg">+0.76</span>
             <span class="change-pct">+0.42%</span>
-
             <span class="volume">—</span>
             <span class="extended">—</span>
-
             <span class="ai-cote">—</span>
             <span class="ai-prob">—</span>
           </div>
@@ -190,9 +189,7 @@
       <div id="resizer-horizontal"></div>
 
       <!-- ================= ZONE 2 ================= -->
-      <div id="zone-2">
-        Zone 2
-      </div>
+      <div id="zone-2">Zone 2</div>
 
     </div>
 
