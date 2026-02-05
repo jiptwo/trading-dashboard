@@ -3,11 +3,10 @@ console.log("MAIN.JS LOADED");
 /* ================= DROPDOWNS ================= */
 
 document.addEventListener("click", (e) => {
+  // close dropdowns (except when clicking keepopen items)
   document.querySelectorAll(".dropdown-menu.open").forEach(menu => {
     const btn = document.querySelector(`.dropdown-btn[data-dropdown="${menu.id}"]`);
     const keepOpen = e.target.closest('[data-keepopen="true"]');
-
-    // si clic sur checkbox/ligne "keepopen", ne ferme pas
     if (keepOpen) return;
 
     if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
@@ -15,8 +14,9 @@ document.addEventListener("click", (e) => {
     }
   });
 
-  // fermer menu clic droit
-  closeRowMenu();
+  // close row menu when clicking outside
+  const rowMenu = document.getElementById("row-menu");
+  if (rowMenu && !rowMenu.contains(e.target)) closeRowMenu();
 });
 
 document.querySelectorAll(".dropdown-btn").forEach(btn => {
@@ -34,7 +34,7 @@ document.querySelectorAll(".dropdown-btn").forEach(btn => {
   });
 });
 
-/* ================= RESIZERS ================= */
+/* ================= RESIZERS (PANEL) ================= */
 
 const rightBar = document.getElementById("right-bar");
 const resizerV = document.getElementById("resizer-vertical");
@@ -45,11 +45,11 @@ let resizingV = false;
 let resizingH = false;
 
 resizerV?.addEventListener("mousedown", () => resizingV = true);
-document.addEventListener("mouseup", () => resizingV = false);
+document.addEventListener("mouseup", () => { resizingV = false; resizingCol = null; });
 document.addEventListener("mousemove", e => {
   if (!resizingV) return;
   const w = window.innerWidth - e.clientX;
-  if (w > 320 && w < 800) rightBar.style.width = w + "px";
+  if (w > 320 && w < 900) rightBar.style.width = w + "px";
 });
 
 resizerH?.addEventListener("mousedown", () => resizingH = true);
@@ -68,7 +68,7 @@ document.addEventListener("mousemove", e => {
   }
 });
 
-/* ================= FAVORITES (tu as déjà ça, on laisse) ================= */
+/* ================= FAVORITES ================= */
 
 const chartTypes = {
   "Candles": "./icons/candles.svg",
@@ -77,13 +77,16 @@ const chartTypes = {
   "Heikin Ashi": "./icons/heikin.svg"
 };
 
+// build chart menu (icon -> label)
 const chartMenu = document.getElementById("chart-menu");
 if (chartMenu) {
   chartMenu.innerHTML = "";
   Object.keys(chartTypes).forEach(name => {
     const item = document.createElement("div");
     item.className = "menu-item";
+    item.dataset.label = name;          // ✅ stable label
     item.dataset.type = name;
+
     item.innerHTML = `
       <img src="${chartTypes[name]}" class="icon" />
       <span class="menu-label">${name}</span>
@@ -98,66 +101,72 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
   if (!menu || !favoritesBar) return;
 
   menu.querySelectorAll(".menu-item").forEach(item => {
-    if (item.querySelector(".star")) return;
+    // ✅ stable label for timeframe too (before star is appended)
+    if (!item.dataset.label) {
+      item.dataset.label = (item.dataset.type || item.textContent || "").trim();
+    }
+    const label = item.dataset.label;
 
-    const star = document.createElement("span");
-    star.className = "star";
-    star.textContent = "☆";
-    item.appendChild(star);
+    // add star only once
+    if (!item.querySelector(".star")) {
+      const star = document.createElement("span");
+      star.className = "star";
+      star.textContent = "☆";
+      item.appendChild(star);
 
-    star.addEventListener("click", e => {
-      e.stopPropagation();
+      star.addEventListener("click", (e) => {
+        e.stopPropagation();
 
-      const label = item.dataset.type || item.textContent.trim();
-      const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
+        // ✅ toggle correctly by stable label
+        const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
 
-      if (existing) {
-        existing.remove();
-        star.textContent = "☆";
-        star.classList.remove("active");
-      } else {
-        const btn = document.createElement("button");
-        btn.className = "btn";
-        btn.dataset.label = label;
-
-        if (iconMode && chartTypes[label]) {
-          const img = document.createElement("img");
-          img.src = chartTypes[label];
-          img.className = "icon";
-          btn.appendChild(img);
+        if (existing) {
+          existing.remove();
+          star.textContent = "☆";
+          star.classList.remove("active");
         } else {
-          btn.textContent = label.replace("★", "").replace("☆", "").trim();
-        }
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.dataset.label = label;
 
-        favoritesBar.appendChild(btn);
-        star.textContent = "★";
-        star.classList.add("active");
-      }
-    });
+          if (iconMode && chartTypes[label]) {
+            const img = document.createElement("img");
+            img.src = chartTypes[label];
+            img.className = "icon";
+            btn.appendChild(img);
+          } else {
+            // ✅ ONLY text (no star)
+            btn.textContent = label;
+          }
+
+          favoritesBar.appendChild(btn);
+          star.textContent = "★";
+          star.classList.add("active");
+        }
+      });
+    }
   });
 }
 
 initFavorites("chart-menu", "chart-favorites", true);
-initFavorites("timeframe-menu", "timeframe-favorites");
+initFavorites("timeframe-menu", "timeframe-favorites", false);
 
-/* ================= WATCHLIST TABLE (PRO, ALIGNÉ) ================= */
+/* ================= WATCHLIST TABLE ================= */
 
 const watchlistBody = document.getElementById("watchlist-body");
 const tableToggle = document.getElementById("table-toggle");
 
-/** Colonnes (ordre EXACT) */
 const columnsOrder = [
-  { key: "symbol",   label: "Symbol",   always: true },
-  { key: "last",     label: "Last" },
-  { key: "change",   label: "Change" },
-  { key: "changePct",label: "Change %" },
-  { key: "volume",   label: "Volume" },
+  { key: "symbol", label: "Symbol", always: true },
+  { key: "last", label: "Last" },
+  { key: "change", label: "Change" },
+  { key: "changePct", label: "Change %" },
+  { key: "volume", label: "Volume" },
   { key: "extended", label: "Extended" },
-  { key: "aiCote",   label: "Ai Cote" },
-  { key: "aiProb",   label: "Ai Prob" },
+  { key: "aiCote", label: "Ai Cote" },
+  { key: "aiProb", label: "Ai Prob" },
 ];
 
-/** Mapping key -> checkbox data-col */
 const checkboxKey = {
   last: "last",
   change: "change",
@@ -169,62 +178,120 @@ const checkboxKey = {
 };
 
 let watchlistData = [
+  { symbol: "BCAL", color: "red", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—" },
   { symbol: "TSLA", color: "red", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—" },
   { symbol: "AAPL", color: "red", last: "182.34", change: "+0.76", changePct: "+0.42%", volume: "—", extended: "—", aiCote: "—", aiProb: "—" },
 ];
 
-/** Lire quels champs sont visibles selon table view + checkboxes */
 function getVisibleColumns() {
   const on = !!(tableToggle && tableToggle.checked);
   const visible = new Set(["symbol"]);
-
   if (!on) return visible;
 
   Object.keys(checkboxKey).forEach(k => {
     const cb = document.querySelector(`#columns-menu input[data-col="${checkboxKey[k]}"]`);
     if (cb && cb.checked) visible.add(k);
   });
-
   return visible;
 }
 
-/** Render header + rows (structure identique -> plus de mélange) */
+/* ---- Column resizers (like TradingView) ---- */
+
+const colVarMap = {
+  symbol: "--c-symbol",
+  last: "--c-last",
+  change: "--c-change",
+  changePct: "--c-changePct",
+  volume: "--c-volume",
+  extended: "--c-extended",
+  aiCote: "--c-aiCote",
+  aiProb: "--c-aiProb"
+};
+
+let resizingCol = null;
+let startX = 0;
+let startW = 0;
+
+function attachHeaderResizers(headerEl) {
+  if (!headerEl || !watchlistBody) return;
+
+  const headerCells = Array.from(headerEl.children);
+  // last cell is actions col (no resizer)
+  headerCells.forEach((cell, idx) => {
+    // skip last cell (actions)
+    if (idx === headerCells.length - 1) return;
+
+    // avoid duplicates
+    if (cell.querySelector(".col-resizer")) return;
+
+    const key = idx === 0 ? "symbol" : columnsOrder[idx].key; // idx aligns to columnsOrder
+    const cssVar = colVarMap[key];
+    if (!cssVar) return;
+
+    const handle = document.createElement("div");
+    handle.className = "col-resizer";
+    handle.title = "Drag to resize";
+
+    handle.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      resizingCol = cssVar;
+      startX = e.clientX;
+
+      const current = getComputedStyle(watchlistBody).getPropertyValue(cssVar).trim();
+      startW = parseInt(current.replace("px",""), 10) || 80;
+      document.body.style.userSelect = "none";
+    });
+
+    cell.appendChild(handle);
+  });
+}
+
+document.addEventListener("mousemove", (e) => {
+  if (!resizingCol || !watchlistBody) return;
+  const dx = e.clientX - startX;
+  const next = Math.max(55, startW + dx); // min width
+  watchlistBody.style.setProperty(resizingCol, `${next}px`);
+});
+
+document.addEventListener("mouseup", () => {
+  if (resizingCol) document.body.style.userSelect = "";
+  resizingCol = null;
+});
+
+/* ---- Render ---- */
+
 function renderWatchlist() {
   if (!watchlistBody) return;
-
   const visible = getVisibleColumns();
-
-  // clear
   watchlistBody.innerHTML = "";
 
   // header
   const header = document.createElement("div");
   header.className = "watchlist-table-header";
 
-  // créer toutes les cellules dans le même ordre (on cache celles non visibles)
-  columnsOrder.forEach(col => {
-    if (col.key === "symbol") {
-      const cell = document.createElement("span");
-      cell.className = "col-symbol";
-      cell.textContent = col.label;
-      header.appendChild(cell);
-      return;
-    }
-
+  columnsOrder.forEach((col, i) => {
     const cell = document.createElement("span");
-    cell.className = `col ${col.key}`;
     cell.textContent = col.label;
-    if (!visible.has(col.key)) cell.classList.add("col-hidden");
+
+    if (col.key === "symbol") {
+      cell.className = "col-symbol";
+    } else {
+      cell.className = `col ${col.key}`;
+      if (!visible.has(col.key)) cell.classList.add("col-hidden");
+    }
     header.appendChild(cell);
   });
 
-  // actions column header (vide)
+  // actions header cell
   const actionsH = document.createElement("span");
   actionsH.className = "col actions";
   actionsH.textContent = "";
   header.appendChild(actionsH);
 
   watchlistBody.appendChild(header);
+  attachHeaderResizers(header);
 
   // rows
   watchlistData.forEach(row => {
@@ -235,19 +302,13 @@ function renderWatchlist() {
     // symbol cell
     const sym = document.createElement("span");
     sym.className = "col-symbol";
-
-    const dot = document.createElement("span");
-    dot.className = `dot ${row.color || "red"}`;
-
-    const symText = document.createElement("span");
-    symText.className = "symbol";
-    symText.textContent = row.symbol;
-
-    sym.appendChild(dot);
-    sym.appendChild(symText);
+    sym.innerHTML = `
+      <span class="dot ${row.color || "red"}"></span>
+      <span class="symbol">${row.symbol}</span>
+    `;
     r.appendChild(sym);
 
-    // other cells in same order
+    // other cells
     columnsOrder.slice(1).forEach(col => {
       const cell = document.createElement("span");
       cell.className = `cell ${col.key}`;
@@ -256,7 +317,7 @@ function renderWatchlist() {
       r.appendChild(cell);
     });
 
-    // actions (always last column)
+    // actions column
     const actions = document.createElement("span");
     actions.className = "row-actions";
     actions.innerHTML = `
@@ -265,25 +326,19 @@ function renderWatchlist() {
     `;
     r.appendChild(actions);
 
-    // left click select (simple)
-    r.addEventListener("click", () => {
-      document.querySelectorAll(".watchlist-row.selected").forEach(x => x.classList.remove("selected"));
-      r.classList.add("selected");
-    });
-
-    // right click menu
+    // right click
     r.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       openRowMenu(e.clientX, e.clientY, row.symbol);
     });
 
-    // actions click
+    // click row buttons
     actions.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-action]");
       if (!btn) return;
       const act = btn.dataset.action;
-      if (act === "delete") removeSymbol(row.symbol);
-      if (act === "move") alert(`Move ${row.symbol} to another watchlist (next step)`);
+      if (act === "delete") confirmDelete(row.symbol);
+      if (act === "move") alert(`${row.symbol} Move to watchlist (use right click menu for list)`);
     });
 
     watchlistBody.appendChild(r);
@@ -355,11 +410,42 @@ input?.addEventListener("keydown", (e) => {
 /* ================= RIGHT CLICK MENU ================= */
 
 const rowMenu = document.getElementById("row-menu");
+const rowSubmenu = document.getElementById("row-submenu");
+const moveText = document.getElementById("row-menu-move-text");
+const compareBtn = document.getElementById("row-menu-compare");
+const deleteBtn = document.getElementById("row-menu-delete");
+
 let menuSymbol = null;
+
+// Example other watchlists (colors)
+const otherWatchlists = [
+  { name: "Blue list", color: "blue" },
+  { name: "Green list", color: "green" },
+  { name: "Orange list", color: "orange" },
+];
 
 function openRowMenu(x, y, symbol) {
   menuSymbol = symbol;
   if (!rowMenu) return;
+
+  // dynamic labels
+  moveText.textContent = `${symbol}  Move to watchlist`;
+  compareBtn.textContent = `${symbol}  Compare`;
+  deleteBtn.textContent = `${symbol}  Delete`;
+
+  // build submenu
+  rowSubmenu.innerHTML = "";
+  otherWatchlists.forEach(wl => {
+    const b = document.createElement("button");
+    b.className = "submenu-item";
+    b.innerHTML = `<span class="dot ${wl.color}"></span><span>${wl.name}</span>`;
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      alert(`${symbol} moved to ${wl.name} (next step: real move)`);
+      closeRowMenu();
+    });
+    rowSubmenu.appendChild(b);
+  });
 
   rowMenu.style.left = `${x}px`;
   rowMenu.style.top = `${y}px`;
@@ -372,15 +458,29 @@ function closeRowMenu() {
   menuSymbol = null;
 }
 
+function confirmDelete(symbol) {
+  const ok = window.confirm(`Are you sure you want to delete ${symbol}?`);
+  if (ok) removeSymbol(symbol);
+}
+
 rowMenu?.addEventListener("click", (e) => {
-  const btn = e.target.closest(".row-menu-item");
-  if (!btn) return;
-  const act = btn.dataset.action;
+  const item = e.target.closest("[data-action]");
+  if (!item) return;
 
-  if (act === "delete" && menuSymbol) removeSymbol(menuSymbol);
-  if (act === "move" && menuSymbol) alert(`Move ${menuSymbol} to another watchlist (next step)`);
+  const act = item.dataset.action;
 
-  closeRowMenu();
+  if (act === "compare" && menuSymbol) {
+    alert(`${menuSymbol} Compare (next step)`);
+    closeRowMenu();
+  }
+
+  if (act === "delete" && menuSymbol) {
+    const sym = menuSymbol;
+    closeRowMenu();
+    confirmDelete(sym);
+  }
+
+  // move is handled by submenu hover/click
 });
 
 /* ================= INIT ================= */
