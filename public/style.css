@@ -367,3 +367,79 @@ body.resizing-cols .col-resizer::after{
   width: 100%;
   box-sizing: border-box;
 }
+
+/* ================= WATCHLIST ROW PRO ================= */
+
+.watchlist-row {
+  display: grid;
+  grid-template-columns: 14px minmax(60px, auto) 1fr;
+  align-items: center;
+  padding: 4px 6px;
+  cursor: grab;
+}
+
+.watchlist-row:active {
+  cursor: grabbing;
+}
+
+.symbol {
+  white-space: nowrap;
+ remember: overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Drag handle */
+.drag-handle {
+  opacity: 0.4;
+  cursor: grab;
+}
+
+.watchlist-row:hover .drag-handle {
+  opacity: 1;
+}
+
+/* Actions */
+.row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  opacity: 0;
+}
+
+.watchlist-row:hover .row-actions {
+  opacity: 1;
+}
+
+.row-actions button {
+  background: none;
+  border: none;
+  color: var(--icon-color, #ccc);
+  cursor: pointer;
+}
+
+/* Watchlist menu icons */
+.dropdown-menu .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-menu .menu-item svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+/* Danger */
+.menu-item.danger {
+  color: #ef4444;
+}
+
+/* THEME READY */
+body.dark {
+  --icon-color: #fff;
+}
+
+body.light {
+  --icon-color: #000;
+}
