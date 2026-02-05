@@ -150,6 +150,7 @@
               </div>
             </div>
           </div>
+
         </div>
 
         <!-- Watchlist table rendered by JS -->
@@ -202,8 +203,20 @@
 
 <!-- Right-click context menu -->
 <div id="row-menu" class="row-menu" aria-hidden="true">
-  <button class="row-menu-item" data-action="move">Move to watchlist</button>
-  <button class="row-menu-item danger" data-action="delete">Delete</button>
+  <div class="row-menu-item has-submenu" data-action="move" id="row-menu-move">
+    <span class="row-menu-text" id="row-menu-move-text">Move to watchlist</span>
+    <span class="row-menu-arrow">▸</span>
+
+    <div class="row-submenu" id="row-submenu" aria-hidden="true"></div>
+  </div>
+
+  <button class="row-menu-item" data-action="compare" id="row-menu-compare">
+    Compare
+  </button>
+
+  <button class="row-menu-item danger" data-action="delete" id="row-menu-delete">
+    Delete
+  </button>
 </div>
 
 <script src="./main.js"></script>
