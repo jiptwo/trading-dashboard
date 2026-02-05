@@ -10,21 +10,24 @@
 <body>
 
 <header id="top-bar">
+
   <div class="logo">LOGO</div>
 
   <div class="symbol-search">
-    <button class="btn" title="Search">
+    <button class="btn">
       <img src="./icons/search.svg" class="icon" />
     </button>
     <input type="text" value="AAPL" />
   </div>
 
-  <button class="btn" title="Compare">
+  <button class="btn">
     <img src="./icons/compare.svg" class="icon" />
   </button>
 
+  <!-- FAVORITES -->
   <div id="chart-favorites"></div>
 
+  <!-- CHART TYPE DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="chart-menu">
       Chart <span class="arrow">▾</span>
@@ -34,6 +37,7 @@
 
   <div id="timeframe-favorites"></div>
 
+  <!-- TIMEFRAME DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="timeframe-menu">
       Timeframe <span class="arrow">▾</span>
@@ -53,16 +57,19 @@
     <button class="btn"><img src="./icons/settings.svg" class="icon" /></button>
     <button class="btn"><img src="./icons/user.svg" class="icon" /></button>
   </div>
+
 </header>
 
 <section id="ai-bar">AI assistant (future)</section>
 
 <div id="main-layout">
+
   <aside id="left-bar">tools</aside>
   <main id="chart-area">Chart Area</main>
   <div id="resizer-vertical"></div>
 
   <aside id="right-bar">
+
     <div class="right-panels">
 
       <!-- ================= ZONE 1 ================= -->
@@ -129,10 +136,17 @@
       </div>
 
       <div id="resizer-horizontal"></div>
+
       <div id="zone-2">Zone 2</div>
     </div>
 
-    <div class="right-icons"></div>
+    <!-- ✅ BARRE DE DROITE RESTAURÉE -->
+    <div class="right-icons">
+      <button class="btn"><img src="./icons/watchlist.svg" class="icon" /></button>
+      <button class="btn"><img src="./icons/calendar.svg" class="icon" /></button>
+      <button class="btn"><img src="./icons/chat.svg" class="icon" /></button>
+    </div>
+
   </aside>
 </div>
 
