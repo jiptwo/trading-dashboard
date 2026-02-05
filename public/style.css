@@ -22,14 +22,9 @@ html, body {
   cursor: pointer;
 }
 
-.btn:hover {
-  background: #1f2937;
-}
+.btn:hover { background: #1f2937; }
 
-.icon {
-  width: 16px;
-  height: 16px;
-}
+.icon { width: 16px; height: 16px; }
 
 .right-actions {
   margin-left: auto;
@@ -37,20 +32,14 @@ html, body {
   gap: 8px;
 }
 
-#ai-bar {
-  background: #0f172a;
-  padding: 6px;
-}
+#ai-bar { background: #0f172a; padding: 6px; }
 
 #main-layout {
   display: flex;
   height: calc(100vh - 120px);
 }
 
-#chart-area {
-  flex: 1;
-  background: black;
-}
+#chart-area { flex: 1; background: black; }
 
 #resizer-vertical {
   width: 4px;
@@ -90,11 +79,71 @@ html, body {
   align-items: center;
 }
 
+/* ===== Watchlist header ===== */
+
 .watchlist-header {
   display: flex;
   justify-content: space-between;
   padding: 6px;
   border-bottom: 1px solid #1f2937;
+}
+
+.watchlist-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.watchlist-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.wl-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ef4444;
+  display: inline-block;
+}
+
+.wl-name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wl-quick-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wl-quick-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  opacity: 0.9;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.wl-quick-dot:hover {
+  transform: scale(1.08);
+}
+
+.wl-quick-dot.active {
+  border: 2px solid rgba(255,255,255,0.65);
+  opacity: 1;
 }
 
 .watchlist-actions {
@@ -110,29 +159,25 @@ html, body {
   cursor: pointer;
   padding: 4px 6px;
 }
+.icon-btn:hover { color: white; }
 
-.icon-btn:hover {
-  color: white;
-}
-
-.wl-color,
-.dot {
+.wl-color, .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 
+/* Colors */
 .red { background: #ef4444; }
 .blue { background: #3b82f6; }
 .green { background: #22c55e; }
 .orange { background: #f97316; }
+.purple { background: #a855f7; }
+.yellow { background: #facc15; }
 
-#bottom-bar {
-  background: #0f1623;
-  padding: 6px;
-}
+#bottom-bar { background: #0f1623; padding: 6px; }
 
-/* ================= DROPDOWNS ================= */
+/* ===== Dropdowns ===== */
 
 .dropdown { position: relative; }
 
@@ -140,7 +185,7 @@ html, body {
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 180px;
+  min-width: 210px;
   background: #0f1623;
   border: 1px solid #1f2937;
   display: none;
@@ -158,16 +203,7 @@ html, body {
 }
 
 .menu-item:hover { background: #1f2937; }
-
 .menu-item.danger { color: #fca5a5; }
-
-.star {
-  color: #6b7280;
-  font-size: 14px;
-  margin-left: 8px;
-}
-
-.star.active { color: #facc15; }
 
 .menu-row {
   display: flex;
@@ -178,7 +214,6 @@ html, body {
   font-size: 13px;
   cursor: pointer;
 }
-
 .menu-row input { cursor: pointer; }
 
 .menu-title {
@@ -195,20 +230,19 @@ html, body {
 }
 
 /* Customize columns dropdown opens to the LEFT */
-#columns-menu {
-  right: auto;
-  left: -240px;
-}
+#columns-menu { right: auto; left: -240px; }
 
-/* ================= WATCHLIST TABLE ================= */
+.star { color: #6b7280; font-size: 14px; margin-left: 8px; }
+.star.active { color: #facc15; }
+
+/* ===== Watchlist Table ===== */
 
 .watchlist-body {
   width: 100%;
   display: flex;
   flex-direction: column;
 
-  /* widths (modifiable by JS resizers) */
-  --c-symbol: 140px;
+  --c-symbol: 170px;
   --c-last: 74px;
   --c-change: 74px;
   --c-changePct: 86px;
@@ -219,7 +253,6 @@ html, body {
   --c-actions: 64px;
 }
 
-/* Header + row = same grid */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
@@ -233,7 +266,6 @@ html, body {
     var(--c-aiCote)
     var(--c-aiProb)
     var(--c-actions);
-
   align-items: center;
   width: 100%;
   min-width: max-content;
@@ -249,28 +281,21 @@ html, body {
 
 .watchlist-row {
   font-size: 13px;
-  padding: 4px 8px;
-  height: 28px;
+  padding: 2px 8px;
+  height: 26px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
-.watchlist-row:hover {
-  background: rgba(255,255,255,0.03);
-}
+.watchlist-row:hover { background: rgba(255,255,255,0.03); }
 
-/* vertical separators */
 .watchlist-table-header > span:not(:last-child),
 .watchlist-row > span:not(:last-child) {
   border-right: 1px solid rgba(255,255,255,0.06);
   padding-right: 8px;
 }
 
-/* header cells need position relative for resizer handles */
-.watchlist-table-header > span {
-  position: relative;
-}
+.watchlist-table-header > span { position: relative; }
 
-/* column resizer handle */
 .col-resizer {
   position: absolute;
   top: -6px;
@@ -278,28 +303,20 @@ html, body {
   width: 12px;
   height: calc(100% + 12px);
   cursor: col-resize;
+  opacity: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
 }
-
 .col-resizer::before {
   content: "";
   width: 2px;
   height: 16px;
-  background: rgba(59,130,246,0.0); /* invisible by default */
+  background: rgba(59,130,246,0.0);
 }
+.watchlist-table-header > span:hover .col-resizer { opacity: 1; }
+.watchlist-table-header > span:hover .col-resizer::before { background: rgba(59,130,246,0.65); }
 
-.watchlist-table-header > span:hover .col-resizer {
-  opacity: 1;
-}
-
-.watchlist-table-header > span:hover .col-resizer::before {
-  background: rgba(59,130,246,0.65); /* “ligne bleue” */
-}
-
-/* Symbol cell */
 .col-symbol {
   display: flex;
   align-items: center;
@@ -314,39 +331,36 @@ html, body {
   text-overflow: ellipsis;
 }
 
-.cell {
-  text-align: right;
-  white-space: nowrap;
+.note-icon {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-left: 4px;
 }
 
-/* actions column */
+.cell { text-align: right; white-space: nowrap; }
+
 .row-actions {
   display: flex;
   justify-content: flex-end;
   gap: 6px;
   opacity: 0;
 }
-
-.watchlist-row:hover .row-actions {
-  opacity: 1;
-}
+.watchlist-row:hover .row-actions { opacity: 1; }
 
 .row-btn {
   background: #111827;
   border: 1px solid #1f2937;
   color: #e5e7eb;
   cursor: pointer;
-  padding: 3px 6px;
+  padding: 2px 6px;
   border-radius: 6px;
   font-size: 12px;
 }
-
 .row-btn:hover { background: #1f2937; }
 
-/* hidden columns */
 .col-hidden { display: none !important; }
 
-/* ================= MODAL ================= */
+/* ===== Modals ===== */
 
 .modal-overlay {
   position: fixed;
@@ -357,7 +371,6 @@ html, body {
   justify-content: center;
   z-index: 2000;
 }
-
 .modal-overlay.open { display: flex; }
 
 .modal {
@@ -365,18 +378,12 @@ html, body {
   border: 1px solid #1f2937;
   border-radius: 10px;
   padding: 12px;
-  width: 360px;
+  width: 380px;
 }
 
-.modal-title {
-  font-weight: 700;
-  margin-bottom: 10px;
-}
+.modal-title { font-weight: 700; margin-bottom: 10px; }
 
-.modal-row {
-  display: flex;
-  gap: 8px;
-}
+.modal-row { display: flex; gap: 8px; }
 
 .modal-input {
   flex: 1;
@@ -387,13 +394,50 @@ html, body {
   border-radius: 8px;
 }
 
+.modal-textarea {
+  width: 100%;
+  height: 120px;
+  resize: vertical;
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
 .modal-hint {
   margin-top: 8px;
   font-size: 12px;
   color: rgba(255,255,255,0.6);
 }
 
-/* ================= TOOLTIP ================= */
+.modal-block { margin: 10px 0; }
+
+.modal-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 6px;
+}
+
+.color-picker {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.color-choice {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+.color-choice.selected {
+  border: 2px solid rgba(255,255,255,0.75);
+}
+
+/* ===== Tooltip ===== */
 
 .symbol-tooltip {
   position: fixed;
@@ -406,12 +450,11 @@ html, body {
   color: #e5e7eb;
   display: none;
   pointer-events: none;
-  max-width: 240px;
+  max-width: 260px;
 }
-
 .symbol-tooltip.open { display: block; }
 
-/* ================= RIGHT CLICK MENU ================= */
+/* ===== Right-click menu ===== */
 
 .row-menu {
   position: fixed;
@@ -421,9 +464,8 @@ html, body {
   border-radius: 10px;
   padding: 6px;
   display: none;
-  min-width: 230px;
+  min-width: 260px;
 }
-
 .row-menu.open { display: block; }
 
 .row-menu-item {
@@ -440,7 +482,6 @@ html, body {
   justify-content: space-between;
   gap: 10px;
 }
-
 .row-menu-item:hover { background: #1f2937; }
 .row-menu-item.danger { color: #fca5a5; }
 
@@ -459,10 +500,7 @@ html, body {
   min-width: 190px;
   display: none;
 }
-
-.has-submenu:hover .row-submenu {
-  display: block;
-}
+.has-submenu:hover .row-submenu { display: block; }
 
 .submenu-item {
   width: 100%;
@@ -477,5 +515,4 @@ html, body {
   align-items: center;
   gap: 10px;
 }
-
 .submenu-item:hover { background: #1f2937; }
