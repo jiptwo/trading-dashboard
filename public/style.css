@@ -211,7 +211,7 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
-/* ================= WATCHLIST TABLE GRID (PRO / TRADINGVIEW) ================= */
+/* ================= WATCHLIST TABLE (FIX PRO) ================= */
 
 .watchlist-body {
   display: flex;
@@ -219,32 +219,39 @@ html, body {
   width: 100%;
 }
 
-/* Header + rows = même grille fluide */
+/* UNE SEULE GRILLE SYNCHRONISÉE */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(70px, auto);
+  grid-template-columns:
+    140px   /* Symbol */
+    80px    /* Last */
+    80px    /* Change */
+    90px    /* Change % */
+    90px    /* Volume */
+    110px   /* Extended */
+    80px    /* Ai Cote */
+    80px;   /* Ai Prob */
+
   align-items: center;
   padding: 4px 6px;
   width: 100%;
 }
 
-/* Header */
 .watchlist-table-header {
   font-size: 11px;
-  color: #9ca3af;
+  color: rgba(255,255,255,0.55);
   border-bottom: 1px solid #1f2937;
 }
 
-/* Lignes */
 .watchlist-row {
   font-size: 13px;
 }
 
-/* Colonnes */
 .col-symbol {
-  min-width: 110px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 600;
 }
 
@@ -253,14 +260,12 @@ html, body {
   white-space: nowrap;
 }
 
-/* Séparateurs verticaux (TradingView style) */
-.watchlist-table-header > span:not(:last-child),
-.watchlist-row > span:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.06);
-  padding-right: 6px;
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
-/* Colonnes masquées */
-.col-hidden {
-  display: none;
+.red {
+  background: #ef4444;
 }
