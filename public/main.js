@@ -137,20 +137,20 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
 
-/* ================= CUSTOMIZE COLUMNS (ALIGN TABLE) ================= */
+/* ================= CUSTOMIZE COLUMNS (COMPACT) ================= */
 
 const tableToggle = document.getElementById("table-toggle");
 const watchlistBody = document.querySelector(".watchlist-body");
 
-/* Largeurs fixes style TradingView */
+/* ✅ Largeurs plus compactes (style TradingView) */
 const columns = [
-  { key: "last",      label: "Last",      cls: ".price",      width: "90px"  },
-  { key: "change",    label: "Change",    cls: ".chg",        width: "90px"  },
-  { key: "changePct", label: "Change %",  cls: ".change-pct", width: "90px"  },
-  { key: "volume",    label: "Volume",    cls: ".volume",     width: "90px"  },
-  { key: "extended",  label: "Extended",  cls: ".extended",   width: "110px" },
-  { key: "aiCote",    label: "Ai Cote",   cls: ".ai-cote",    width: "90px"  },
-  { key: "aiProb",    label: "Ai Prob",   cls: ".ai-prob",    width: "90px"  },
+  { key: "last",      label: "Last",      cls: ".price",      width: "70px"  },
+  { key: "change",    label: "Change",    cls: ".chg",        width: "70px"  },
+  { key: "changePct", label: "Change %",  cls: ".change-pct", width: "78px"  },
+  { key: "volume",    label: "Volume",    cls: ".volume",     width: "78px"  },
+  { key: "extended",  label: "Extended",  cls: ".extended",   width: "90px"  },
+  { key: "aiCote",    label: "Ai Cote",   cls: ".ai-cote",    width: "70px"  },
+  { key: "aiProb",    label: "Ai Prob",   cls: ".ai-prob",    width: "70px"  },
 ];
 
 function ensureHeader(){
@@ -182,12 +182,10 @@ function updateWatchlistTable(){
 
   const visible = getVisibleColumns();
 
-  // ✅ Même grille pour header + rows :
-  // dot (14px) + symbol (150px) + colonnes visibles (largeurs fixes)
-  const gridParts = ["14px", "150px", ...visible.map(c => c.width)];
+  /* ✅ Dot + Symbol + colonnes visibles (compact) */
+  const gridParts = ["12px", "120px", ...visible.map(c => c.width)];
   document.documentElement.style.setProperty("--wl-cols", gridParts.join(" "));
 
-  // ✅ Header: 1 cellule vide pour la pastille, ensuite Symbol, ensuite colonnes visibles
   header.innerHTML = "";
 
   const emptyDot = document.createElement("span");
@@ -204,23 +202,18 @@ function updateWatchlistTable(){
     header.appendChild(h);
   });
 
-  // ✅ Rows : on affiche/cache les cellules, et comme la grille est recalculée => alignement parfait
   document.querySelectorAll(".watchlist-row").forEach(row => {
     columns.forEach(c => {
       const cell = row.querySelector(c.cls);
       if (!cell) return;
-
       const isVisible = visible.some(v => v.key === c.key);
       cell.classList.toggle("col-hidden", !isVisible);
     });
   });
 }
 
-/* Events */
 if (tableToggle) tableToggle.addEventListener("change", updateWatchlistTable);
-
 document.querySelectorAll("#columns-menu input[data-col]")
   .forEach(cb => cb.addEventListener("change", updateWatchlistTable));
 
-/* Init */
 updateWatchlistTable();
