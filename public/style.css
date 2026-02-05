@@ -1,6 +1,5 @@
 :root{
-  /* La grille est définie en JS selon colonnes visibles */
-  --wl-cols: 14px 150px 90px 90px 90px 90px 110px 90px 90px;
+  --wl-cols: 12px 120px 70px 70px 78px 78px 90px 70px 70px;
 }
 
 html, body {
@@ -29,14 +28,9 @@ html, body {
   cursor: pointer;
 }
 
-.btn:hover {
-  background: #1f2937;
-}
+.btn:hover { background: #1f2937; }
 
-.icon {
-  width: 16px;
-  height: 16px;
-}
+.icon { width: 16px; height: 16px; }
 
 .right-actions {
   margin-left: auto;
@@ -65,10 +59,7 @@ html, body {
   padding: 6px;
 }
 
-#chart-area {
-  flex: 1;
-  background: black;
-}
+#chart-area { flex: 1; background: black; }
 
 #resizer-vertical {
   width: 4px;
@@ -90,10 +81,7 @@ html, body {
   min-width: 0;
 }
 
-#zone-1, #zone-2 {
-  overflow: auto;
-  min-width: 0;
-}
+#zone-1, #zone-2 { overflow: auto; min-width: 0; }
 
 #resizer-horizontal {
   height: 4px;
@@ -118,10 +106,7 @@ html, body {
   border-bottom: 1px solid #1f2937;
 }
 
-.watchlist-actions {
-  display: flex;
-  gap: 6px;
-}
+.watchlist-actions { display: flex; gap: 6px; }
 
 .icon-btn {
   background: none;
@@ -131,19 +116,10 @@ html, body {
   padding: 4px 6px;
 }
 
-.icon-btn:hover {
-  color: white;
-}
+.icon-btn:hover { color: white; }
 
-.wl-color {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.red {
-  background: #ef4444;
-}
+.wl-color { width: 8px; height: 8px; border-radius: 50%; }
+.red { background: #ef4444; }
 
 /* ================= DROPDOWNS ================= */
 
@@ -162,11 +138,7 @@ html, body {
 
 .dropdown-menu.open { display: block; }
 
-.menu-item {
-  padding: 8px 10px;
-  cursor: pointer;
-}
-
+.menu-item { padding: 8px 10px; cursor: pointer; }
 .menu-item:hover { background: #1f2937; }
 
 .star {
@@ -174,7 +146,6 @@ html, body {
   font-size: 14px;
   margin-left: 8px;
 }
-
 .star.active { color: #facc15; }
 
 .menu-row {
@@ -202,10 +173,9 @@ html, body {
   margin: 6px 0;
 }
 
-/* Customize columns s'ouvre vers la gauche */
 #columns-menu { left: -220px; }
 
-/* ================= WATCHLIST TABLE (ALIGN PRO) ================= */
+/* ================= WATCHLIST TABLE (COMPACT + ALIGNED) ================= */
 
 .watchlist-body {
   display: flex;
@@ -213,38 +183,31 @@ html, body {
   width: 100%;
 }
 
-/* Header + rows partagent EXACTEMENT la même grille */
 .watchlist-table-header,
 .watchlist-row {
   display: grid;
   grid-template-columns: var(--wl-cols);
   align-items: center;
-  column-gap: 12px;
-  padding: 6px 8px;
+  column-gap: 8px;     /* ✅ moins d'espace */
+  padding: 4px 6px;    /* ✅ moins d'espace */
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Header: petit + pâle */
 .watchlist-table-header {
   font-size: 11px;
   color: rgba(255,255,255,0.60);
   border-bottom: 1px solid #1f2937;
 }
 
-/* Row */
-.watchlist-row {
-  font-size: 13px;
-}
+.watchlist-row { font-size: 13px; }
 
-/* Traits verticaux subtils */
 .watchlist-table-header > span:not(:last-child),
 .watchlist-row > span:not(:last-child){
   border-right: 1px solid rgba(255,255,255,0.06);
-  padding-right: 10px;
+  padding-right: 8px;
 }
 
-/* Dot */
 .dot {
   width: 8px;
   height: 8px;
@@ -252,11 +215,9 @@ html, body {
   justify-self: center;
 }
 
-/* Alignements texte */
 .symbol { font-weight: 600; }
 .price, .chg, .change-pct, .volume, .extended, .ai-cote, .ai-prob { text-align: right; }
 
-/* Masquage colonnes */
 .col-hidden { display: none; }
 
 #bottom-bar {
