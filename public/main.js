@@ -2,33 +2,16 @@ console.log("MAIN.JS LOADED");
 
 /* ================= DROPDOWNS ================= */
 
-document.addEventListener("click", (e) => {
-  document.querySelectorAll(".dropdown-menu.open").forEach(menu => {
-    const btn = document.querySelector(
-      `.dropdown-btn[data-dropdown="${menu.id}"]`
-    );
-
-    if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
-      menu.classList.remove("open");
-    }
-  });
+document.addEventListener("click", () => {
+  document.querySelectorAll(".dropdown-menu.open")
+    .forEach(m => m.classList.remove("open"));
 });
 
 document.querySelectorAll(".dropdown-btn").forEach(btn => {
   btn.addEventListener("click", e => {
     e.stopPropagation();
-
-    const id = btn.dataset.dropdown;
-    const menu = document.getElementById(id);
-    if (!menu) return;
-
-    const isOpen = menu.classList.contains("open");
-
-    document
-      .querySelectorAll(".dropdown-menu.open")
-      .forEach(m => m.classList.remove("open"));
-
-    if (!isOpen) menu.classList.add("open");
+    const menu = document.getElementById(btn.dataset.dropdown);
+    if (menu) menu.classList.toggle("open");
   });
 });
 
@@ -43,124 +26,47 @@ let resizingV = false;
 let resizingH = false;
 
 resizerV.addEventListener("mousedown", () => resizingV = true);
-document.addEventListener("mouseup", () => resizingV = false);
-document.addEventListener("mousemove", e => {
-  if (!resizingV) return;
-  const w = window.innerWidth - e.clientX;
-  if (w > 260 && w < 600) rightBar.style.width = w + "px";
+resizerH.addEventListener("mousedown", () => resizingH = true);
+
+document.addEventListener("mouseup", () => {
+  resizingV = false;
+  resizingH = false;
 });
 
-resizerH.addEventListener("mousedown", () => resizingH = true);
-document.addEventListener("mouseup", () => resizingH = false);
 document.addEventListener("mousemove", e => {
-  if (!resizingH) return;
+  if (resizingV) {
+    const w = window.innerWidth - e.clientX;
+    if (w > 260 && w < 600) rightBar.style.width = w + "px";
+  }
 
-  const rect = rightBar.getBoundingClientRect();
-  const y = e.clientY - rect.top;
-
-  const min = 120;
-  const max = rect.height - 120;
-
-  if (y > min && y < max) {
-    zone1.style.flex = "none";
-    zone1.style.height = y + "px";
+  if (resizingH) {
+    const rect = rightBar.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    if (y > 120 && y < rect.height - 120) {
+      zone1.style.height = y + "px";
+      zone1.style.flex = "none";
+    }
   }
 });
-
-/* ================= FAVORITES ================= */
-
-const chartTypes = {
-  "Candles": "./icons/candles.svg",
-  "Bars": "./icons/bars.svg",
-  "Line": "./icons/line.svg",
-  "Heikin Ashi": "./icons/heikin.svg"
-};
-
-/* Chart menu : ICON → TEXT → STAR */
-const chartMenu = document.getElementById("chart-menu");
-if (chartMenu) {
-  chartMenu.innerHTML = "";
-
-  Object.keys(chartTypes).forEach(name => {
-    const item = document.createElement("div");
-    item.className = "menu-item";
-    item.dataset.type = name;
-
-    item.innerHTML = `
-      <img src="${chartTypes[name]}" class="icon" />
-      <span class="menu-label">${name}</span>
-    `;
-
-    chartMenu.appendChild(item);
-  });
-}
-
-function initFavorites(menuId, favoritesContainerId, iconMode = false) {
-  const menu = document.getElementById(menuId);
-  const favoritesBar = document.getElementById(favoritesContainerId);
-  if (!menu || !favoritesBar) return;
-
-  menu.querySelectorAll(".menu-item").forEach(item => {
-    if (item.querySelector(".star")) return;
-
-    const star = document.createElement("span");
-    star.className = "star";
-    star.textContent = "☆";
-
-    item.appendChild(star);
-
-    star.addEventListener("click", e => {
-      e.stopPropagation();
-
-      const label = item.dataset.type || item.textContent.trim();
-      const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
-
-      if (existing) {
-        existing.remove();
-        star.textContent = "☆";
-        star.classList.remove("active");
-      } else {
-        const btn = document.createElement("button");
-        btn.className = "btn";
-        btn.dataset.label = label;
-
-        if (iconMode && chartTypes[label]) {
-          const img = document.createElement("img");
-          img.src = chartTypes[label];
-          img.className = "icon";
-          btn.appendChild(img);
-        } else {
-          btn.textContent = label.replace("★", "").replace("☆", "").trim();
-        }
-
-        favoritesBar.appendChild(btn);
-        star.textContent = "★";
-        star.classList.add("active");
-      }
-    });
-  });
-}
-
-initFavorites("chart-menu", "chart-favorites", true);
-initFavorites("timeframe-menu", "timeframe-favorites");
 
 /* ================= CUSTOMIZE COLUMNS ================= */
 
 const tableToggle = document.getElementById("table-toggle");
 const watchlistBody = document.querySelector(".watchlist-body");
 
-/* Colonnes custom (Symbol exclu volontairement) */
-const columnMap = {
-  last: ".price",
-  change: ".pos",
-  changePct: ".change-pct",
-  volume: ".volume",
-  extended: ".extended",
-  aiCote: ".ai-cote",
-  aiProb: ".ai-prob"
-};
+const columnOrder = [
+  "symbol",
+  "last",
+  "change",
+  "changePct",
+  "volume",
+  "extended",
+  "aiCote",
+  "aiProb"
+];
 
 const columnLabels = {
+  symbol: "Symbol",
   last: "Last",
   change: "Change",
   changePct: "Change %",
@@ -170,11 +76,7 @@ const columnLabels = {
   aiProb: "Ai Prob"
 };
 
-/* ===== HEADER DE TABLE (DANS LA WATCHLIST) ===== */
-
 function updateTableHeader() {
-  if (!watchlistBody) return;
-
   let header = watchlistBody.querySelector(".watchlist-table-header");
 
   if (!header) {
@@ -185,48 +87,40 @@ function updateTableHeader() {
 
   header.innerHTML = "";
 
-  /* Symbol — toujours présent */
-  const symbol = document.createElement("span");
-  symbol.className = "col-symbol";
-  symbol.textContent = "Symbol";
-  header.appendChild(symbol);
+  columnOrder.forEach(key => {
+    if (key !== "symbol") {
+      const cb = document.querySelector(`[data-col="${key}"]`);
+      if (!tableToggle.checked || !cb || !cb.checked) return;
+    }
 
-  if (!tableToggle || !tableToggle.checked) return;
-
-  Object.keys(columnMap).forEach(key => {
-    const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
-    if (!cb || !cb.checked) return;
-
-    const col = document.createElement("span");
-    col.className = `col ${key}`;
-    col.textContent = columnLabels[key];
-    header.appendChild(col);
+    const span = document.createElement("span");
+    span.className = key === "symbol" ? "col-symbol" : `col ${key}`;
+    span.textContent = columnLabels[key];
+    header.appendChild(span);
   });
 }
 
 function updateColumns() {
-  /* lignes */
   document.querySelectorAll(".watchlist-row").forEach(row => {
-    Object.entries(columnMap).forEach(([key, selector]) => {
-      const cb = document.querySelector(`#columns-menu input[data-col="${key}"]`);
-      const visible = tableToggle && tableToggle.checked && cb && cb.checked;
+    columnOrder.forEach(key => {
+      if (key === "symbol") return;
 
-      const cell = row.querySelector(selector);
-      if (cell) cell.classList.toggle("col-hidden", !visible);
+      const cb = document.querySelector(`[data-col="${key}"]`);
+      const cell = row.querySelector(`.${key.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}`);
+
+      if (cell) {
+        cell.style.display =
+          tableToggle.checked && cb && cb.checked ? "" : "none";
+      }
     });
   });
 
   updateTableHeader();
 }
 
-/* Events */
-if (tableToggle) {
-  tableToggle.addEventListener("change", updateColumns);
-}
-
-document
-  .querySelectorAll("#columns-menu input[data-col]")
+tableToggle.addEventListener("change", updateColumns);
+document.querySelectorAll("#columns-menu input[data-col]")
   .forEach(cb => cb.addEventListener("change", updateColumns));
 
-/* Init */
 updateColumns();
+
