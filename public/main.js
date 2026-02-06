@@ -182,8 +182,18 @@ function initUserMenu() {
   const themeToggle = document.getElementById("user-theme-toggle");
   const drawingsToggle = document.getElementById("user-drawings-toggle");
   const languageLabel = document.getElementById("user-language-label");
+
+  // Modals
+  const langOverlay = document.getElementById("language-overlay");
+  const langClose = document.getElementById("language-close");
   const langEn = document.getElementById("lang-en");
   const langFr = document.getElementById("lang-fr");
+  const langEs = document.getElementById("lang-es");
+
+  const profileOverlay = document.getElementById("profile-overlay");
+  const profileClose = document.getElementById("profile-close");
+  const profileNav = document.getElementById("profile-nav");
+  const profileContent = document.getElementById("profile-content");
 
   const theme = LS.get(THEME_KEY, "dark");
   applyTheme(theme);
@@ -210,13 +220,58 @@ function initUserMenu() {
     LS.set(LANG_KEY, v);
     if (languageLabel) languageLabel.textContent = v;
   }
-  langEn?.addEventListener("click", (e) => { e.stopPropagation(); setLang("English"); });
-  langFr?.addEventListener("click", (e) => { e.stopPropagation(); setLang("Français"); });
+
+  function openLangModal() {
+    if (!langOverlay) return;
+    langOverlay.classList.add("open");
+  }
+  function closeLangModal() {
+    langOverlay?.classList.remove("open");
+  }
+  langClose?.addEventListener("click", closeLangModal);
+  langOverlay?.addEventListener("click", (e) => { if (e.target === langOverlay) closeLangModal(); });
+
+  langEn?.addEventListener("click", () => { setLang("English"); closeLangModal(); });
+  langFr?.addEventListener("click", () => { setLang("Français"); closeLangModal(); });
+  langEs?.addEventListener("click", () => { setLang("Español"); closeLangModal(); });
+
+  function openProfile(tab = "profile") {
+    if (!profileOverlay || !profileNav || !profileContent) return;
+    profileOverlay.classList.add("open");
+    profileNav.querySelectorAll(".profile-nav-item").forEach(b => b.classList.remove("active"));
+    profileContent.querySelectorAll(".profile-page").forEach(p => p.classList.add("panel-hidden"));
+    const btn = profileNav.querySelector(`[data-profile-tab="${tab}"]`);
+    const page = profileContent.querySelector(`[data-profile-page="${tab}"]`);
+    btn?.classList.add("active");
+    page?.classList.remove("panel-hidden");
+  }
+  function closeProfile() {
+    profileOverlay?.classList.remove("open");
+  }
+  profileClose?.addEventListener("click", closeProfile);
+  profileOverlay?.addEventListener("click", (e) => { if (e.target === profileOverlay) closeProfile(); });
+  profileNav?.addEventListener("click", (e) => {
+    const t = e.target.closest(".profile-nav-item");
+    if (!t) return;
+    openProfile(t.dataset.profileTab);
+  });
 
   // Simple placeholders (no navigation yet)
   document.querySelectorAll("[data-user-action]").forEach(el => {
     el.addEventListener("click", (e) => {
       const action = el.getAttribute("data-user-action");
+      if (action === "language") {
+        openLangModal();
+        return;
+      }
+      if (action === "profile") {
+        openProfile("profile");
+        return;
+      }
+      if (action === "settings") {
+        openProfile("settings");
+        return;
+      }
       if (action === "signout") {
         openConfirm("Sign out", "Are you sure you want to sign out?", () => {
           console.log("SIGN OUT");
@@ -227,7 +282,7 @@ function initUserMenu() {
         openConfirm("Keyboard shortcuts", "Coming soon.", () => {});
         return;
       }
-      if (action === "billing" || action === "profile" || action === "refer" || action === "plans") {
+      if (action === "billing" || action === "refer" || action === "plans" || action === "home" || action === "help" || action === "whatsnew") {
         openConfirm("Info", "Coming soon.", () => {});
       }
     });
