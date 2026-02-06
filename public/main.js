@@ -1140,3 +1140,177 @@ noteConfirm?.addEventListener("click", () => {
 /* ================= INIT ================= */
 
 renderAllWatchlistUI();
+
+/* ================= MOVE SUBMENU FIX + ALERTS PANEL + SETTINGS PLACEMENT ================= */
+
+// ---- 1) Fix: submenu should NOT disappear when moving mouse to the list ----
+(function fixMoveSubmenuHover() {
+  const rowMenuMove = document.getElementById("row-menu-move");
+  const rowSubmenu = document.getElementById("row-submenu");
+  if (!rowMenuMove || !rowSubmenu) return;
+
+  let hoverInside = false;
+  let closeTimer = null;
+
+  const open = () => {
+    clearTimeout(closeTimer);
+    rowMenuMove.classList.add("submenu-open");
+  };
+
+  const scheduleClose = () => {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      if (!hoverInside) rowMenuMove.classList.remove("submenu-open");
+    }, 250);
+  };
+
+  rowMenuMove.addEventListener("mouseenter", () => {
+    hoverInside = true;
+    open();
+  });
+  rowMenuMove.addEventListener("mouseleave", () => {
+    hoverInside = false;
+    scheduleClose();
+  });
+
+  rowSubmenu.addEventListener("mouseenter", () => {
+    hoverInside = true;
+    open();
+  });
+  rowSubmenu.addEventListener("mouseleave", () => {
+    hoverInside = false;
+    scheduleClose();
+  });
+
+  // When the row menu opens, keep submenu closed until hovered (clean)
+  const rowMenu = document.getElementById("row-menu");
+  const obs = new MutationObserver(() => {
+    if (rowMenu.classList.contains("open")) {
+      rowMenuMove.classList.remove("submenu-open");
+    }
+  });
+  obs.observe(rowMenu, { attributes: true, attributeFilter: ["class"] });
+})();
+
+// ---- 2) Alerts button placement: top = zone1, bottom = zone2 ----
+const ALERTS_BTN_ID = "btn-alerts";
+let alertsPlacement = "zone2"; // default
+
+function createAlertsButton() {
+  const btn = document.createElement("button");
+  btn.className = "btn";
+  btn.id = ALERTS_BTN_ID;
+  btn.title = "Alerts";
+  btn.innerHTML = `<img src="./icons/alert.svg" class="icon" />`;
+  btn.addEventListener("click", () => showAlertsPanel());
+  return btn;
+}
+
+function mountAlertsButton() {
+  const slotTop = document.getElementById("slot-alert-top");
+  const slotBottom = document.getElementById("slot-alert-bottom");
+  if (!slotTop || !slotBottom) return;
+
+  // remove old
+  const existing = document.getElementById(ALERTS_BTN_ID);
+  if (existing) existing.remove();
+
+  const btn = createAlertsButton();
+  if (alertsPlacement === "zone1") slotTop.appendChild(btn);
+  else slotBottom.appendChild(btn);
+}
+
+function showAlertsPanel() {
+  const pWatch = document.getElementById("panel-watchlist");
+  const pA1 = document.getElementById("panel-alerts-zone1");
+  const pA2 = document.getElementById("panel-alerts-zone2");
+  const pZ2 = document.getElementById("panel-zone2-default");
+
+  // Watchlist always accessible (button top)
+  // Alerts panel displays in the chosen zone
+  if (alertsPlacement === "zone1") {
+    // show alerts in zone1, hide watchlist panel
+    pWatch?.classList.add("panel-hidden");
+    pA1?.classList.remove("panel-hidden");
+
+    // keep zone2 default visible
+    pA2?.classList.add("panel-hidden");
+    pZ2?.classList.remove("panel-hidden");
+  } else {
+    // show alerts in zone2
+    pWatch?.classList.remove("panel-hidden");
+    pA1?.classList.add("panel-hidden");
+
+    pZ2?.classList.add("panel-hidden");
+    pA2?.classList.remove("panel-hidden");
+  }
+}
+
+function showWatchlistPanel() {
+  const pWatch = document.getElementById("panel-watchlist");
+  const pA1 = document.getElementById("panel-alerts-zone1");
+  const pA2 = document.getElementById("panel-alerts-zone2");
+  const pZ2 = document.getElementById("panel-zone2-default");
+
+  // Watchlist always in zone1
+  pWatch?.classList.remove("panel-hidden");
+  pA1?.classList.add("panel-hidden");
+
+  // Zone2 returns to default unless alerts is configured there (keep it if user wants)
+  if (alertsPlacement === "zone2") {
+    pZ2?.classList.add("panel-hidden");
+    pA2?.classList.remove("panel-hidden");
+  } else {
+    pA2?.classList.add("panel-hidden");
+    pZ2?.classList.remove("panel-hidden");
+  }
+}
+
+// Wire watchlist button (always zone1)
+document.getElementById("btn-watchlist")?.addEventListener("click", () => {
+  showWatchlistPanel();
+});
+
+// ---- 3) Settings modal for Alerts placement ----
+const panelSettingsOverlay = document.getElementById("panel-settings-overlay");
+const panelSettingsBtn = document.getElementById("btn-rightbar-settings");
+const panelSettingsSave = document.getElementById("panel-settings-save");
+const panelSettingsCancel = document.getElementById("panel-settings-cancel");
+
+function openPanelSettings() {
+  if (!panelSettingsOverlay) return;
+  panelSettingsOverlay.classList.add("open");
+
+  const radios = document.querySelectorAll('input[name="alertsPlacement"]');
+  radios.forEach(r => r.checked = (r.value === alertsPlacement));
+}
+
+function closePanelSettings() {
+  panelSettingsOverlay?.classList.remove("open");
+}
+
+panelSettingsBtn?.addEventListener("click", openPanelSettings);
+panelSettingsCancel?.addEventListener("click", closePanelSettings);
+panelSettingsOverlay?.addEventListener("click", (e) => {
+  if (e.target === panelSettingsOverlay) closePanelSettings();
+});
+
+panelSettingsSave?.addEventListener("click", () => {
+  const selected = document.querySelector('input[name="alertsPlacement"]:checked');
+  if (selected) alertsPlacement = selected.value;
+
+  mountAlertsButton();
+  // refresh panels depending on where alerts should live
+  if (alertsPlacement === "zone2") {
+    showWatchlistPanel(); // keep watchlist zone1 and show alerts zone2 by default
+  } else {
+    showWatchlistPanel(); // returns to watchlist, alerts accessible by clicking alerts btn
+  }
+
+  closePanelSettings();
+});
+
+// ---- Init alerts placement (default zone2) ----
+mountAlertsButton();
+showWatchlistPanel();
+
