@@ -70,7 +70,6 @@
             <div class="user-name">jpbeaudoin</div>
             <div class="user-sub">Your profile</div>
           </div>
-          <div class="user-caret">▸</div>
         </div>
 
         <div class="menu-separator"></div>
@@ -574,17 +573,6 @@
 
         <div class="settings-nav-title">ACCOUNT AND SECURITY</div>
         <button class="settings-nav-item" data-settings-tab="account">Account settings</button>
-        <button class="settings-nav-item" data-settings-tab="sessions">Active sessions</button>
-
-        <div class="settings-nav-title">BILLING</div>
-        <button class="settings-nav-item" data-settings-tab="subscriptions">Subscriptions</button>
-        <button class="settings-nav-item" data-settings-tab="payments">Payment methods</button>
-        <button class="settings-nav-item" data-settings-tab="history">Billing history</button>
-
-        <div class="settings-nav-title">NOTIFICATIONS</div>
-        <button class="settings-nav-item" data-settings-tab="alertsDelivery">Alerts delivery</button>
-        <button class="settings-nav-item" data-settings-tab="socialNotif">Social notifications</button>
-        <button class="settings-nav-item" data-settings-tab="emailSubs">Email subscriptions</button>
       </aside>
 
       <section class="settings-content">
@@ -599,58 +587,163 @@
                 <div class="form-label">Username</div>
                 <input id="settings-username" class="modal-input" placeholder="Username" />
               </div>
+
+              <div class="form-field">
+                <div class="form-label">Upload photo</div>
+                <input id="settings-photo" class="modal-input" type="file" accept="image/*" />
+              </div>
+
               <div class="modal-row" style="justify-content:flex-start">
                 <button class="btn" id="settings-save-profile">Save</button>
               </div>
             </div>
           </div>
+
+          <h2 style="margin-top:18px">Social and website links</h2>
+          <p class="muted">These links can be shown on your public profile to share with the community.</p>
+
+          <div class="social-grid">
+            <div class="social-field">
+              <div class="social-label">X profile</div>
+              <div class="social-input">
+                <img src="./icons/x.svg" class="icon" alt="" />
+                <input id="settings-x" class="modal-input" placeholder="@username" />
+              </div>
+            </div>
+
+            <div class="social-field">
+              <div class="social-label">YouTube channel</div>
+              <div class="social-input">
+                <img src="./icons/youtube.svg" class="icon" alt="" />
+                <input id="settings-youtube" class="modal-input" placeholder="youtube.com/@YourChannel" />
+              </div>
+            </div>
+
+            <div class="social-field" style="grid-column:1/-1">
+              <div class="social-label">Website</div>
+              <div class="social-input">
+                <img src="./icons/globe.svg" class="icon" alt="" />
+                <input id="settings-website" class="modal-input" placeholder="https://example.com" />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-row" style="justify-content:flex-start">
+            <button class="btn" id="settings-save-links">Save links</button>
+          </div>
         </div>
 
         <div class="settings-panel panel-hidden" data-settings-panel="privacy">
           <h2>Privacy preferences</h2>
-          <p class="muted">Coming soon.</p>
+          <div class="settings-list">
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-title">Anyone can see your online status</div>
+                <div class="settings-item-sub">Others can view if you're online or your last activity.</div>
+              </div>
+              <label class="toggle"><input id="privacy-online" type="checkbox" /><span></span></label>
+            </div>
+
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-title">Anyone can start a private chat with you</div>
+                <div class="settings-item-sub">Others can text you directly, even if you've never chatted before.</div>
+              </div>
+              <label class="toggle"><input id="privacy-chat" type="checkbox" /><span></span></label>
+            </div>
+
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-title">Blocked users list</div>
+                <div class="settings-item-sub">Users from this list can't comment on your posts or message you.</div>
+              </div>
+              <button class="btn" id="privacy-blocked">Show list</button>
+            </div>
+          </div>
         </div>
 
         <div class="settings-panel panel-hidden" data-settings-panel="account">
           <h2>Account settings</h2>
-          <p class="muted">Coming soon.</p>
-        </div>
+          <div class="settings-list">
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-title">Sign-in credentials</div>
+                <div class="settings-item-sub">Email and password for your account.</div>
+              </div>
+              <button class="btn" id="account-change-email">Change email</button>
+            </div>
 
-        <div class="settings-panel panel-hidden" data-settings-panel="sessions">
-          <h2>Active sessions</h2>
-          <p class="muted">Coming soon.</p>
-        </div>
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-title">Password</div>
+                <div class="settings-item-sub">Update your password.</div>
+              </div>
+              <button class="btn" id="account-change-password">Change password</button>
+            </div>
 
-        <div class="settings-panel panel-hidden" data-settings-panel="subscriptions">
-          <h2>Subscriptions</h2>
-          <p class="muted">Coming soon.</p>
-        </div>
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-title">Two-factor authentication</div>
+                <div class="settings-item-sub">Secure your account with two-factor authentication.</div>
+              </div>
+              <label class="toggle"><input id="account-2fa" type="checkbox" /><span></span></label>
+            </div>
 
-        <div class="settings-panel panel-hidden" data-settings-panel="payments">
-          <h2>Payment methods</h2>
-          <p class="muted">Coming soon.</p>
-        </div>
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-title">Linked external accounts</div>
+                <div class="settings-item-sub">Connect accounts to sign in faster.</div>
+              </div>
+              <button class="btn" id="account-google">Remove</button>
+            </div>
 
-        <div class="settings-panel panel-hidden" data-settings-panel="history">
-          <h2>Billing history</h2>
-          <p class="muted">Coming soon.</p>
-        </div>
-
-        <div class="settings-panel panel-hidden" data-settings-panel="alertsDelivery">
-          <h2>Alerts delivery</h2>
-          <p class="muted">Coming soon.</p>
-        </div>
-
-        <div class="settings-panel panel-hidden" data-settings-panel="socialNotif">
-          <h2>Social notifications</h2>
-          <p class="muted">Coming soon.</p>
-        </div>
-
-        <div class="settings-panel panel-hidden" data-settings-panel="emailSubs">
-          <h2>Email subscriptions</h2>
-          <p class="muted">Coming soon.</p>
+            <div class="settings-item danger">
+              <div>
+                <div class="settings-item-title">Account deletion</div>
+                <div class="settings-item-sub">Delete your account (you can cancel during the process).</div>
+              </div>
+              <button class="btn" id="account-delete" style="border-color:rgba(239,68,68,0.45)">Delete account</button>
+            </div>
+          </div>
         </div>
       </section>
+    </div>
+  </div>
+</div>
+
+<!-- PUBLIC PROFILE (community) -->
+<div id="public-profile-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">Public profile</div>
+      <button class="icon-btn modal-close" id="public-profile-close" title="Close">✕</button>
+    </div>
+
+    <div class="pubprof-header">
+      <div class="pubprof-avatar" id="pubprof-avatar">J</div>
+      <div class="pubprof-meta">
+        <div class="pubprof-name" id="pubprof-name">jpbeaudoin <span class="pubprof-online">Online</span></div>
+        <div class="pubprof-stats">
+          <div><b>Followers</b><div id="pubprof-followers">0</div></div>
+          <div><b>Following</b><div id="pubprof-following">0</div></div>
+          <div><b>Ideas</b><div id="pubprof-ideas">0</div></div>
+          <div><b>Scripts</b><div id="pubprof-scripts">0</div></div>
+        </div>
+        <div class="pubprof-joined">Joined <span id="pubprof-joined">Jan 12, 2020</span></div>
+      </div>
+    </div>
+
+    <div class="pubprof-tabs">
+      <button class="pubprof-tab active" data-pubprof-tab="ideas">Ideas</button>
+      <button class="pubprof-tab" data-pubprof-tab="minds">Minds</button>
+      <button class="pubprof-tab" data-pubprof-tab="scripts">Scripts</button>
+    </div>
+
+    <div class="pubprof-empty" id="pubprof-empty">
+      <div class="pubprof-bulb">💡</div>
+      <div class="pubprof-empty-title">No published ideas here, yet</div>
+      <div class="pubprof-empty-sub">Share your unique thoughts and start new discussions.</div>
+      <button class="btn">Find out about ideas</button>
     </div>
   </div>
 </div>
