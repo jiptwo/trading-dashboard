@@ -455,6 +455,7 @@ html, body {
 }
 .alert-menu-btn:hover { background: rgba(255,255,255,0.08); }
 
+/* Empty */
 .alerts-empty {
   display: grid;
   place-items: center;
@@ -472,6 +473,7 @@ html, body {
   margin-bottom: 14px;
 }
 
+/* Log */
 .alerts-log {
   display: flex;
   flex-direction: column;
