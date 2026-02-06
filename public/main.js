@@ -56,7 +56,7 @@ const zone1 = document.getElementById("zone-1");
 let resizingV = false;
 let resizingH = false;
 
-resizerV.addEventListener("mousedown", () => resizingV = true);
+resizerV?.addEventListener("mousedown", () => resizingV = true);
 document.addEventListener("mouseup", () => resizingV = false);
 document.addEventListener("mousemove", e => {
   if (!resizingV) return;
@@ -64,7 +64,7 @@ document.addEventListener("mousemove", e => {
   if (w > 260 && w < 900) rightBar.style.width = w + "px";
 });
 
-resizerH.addEventListener("mousedown", () => resizingH = true);
+resizerH?.addEventListener("mousedown", () => resizingH = true);
 document.addEventListener("mouseup", () => resizingH = false);
 document.addEventListener("mousemove", e => {
   if (!resizingH) return;
@@ -96,6 +96,7 @@ if (chartMenu) {
     const item = document.createElement("div");
     item.className = "menu-item";
     item.dataset.type = name;
+    item.dataset.label = name;
     item.innerHTML = `
       <img src="${chartTypes[name]}" class="icon" />
       <span class="menu-label">${name}</span>
@@ -104,12 +105,22 @@ if (chartMenu) {
   });
 }
 
+/**
+ * Favorites logic (fix: timeframe duplicates)
+ * - We store the base label in item.dataset.label before injecting ☆/★
+ * - We always use dataset.label as the key for add/remove
+ */
 function initFavorites(menuId, favoritesContainerId, iconMode = false) {
   const menu = document.getElementById(menuId);
   const favoritesBar = document.getElementById(favoritesContainerId);
   if (!menu || !favoritesBar) return;
 
   menu.querySelectorAll(".menu-item").forEach(item => {
+    // Ensure stable label (timeframe menu items are plain text)
+    if (!item.dataset.label) {
+      item.dataset.label = (item.dataset.type || item.textContent || "").replace("★", "").replace("☆", "").trim();
+    }
+
     if (item.querySelector(".star")) return;
 
     const star = document.createElement("span");
@@ -120,8 +131,8 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
     star.addEventListener("click", e => {
       e.stopPropagation();
 
-      const label = item.dataset.type || item.textContent.trim();
-      const existing = favoritesBar.querySelector(`[data-label="${label}"]`);
+      const label = item.dataset.type || item.dataset.label;
+      const existing = favoritesBar.querySelector(`[data-label="${CSS.escape(label)}"]`);
 
       if (existing) {
         existing.remove();
@@ -140,7 +151,7 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
         img.className = "icon";
         btn.appendChild(img);
       } else {
-        btn.textContent = label.replace("★", "").replace("☆", "").trim();
+        btn.textContent = label;
       }
 
       favoritesBar.appendChild(btn);
@@ -197,20 +208,24 @@ function setActiveWatchlist(id) {
 
 function renderWatchlistHeader() {
   const list = getActiveList();
-  document.getElementById("active-watchlist-name").textContent = list.name;
-  document.getElementById("active-watchlist-dot").style.background = list.color;
+  const nameEl = document.getElementById("active-watchlist-name");
+  const dotEl = document.getElementById("active-watchlist-dot");
+  if (nameEl) nameEl.textContent = list.name;
+  if (dotEl) dotEl.style.background = list.color;
 
   const quick = document.getElementById("wl-quick-switch");
-  quick.innerHTML = "";
-  watchlists.forEach(w => {
-    const b = document.createElement("button");
-    b.className = "wl-quick-btn";
-    b.title = w.name;
-    b.style.background = w.color;
-    b.style.opacity = (w.id === activeWatchlistId) ? "1" : "0.55";
-    b.addEventListener("click", () => setActiveWatchlist(w.id));
-    quick.appendChild(b);
-  });
+  if (quick) {
+    quick.innerHTML = "";
+    watchlists.forEach(w => {
+      const b = document.createElement("button");
+      b.className = "wl-quick-btn";
+      b.title = w.name;
+      b.style.background = w.color;
+      b.style.opacity = (w.id === activeWatchlistId) ? "1" : "0.55";
+      b.addEventListener("click", () => setActiveWatchlist(w.id));
+      quick.appendChild(b);
+    });
+  }
 
   // apply per-watchlist columns to UI checkboxes
   if (tableToggle) tableToggle.checked = !!list.columns.table;
@@ -220,8 +235,9 @@ function renderWatchlistHeader() {
   });
 }
 
+const priceState = {}; // simulated prices
+
 function mockPrice(symbol) {
-  // simulated feed state
   if (!priceState[symbol]) {
     priceState[symbol] = { price: symbol === "AAPL" ? 182.34 : (symbol === "TSLA" ? 245.12 : 18.85) };
   }
@@ -434,8 +450,10 @@ function moveSymbolToWatchlist(symbol, targetId) {
   renderWatchlistTable();
 }
 
-/* Submenu stability (your issue) */
+/* Submenu stability */
 (function fixMoveSubmenuHover() {
+  if (!rowMenuMove || !rowSubmenu) return;
+
   let hoverInside = false;
   let closeTimer = null;
 
@@ -471,7 +489,7 @@ function moveSymbolToWatchlist(symbol, targetId) {
 })();
 
 /* Compare placeholder */
-rowMenuCompare.addEventListener("click", () => {
+rowMenuCompare?.addEventListener("click", () => {
   console.log("COMPARE", currentRowSymbol);
   closeRowMenu();
 });
@@ -496,14 +514,14 @@ function closeConfirm() {
   confirmAction = null;
 }
 
-confirmNo.addEventListener("click", closeConfirm);
-confirmOverlay.addEventListener("click", (e) => { if (e.target === confirmOverlay) closeConfirm(); });
-confirmYes.addEventListener("click", () => {
+confirmNo?.addEventListener("click", closeConfirm);
+confirmOverlay?.addEventListener("click", (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+confirmYes?.addEventListener("click", () => {
   if (confirmAction) confirmAction();
   closeConfirm();
 });
 
-rowMenuDelete.addEventListener("click", () => {
+rowMenuDelete?.addEventListener("click", () => {
   const sym = currentRowSymbol;
   closeRowMenu();
   openConfirm("Delete symbol", `Are you sure you want to delete ${sym}?`, () => {
@@ -514,8 +532,8 @@ rowMenuDelete.addEventListener("click", () => {
   });
 });
 
-/* Note placeholder (we keep UI later if you want) */
-rowMenuNote.addEventListener("click", () => {
+/* Note placeholder */
+rowMenuNote?.addEventListener("click", () => {
   console.log("ADD NOTE", currentRowSymbol);
   closeRowMenu();
 });
@@ -525,8 +543,6 @@ const ALERTS_LS_KEY = "tp_alerts_v1";
 const ALERTS_LOG_LS_KEY = "tp_alerts_log_v1";
 let alerts = LS.get(ALERTS_LS_KEY, []);
 let alertLog = LS.get(ALERTS_LOG_LS_KEY, []);
-
-const priceState = {}; // simulated prices
 
 function saveAlerts() {
   LS.set(ALERTS_LS_KEY, alerts);
@@ -697,8 +713,8 @@ function openCreateAlert(prefillSymbol = "") {
 }
 function closeCreateAlert() { alertOverlay.classList.remove("open"); }
 
-alertCreateCancel.addEventListener("click", closeCreateAlert);
-alertOverlay.addEventListener("click", (e) => { if (e.target === alertOverlay) closeCreateAlert(); });
+alertCreateCancel?.addEventListener("click", closeCreateAlert);
+alertOverlay?.addEventListener("click", (e) => { if (e.target === alertOverlay) closeCreateAlert(); });
 
 function createAlert() {
   const sym = (alertSymbol.value || "").trim().toUpperCase();
@@ -726,7 +742,7 @@ function createAlert() {
   renderAlerts("zone1");
 }
 
-alertCreateConfirm.addEventListener("click", createAlert);
+alertCreateConfirm?.addEventListener("click", createAlert);
 
 document.getElementById("create-alert-btn-zone1")?.addEventListener("click", () => openCreateAlert());
 document.getElementById("alerts-add-btn-zone1")?.addEventListener("click", () => openCreateAlert());
@@ -797,7 +813,7 @@ setInterval(() => {
 
 /* ================= RIGHT BAR: WATCHLIST + ALERTS placement ================= */
 const ALERTS_BTN_ID = "btn-alerts";
-let alertsPlacement = "zone1"; // ✅ default = Zone 1 (top)
+let alertsPlacement = "zone1"; // default = Zone 1 (top)
 
 function createAlertsButton() {
   const btn = document.createElement("button");
@@ -826,7 +842,6 @@ function showAlertsPanel() {
   const pWatch = document.getElementById("panel-watchlist");
   const pA1 = document.getElementById("panel-alerts-zone1");
 
-  // We only built alerts UI in zone1 for now (as requested)
   pWatch?.classList.add("panel-hidden");
   pA1?.classList.remove("panel-hidden");
 
@@ -868,13 +883,10 @@ panelSettingsSave?.addEventListener("click", () => {
   closePanelSettings();
 });
 
-/* Alerts buttons on panel */
-document.getElementById("create-alert-btn-zone1")?.addEventListener("click", () => openCreateAlert());
-
 /* ================= INIT ================= */
 ensureListState();
 renderWatchlistHeader();
 renderWatchlistTable();
 
 mountAlertsButton();
-showWatchlistPanel(); // ✅ default: watchlist visible
+showWatchlistPanel(); // default: watchlist visible
