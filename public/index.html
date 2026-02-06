@@ -64,7 +64,7 @@
       </button>
 
       <div class="dropdown-menu user-menu" id="user-menu">
-        <div class="user-menu-top">
+        <div class="user-menu-top" data-user-action="profile" role="button" tabindex="0">
           <div class="user-avatar">JP</div>
           <div class="user-meta">
             <div class="user-name">jpbeaudoin</div>
@@ -81,6 +81,8 @@
           <span>What's new</span>
           <span class="badge">11</span>
         </div>
+
+        <div class="menu-item" data-user-action="settings">Settings and billing</div>
 
         <div class="menu-separator"></div>
 
@@ -100,7 +102,7 @@
           </label>
         </div>
 
-        <div class="menu-item" data-user-action="language">Language <span class="muted">English</span></div>
+        <div class="menu-item" data-user-action="language">Language <span class="muted" id="user-language-label">English</span></div>
         <div class="menu-item" data-user-action="shortcuts">Keyboard shortcuts <span class="muted">Ctrl+/</span></div>
 
         <div class="menu-separator"></div>
@@ -455,6 +457,128 @@
     <div class="modal-row">
       <button id="panel-settings-save" class="btn">Save</button>
       <button id="panel-settings-cancel" class="btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER PROFILE MODAL -->
+<div id="profile-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal modal-profile">
+    <div class="profile-head">
+      <div class="profile-title">Profile & settings</div>
+      <button class="icon-btn" id="profile-close" title="Close">✕</button>
+    </div>
+
+    <div class="profile-shell">
+      <aside class="profile-nav">
+        <div class="profile-nav-group">PROFILE AND PRIVACY</div>
+        <button class="profile-nav-item active" data-profile-tab="public">Public profile</button>
+        <button class="profile-nav-item" data-profile-tab="privacy">Privacy preferences</button>
+
+        <div class="profile-nav-group">ACCOUNT AND SECURITY</div>
+        <button class="profile-nav-item" data-profile-tab="account">Account settings</button>
+        <button class="profile-nav-item" data-profile-tab="sessions">Active sessions</button>
+
+        <div class="profile-nav-group">BILLING</div>
+        <button class="profile-nav-item" data-profile-tab="billing">Settings and billing</button>
+
+        <div class="profile-nav-group">NOTIFICATIONS</div>
+        <button class="profile-nav-item" data-profile-tab="alerts">Alerts delivery</button>
+      </aside>
+
+      <main class="profile-main">
+        <div class="profile-card" id="profile-tab-public">
+          <div class="profile-h1">Picture and username</div>
+          <div class="profile-row">
+            <div class="profile-avatar-lg" id="profile-avatar-lg">JP</div>
+            <div class="profile-col">
+              <div class="profile-muted">JPG, GIF, or PNG. Max 700KB.</div>
+              <button class="btn" id="profile-upload" type="button">Upload photo</button>
+            </div>
+          </div>
+
+          <div class="profile-field">
+            <div class="form-label">Username</div>
+            <div class="profile-inline">
+              <input class="modal-input" id="profile-username" placeholder="Username" />
+              <button class="btn" id="profile-save-username" type="button">Save</button>
+            </div>
+          </div>
+
+          <div class="profile-h2">Social and website links</div>
+          <div class="profile-field">
+            <div class="form-label">X profile</div>
+            <input class="modal-input" id="profile-link-x" placeholder="@username" />
+          </div>
+          <div class="profile-field">
+            <div class="form-label">YouTube channel</div>
+            <input class="modal-input" id="profile-link-youtube" placeholder="youtube.com/@YourChannel" />
+          </div>
+          <div class="profile-field">
+            <div class="form-label">Instagram profile</div>
+            <input class="modal-input" id="profile-link-instagram" placeholder="@username" />
+          </div>
+          <div class="profile-field">
+            <div class="form-label">Website</div>
+            <input class="modal-input" id="profile-link-website" placeholder="https://" />
+          </div>
+
+          <div class="modal-row" style="justify-content:flex-start">
+            <button class="btn" id="profile-save-links" type="button">Save links</button>
+          </div>
+        </div>
+
+        <div class="profile-card panel-hidden" id="profile-tab-billing">
+          <div class="profile-h1">Settings and billing</div>
+          <div class="profile-muted">Coming soon.</div>
+        </div>
+
+        <div class="profile-card panel-hidden" id="profile-tab-privacy">
+          <div class="profile-h1">Privacy preferences</div>
+          <div class="profile-muted">Coming soon.</div>
+        </div>
+
+        <div class="profile-card panel-hidden" id="profile-tab-account">
+          <div class="profile-h1">Account settings</div>
+          <div class="profile-muted">Coming soon.</div>
+        </div>
+
+        <div class="profile-card panel-hidden" id="profile-tab-sessions">
+          <div class="profile-h1">Active sessions</div>
+          <div class="profile-muted">Coming soon.</div>
+        </div>
+
+        <div class="profile-card panel-hidden" id="profile-tab-alerts">
+          <div class="profile-h1">Alerts delivery</div>
+          <div class="profile-muted">Coming soon.</div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- LANGUAGE MODAL -->
+<div id="language-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-title">Language</div>
+    <div class="modal-hint">Choose your preferred language.</div>
+
+    <label class="menu-row" style="cursor:default">
+      <span>English</span>
+      <input type="radio" name="appLanguage" value="en" checked />
+    </label>
+    <label class="menu-row" style="cursor:default">
+      <span>Français</span>
+      <input type="radio" name="appLanguage" value="fr" />
+    </label>
+    <label class="menu-row" style="cursor:default">
+      <span>Español</span>
+      <input type="radio" name="appLanguage" value="es" />
+    </label>
+
+    <div class="modal-row">
+      <button id="language-save" class="btn">Save</button>
+      <button id="language-cancel" class="btn">Cancel</button>
     </div>
   </div>
 </div>
