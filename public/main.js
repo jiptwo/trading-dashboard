@@ -407,7 +407,7 @@ function renderWatchlistTable() {
     sectionCell.innerHTML = `
       <span class="section-name" title="Click to rename">${escapeHtml(sec.name)}</span>
       <span class="section-actions">
-        <button class="section-btn" data-section-action="delete" title="Delete section">🗑</button>
+        <button class="section-btn section-btn-danger" data-section-action="delete" title="Delete section">Delete</button>
       </span>
     `;
     srow.appendChild(sectionCell);
@@ -448,12 +448,14 @@ function renderWatchlistTable() {
 
       // Update note icon state
       const noteText = (list.notes && list.notes[sym]) ? String(list.notes[sym]) : "";
+      // If there is no note yet, we hide the icon entirely (TradingView-like).
+      // The user can still add a note via right-click menu.
+      const noteEl = symCell.querySelector(".note-icon");
       if (!noteText) {
-        symCell.querySelector(".note-icon").style.opacity = "0.25";
-        symCell.querySelector(".note-icon").title = "Add note";
+        noteEl.remove();
       } else {
-        symCell.querySelector(".note-icon").style.opacity = "0.85";
-        symCell.querySelector(".note-icon").title = "View note";
+        noteEl.style.opacity = "0.9";
+        noteEl.title = "View note";
       }
 
       // Symbol click -> chart
@@ -461,11 +463,14 @@ function renderWatchlistTable() {
         loadSymbolIntoChart(sym);
       });
 
-      // Note icon click
-      symCell.querySelector(".note-icon").addEventListener("click", (e) => {
-        e.stopPropagation();
-        openNoteModal(sym);
-      });
+      // Note icon click (only if present)
+      const noteIcon = symCell.querySelector(".note-icon");
+      if (noteIcon) {
+        noteIcon.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openNoteModal(sym);
+        });
+      }
 
       // Tooltip (company + note)
       wireSymbolTooltip(symCell.querySelector(".symbol"), sym);
@@ -1242,6 +1247,29 @@ function pushLog(msg) {
   saveAlerts();
 }
 
+/* Small in-app toast (used when an alert triggers) */
+function ensureToastHost() {
+  let host = document.getElementById("toast-host");
+  if (host) return host;
+  host = document.createElement("div");
+  host.id = "toast-host";
+  document.body.appendChild(host);
+  return host;
+}
+
+function showToast(text) {
+  const host = ensureToastHost();
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = text;
+  host.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 250);
+  }, 3200);
+}
+
 function renderAlerts(zone = "zone1") {
   const listEl = document.getElementById(`alerts-list-${zone}`);
   const emptyEl = document.getElementById(`alerts-empty-${zone}`);
@@ -1460,7 +1488,10 @@ function checkAlertsOnce() {
       a.lastFiredAt = now;
       const msg = `[TRIGGER] ${a.symbol} — ${formatCond(a)} (last ${p.toFixed(2)})`;
       pushLog(msg);
-      if (a.notify === "popup") console.log(msg);
+      if (a.notify === "popup") {
+        // Visible toast inside the app (more user friendly than console)
+        showToast(`${a.symbol}: ${formatCond(a)} (last ${p.toFixed(2)})`, "success");
+      }
     }
   });
 
