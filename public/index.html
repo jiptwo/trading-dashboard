@@ -557,6 +557,122 @@
   </div>
 </div>
 
+
+<!-- SETTINGS & BILLING MODAL -->
+<div id="settings-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">Settings and billing</div>
+      <button class="icon-btn modal-close" id="settings-close" title="Close">✕</button>
+    </div>
+
+    <div class="settings-layout">
+      <aside class="settings-nav">
+        <div class="settings-nav-title">PROFILE AND PRIVACY</div>
+        <button class="settings-nav-item active" data-settings-tab="publicProfile">Public profile</button>
+        <button class="settings-nav-item" data-settings-tab="privacy">Privacy preferences</button>
+
+        <div class="settings-nav-title">ACCOUNT AND SECURITY</div>
+        <button class="settings-nav-item" data-settings-tab="account">Account settings</button>
+        <button class="settings-nav-item" data-settings-tab="sessions">Active sessions</button>
+
+        <div class="settings-nav-title">BILLING</div>
+        <button class="settings-nav-item" data-settings-tab="subscriptions">Subscriptions</button>
+        <button class="settings-nav-item" data-settings-tab="payments">Payment methods</button>
+        <button class="settings-nav-item" data-settings-tab="history">Billing history</button>
+
+        <div class="settings-nav-title">NOTIFICATIONS</div>
+        <button class="settings-nav-item" data-settings-tab="alertsDelivery">Alerts delivery</button>
+        <button class="settings-nav-item" data-settings-tab="socialNotif">Social notifications</button>
+        <button class="settings-nav-item" data-settings-tab="emailSubs">Email subscriptions</button>
+      </aside>
+
+      <section class="settings-content">
+        <div class="settings-panel" data-settings-panel="publicProfile">
+          <h2>Picture and username</h2>
+          <p class="muted">Upload a profile image (optional) and update your username.</p>
+
+          <div class="profile-row">
+            <div class="avatar-lg" id="settings-avatar">JP</div>
+            <div class="profile-fields">
+              <div class="form-field">
+                <div class="form-label">Username</div>
+                <input id="settings-username" class="modal-input" placeholder="Username" />
+              </div>
+              <div class="modal-row" style="justify-content:flex-start">
+                <button class="btn" id="settings-save-profile">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="privacy">
+          <h2>Privacy preferences</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="account">
+          <h2>Account settings</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="sessions">
+          <h2>Active sessions</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="subscriptions">
+          <h2>Subscriptions</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="payments">
+          <h2>Payment methods</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="history">
+          <h2>Billing history</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="alertsDelivery">
+          <h2>Alerts delivery</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="socialNotif">
+          <h2>Social notifications</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+
+        <div class="settings-panel panel-hidden" data-settings-panel="emailSubs">
+          <h2>Email subscriptions</h2>
+          <p class="muted">Coming soon.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- KEYBOARD SHORTCUTS MODAL -->
+<div id="shortcuts-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">Keyboard shortcuts</div>
+      <button class="icon-btn modal-close" id="shortcuts-close" title="Close">✕</button>
+    </div>
+
+    <div class="shortcuts-list">
+      <div class="shortcut-row"><span>Search</span><span class="kbd">Ctrl</span><span class="kbd">K</span></div>
+      <div class="shortcut-row"><span>Create alert</span><span class="kbd">A</span></div>
+      <div class="shortcut-row"><span>Toggle watchlist</span><span class="kbd">W</span></div>
+      <div class="shortcut-row"><span>Close dialogs</span><span class="kbd">Esc</span></div>
+    </div>
+
+    <div class="modal-hint">More shortcuts will be added later.</div>
+  </div>
+</div>
 <!-- LANGUAGE MODAL -->
 <div id="language-overlay" class="modal-overlay" aria-hidden="true">
   <div class="modal">
