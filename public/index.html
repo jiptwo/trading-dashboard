@@ -120,6 +120,10 @@
                   <span class="menu-icon">▦</span><span>Create new list</span>
                 </div>
 
+                <div class="menu-item danger" data-wl-action="delete">
+                  <span class="menu-icon">🗑</span><span>Delete list</span>
+                </div>
+
                 <div class="menu-item">
                   <span class="menu-icon">⬆</span><span>Upload list</span>
                 </div>
@@ -130,8 +134,10 @@
             <div class="wl-quick-switch" id="wl-quick-switch" aria-label="Quick watchlist switch"></div>
           </div>
 
-          <!-- ACTIONS TOP RIGHT -->
+          <!-- RIGHT: Search + actions -->
           <div class="watchlist-actions">
+            <input id="watchlist-search" class="watchlist-search" placeholder="Search..." autocomplete="off" />
+
             <button class="icon-btn" id="add-symbol-btn" title="Add symbol">+</button>
             <button class="icon-btn" title="Advanced view">⛶</button>
 
@@ -240,6 +246,7 @@
     <div class="modal-block">
       <div class="modal-label">Color</div>
       <div class="color-picker" id="create-color-picker"></div>
+      <div class="modal-hint">Colors already used are disabled.</div>
     </div>
 
     <div class="modal-block">
