@@ -374,15 +374,21 @@ html, body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  position: relative;
 }
 .section-name{
   cursor: pointer;
 }
 .section-actions{
+  /* Keep actions reachable even when the watchlist scrolls horizontally */
   margin-left: auto;
   display: flex;
   gap: 8px;
   opacity: 0.7;
+  position: sticky;
+  right: 8px;
+  padding-left: 12px;
+  background: linear-gradient(to right, transparent, rgba(11,15,20,0.85) 18px, rgba(11,15,20,0.95));
 }
 .section-actions button{
   border: none;
@@ -393,6 +399,14 @@ html, body {
   border-radius: 8px;
 }
 .section-actions button:hover{ background: rgba(255,255,255,0.08); color: #fff; }
+
+.section-btn-danger{
+  color: rgba(252,165,165,0.95) !important;
+}
+.section-btn-danger:hover{
+  background: rgba(239,68,68,0.14) !important;
+  color: #fff !important;
+}
 
 /* Rows */
 .watchlist-row {
@@ -754,4 +768,30 @@ html, body {
   padding: 6px 10px;
   border-top: 1px solid rgba(255,255,255,0.06);
   box-sizing: border-box;
+}
+
+/* ================= TOASTS ================= */
+#toast-host{
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 4000;
+  pointer-events: none;
+}
+
+.toast{
+  min-width: 260px;
+  max-width: 380px;
+  background: rgba(15,22,35,0.96);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.92);
+  font-size: 12px;
+  line-height: 1.35;
+  pointer-events: none;
 }
