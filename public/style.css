@@ -1,8 +1,37 @@
+/* ================= THEME TOKENS ================= */
+:root{
+  --bg: #0b0f14;
+  --panel: #0f1623;
+  --panel-2: #111827;
+  --text: #e6e6e6;
+  --muted: rgba(255,255,255,0.65);
+  --muted-2: rgba(255,255,255,0.45);
+  --border: rgba(255,255,255,0.10);
+  --border-2: rgba(255,255,255,0.06);
+  --hover: rgba(255,255,255,0.08);
+  --danger: #fca5a5;
+  --danger-bg: rgba(239,68,68,0.15);
+}
+
+html[data-theme="light"]{
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --panel-2: #f3f4f6;
+  --text: #0b0f14;
+  --muted: rgba(11,15,20,0.70);
+  --muted-2: rgba(11,15,20,0.50);
+  --border: rgba(11,15,20,0.12);
+  --border-2: rgba(11,15,20,0.07);
+  --hover: rgba(11,15,20,0.06);
+  --danger: #b91c1c;
+  --danger-bg: rgba(185,28,28,0.10);
+}
+
 html, body {
   margin: 0;
   height: 100%;
-  background: #0b0f14;
-  color: #e6e6e6;
+  background: var(--bg);
+  color: var(--text);
   font-family: Arial, sans-serif;
 }
 
@@ -34,6 +63,44 @@ html.theme-light .alerts-tab:hover {
 /* make monochrome icons readable in dark mode */
 .icon { filter: invert(1) brightness(1.05); }
 html.theme-light .icon { filter: none; }
+
+/* ================= SMALL TOGGLE (user menu) ================= */
+.toggle{
+  width: 42px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.toggle input{ display:none; }
+.toggle-knob{
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  transform: translateX(0);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+html.theme-light .toggle-knob{ background: rgba(11,15,20,0.75); }
+.toggle input:checked + .toggle-knob{ transform: translateX(20px); }
+.toggle input:checked ~ .toggle-knob{ transform: translateX(20px); }
+
+.toggle input:checked + .toggle-knob,
+.toggle input:checked ~ .toggle-knob{ transform: translateX(20px); }
+
+.toggle input:checked + .toggle-knob{ }
+
+.toggle input:checked{ }
+
+.toggle:has(input:checked){
+  background: rgba(34,197,94,0.25);
+  border-color: rgba(34,197,94,0.35);
+}
 
 /* Optional light theme (kept conservative to avoid breaking layout) */
 .theme-light body {
