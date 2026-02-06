@@ -56,9 +56,58 @@
     <button class="btn" title="Settings">
       <img src="./icons/settings.svg" class="icon" />
     </button>
-    <button class="btn" title="User">
-      <img src="./icons/user.svg" class="icon" />
-    </button>
+
+    <!-- USER MENU -->
+    <div class="dropdown">
+      <button class="btn dropdown-btn" data-dropdown="user-menu" title="User">
+        <img src="./icons/user.svg" class="icon" />
+      </button>
+
+      <div class="dropdown-menu user-menu" id="user-menu">
+        <div class="user-menu-top">
+          <div class="user-avatar">JP</div>
+          <div class="user-meta">
+            <div class="user-name">jpbeaudoin</div>
+            <div class="user-sub">Your profile</div>
+          </div>
+          <div class="user-caret">▸</div>
+        </div>
+
+        <div class="menu-separator"></div>
+
+        <div class="menu-item" data-user-action="home">Home</div>
+        <div class="menu-item" data-user-action="help">Help Center</div>
+        <div class="menu-item" data-user-action="whatsnew">
+          <span>What's new</span>
+          <span class="badge">11</span>
+        </div>
+
+        <div class="menu-separator"></div>
+
+        <div class="menu-row" data-keepopen="true">
+          <span>Dark theme</span>
+          <label class="toggle">
+            <input type="checkbox" id="theme-toggle" />
+            <span class="toggle-ui"></span>
+          </label>
+        </div>
+
+        <div class="menu-row" data-keepopen="true">
+          <span>Drawings panel</span>
+          <label class="toggle">
+            <input type="checkbox" id="drawings-toggle" />
+            <span class="toggle-ui"></span>
+          </label>
+        </div>
+
+        <div class="menu-item" data-user-action="language">Language <span class="muted">English</span></div>
+        <div class="menu-item" data-user-action="shortcuts">Keyboard shortcuts <span class="muted">Ctrl+/</span></div>
+
+        <div class="menu-separator"></div>
+
+        <div class="menu-item danger" data-user-action="signout">Sign out</div>
+      </div>
+    </div>
   </div>
 </header>
 
