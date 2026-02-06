@@ -96,7 +96,8 @@ if (chartMenu) {
     const item = document.createElement("div");
     item.className = "menu-item";
     item.dataset.type = name;
-    item.dataset.label = name;
+    item.dataset.labelBase = name;
+
     item.innerHTML = `
       <img src="${chartTypes[name]}" class="icon" />
       <span class="menu-label">${name}</span>
@@ -105,58 +106,61 @@ if (chartMenu) {
   });
 }
 
-/**
- * Favorites logic (fix: timeframe duplicates)
- * - We store the base label in item.dataset.label before injecting ☆/★
- * - We always use dataset.label as the key for add/remove
- */
 function initFavorites(menuId, favoritesContainerId, iconMode = false) {
   const menu = document.getElementById(menuId);
   const favoritesBar = document.getElementById(favoritesContainerId);
   if (!menu || !favoritesBar) return;
 
   menu.querySelectorAll(".menu-item").forEach(item => {
-    // Ensure stable label (timeframe menu items are plain text)
-    if (!item.dataset.label) {
-      item.dataset.label = (item.dataset.type || item.textContent || "").replace("★", "").replace("☆", "").trim();
-    }
-
     if (item.querySelector(".star")) return;
+
+    // stable label
+    const baseLabel = item.dataset.type || item.dataset.labelBase || item.textContent.trim();
+    item.dataset.labelBase = baseLabel;
 
     const star = document.createElement("span");
     star.className = "star";
     star.textContent = "☆";
     item.appendChild(star);
 
+    const syncStarState = () => {
+      const existing = favoritesBar.querySelector(`[data-label="${baseLabel}"]`);
+      if (existing) {
+        star.textContent = "★";
+        star.classList.add("active");
+      } else {
+        star.textContent = "☆";
+        star.classList.remove("active");
+      }
+    };
+    syncStarState();
+
     star.addEventListener("click", e => {
       e.stopPropagation();
 
-      const label = item.dataset.type || item.dataset.label;
-      const existing = favoritesBar.querySelector(`[data-label="${CSS.escape(label)}"]`);
-
+      const existing = favoritesBar.querySelector(`[data-label="${baseLabel}"]`);
       if (existing) {
         existing.remove();
-        star.textContent = "☆";
-        star.classList.remove("active");
+        syncStarState();
         return;
       }
 
       const btn = document.createElement("button");
       btn.className = "btn";
-      btn.dataset.label = label;
+      btn.dataset.label = baseLabel;
 
-      if (iconMode && chartTypes[label]) {
+      if (iconMode && chartTypes[baseLabel]) {
         const img = document.createElement("img");
-        img.src = chartTypes[label];
+        img.src = chartTypes[baseLabel];
         img.className = "icon";
         btn.appendChild(img);
       } else {
-        btn.textContent = label;
+        // timeframe favorites should show only "5m" etc. (no star)
+        btn.textContent = baseLabel;
       }
 
       favoritesBar.appendChild(btn);
-      star.textContent = "★";
-      star.classList.add("active");
+      syncStarState();
     });
   });
 }
@@ -164,25 +168,111 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
 
-/* ================= WATCHLIST (minimal stable, table alignment) ================= */
+/* ================= WATCHLIST DATA MODEL ================= */
 const watchlistBody = document.getElementById("watchlist-body");
 const tableToggle = document.getElementById("table-toggle");
 const watchlistSearch = document.getElementById("watchlist-search");
+const chartSub = document.getElementById("chart-sub");
+const symbolTooltip = document.getElementById("symbol-tooltip");
 
 const columnKeys = ["last","change","changePct","volume","extended","aiCote","aiProb"];
 const columnLabels = {
   last:"Last", change:"Change", changePct:"Change %", volume:"Volume", extended:"Extended", aiCote:"Ai Cote", aiProb:"Ai Prob"
 };
 
-const listsKey = "tp_watchlists_v1";
-const activeListKey = "tp_active_watchlist_v1";
+const COL_VAR = {
+  symbol: "--w-symbol",
+  last: "--w-last",
+  change: "--w-change",
+  changePct: "--w-changepct",
+  volume: "--w-volume",
+  extended: "--w-extended",
+  aiCote: "--w-aicote",
+  aiProb: "--w-aiprob"
+};
 
-const defaultLists = [
-  { id: "wl_red", name: "Red list", color: "#ef4444", symbols: ["AAPL","BCAL","TSLA"], columns: { table:true, last:true, change:true, changePct:true, volume:true, extended:false, aiCote:false, aiProb:false } }
+const listsKey = "tp_watchlists_v2";
+const activeListKey = "tp_active_watchlist_v2";
+const alertsPlacementKey = "tp_alerts_placement_v1";
+
+const COLOR_PALETTE = [
+  "#ef4444", "#3b82f6", "#22c55e", "#a855f7", "#f59e0b",
+  "#06b6d4", "#f43f5e", "#84cc16", "#eab308", "#94a3b8"
 ];
 
-let watchlists = LS.get(listsKey, defaultLists);
-let activeWatchlistId = LS.get(activeListKey, watchlists[0].id);
+const DEFAULT_COLUMNS = { table:true, last:true, change:true, changePct:true, volume:true, extended:false, aiCote:false, aiProb:false };
+
+const COMPANY_MAP = {
+  AAPL: "Apple Inc.",
+  TSLA: "Tesla, Inc.",
+  AMZN: "Amazon.com, Inc.",
+  MSFT: "Microsoft Corporation",
+  NVDA: "NVIDIA Corporation",
+  META: "Meta Platforms, Inc.",
+  GOOGL: "Alphabet Inc.",
+  NFLX: "Netflix, Inc."
+};
+
+function defaultList() {
+  return {
+    id: "wl_red",
+    name: "Red list",
+    color: "#ef4444",
+    columns: { ...DEFAULT_COLUMNS },
+    sections: [
+      { id: "sec_main", name: "Main", symbols: ["AAPL","BCAL","TSLA"] }
+    ],
+    notes: {} // { SYMBOL: "note text" }
+  };
+}
+
+let watchlists = LS.get(listsKey, [defaultList()]);
+let activeWatchlistId = LS.get(activeListKey, watchlists[0]?.id || "wl_red");
+let alertsPlacement = LS.get(alertsPlacementKey, "zone1");
+
+/* Backward compatibility: migrate old shape {symbols:[]} to sections */
+function normalizeWatchlists() {
+  if (!Array.isArray(watchlists) || watchlists.length === 0) watchlists = [defaultList()];
+
+  watchlists = watchlists.map(w => {
+    const nw = { ...w };
+
+    if (!nw.id) nw.id = uid();
+    if (!nw.name) nw.name = "List";
+    if (!nw.color) nw.color = "#94a3b8";
+    if (!nw.columns) nw.columns = { ...DEFAULT_COLUMNS };
+    if (!nw.notes) nw.notes = {};
+
+    // migrate symbols -> sections
+    if (!Array.isArray(nw.sections)) {
+      const syms = Array.isArray(nw.symbols) ? nw.symbols.slice() : [];
+      nw.sections = [{ id: uid(), name: "Main", symbols: syms }];
+      delete nw.symbols;
+    }
+    // ensure section fields
+    nw.sections = nw.sections.map(s => ({
+      id: s.id || uid(),
+      name: (s.name || "Section").toString(),
+      symbols: Array.isArray(s.symbols) ? s.symbols.map(x => String(x).toUpperCase()) : []
+    }));
+
+    // de-dup symbols per list
+    const seen = new Set();
+    nw.sections.forEach(sec => {
+      sec.symbols = sec.symbols.filter(sym => {
+        sym = String(sym).toUpperCase();
+        if (seen.has(sym)) return false;
+        seen.add(sym);
+        return true;
+      });
+    });
+
+    return nw;
+  });
+
+  if (!watchlists.find(w => w.id === activeWatchlistId)) activeWatchlistId = watchlists[0].id;
+  saveWatchlists();
+}
 
 function getActiveList() {
   return watchlists.find(w => w.id === activeWatchlistId) || watchlists[0];
@@ -191,12 +281,7 @@ function getActiveList() {
 function saveWatchlists() {
   LS.set(listsKey, watchlists);
   LS.set(activeListKey, activeWatchlistId);
-}
-
-function ensureListState() {
-  if (!watchlists.length) watchlists = defaultLists;
-  if (!watchlists.find(w => w.id === activeWatchlistId)) activeWatchlistId = watchlists[0].id;
-  saveWatchlists();
+  LS.set(alertsPlacementKey, alertsPlacement);
 }
 
 function setActiveWatchlist(id) {
@@ -206,6 +291,11 @@ function setActiveWatchlist(id) {
   renderWatchlistTable();
 }
 
+function getUsedColors() {
+  return new Set(watchlists.map(w => w.color));
+}
+
+/* ================= WATCHLIST HEADER UI ================= */
 function renderWatchlistHeader() {
   const list = getActiveList();
   const nameEl = document.getElementById("active-watchlist-name");
@@ -213,6 +303,7 @@ function renderWatchlistHeader() {
   if (nameEl) nameEl.textContent = list.name;
   if (dotEl) dotEl.style.background = list.color;
 
+  // quick switch dots
   const quick = document.getElementById("wl-quick-switch");
   if (quick) {
     quick.innerHTML = "";
@@ -235,13 +326,39 @@ function renderWatchlistHeader() {
   });
 }
 
-const priceState = {}; // simulated prices
-
+/* ================= PRICE MOCK ================= */
+const priceState = {}; // simulated
 function mockPrice(symbol) {
   if (!priceState[symbol]) {
-    priceState[symbol] = { price: symbol === "AAPL" ? 182.34 : (symbol === "TSLA" ? 245.12 : 18.85) };
+    // deterministic-ish start
+    const base = (symbol.charCodeAt(0) + symbol.charCodeAt(symbol.length - 1)) % 200;
+    priceState[symbol] = { price: Math.max(1, base + 50 + Math.random() * 40) };
+    if (symbol === "AAPL") priceState[symbol].price = 182.34;
+    if (symbol === "TSLA") priceState[symbol].price = 245.12;
   }
   return priceState[symbol].price;
+}
+
+/* ================= TABLE RENDERING ================= */
+function persistColumnsFromUI() {
+  const list = getActiveList();
+  list.columns.table = !!tableToggle?.checked;
+  columnKeys.forEach(k => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
+    list.columns[k] = !!cb?.checked;
+  });
+  saveWatchlists();
+}
+
+function makeCell(text, classes = []) {
+  const cell = document.createElement("span");
+  cell.className = ["watchlist-cell", ...classes].join(" ");
+  cell.textContent = text;
+  return cell;
+}
+
+function applyHidden(el, hidden) {
+  el.classList.toggle("col-hidden", !!hidden);
 }
 
 function renderWatchlistTable() {
@@ -249,45 +366,116 @@ function renderWatchlistTable() {
   const list = getActiveList();
   watchlistBody.innerHTML = "";
 
-  // header
+  // HEADER
   const header = document.createElement("div");
   header.className = "watchlist-table-header";
 
-  const hSymbol = document.createElement("span");
-  hSymbol.className = "col-symbol";
-  hSymbol.textContent = "Symbol";
+  // Symbol header (resizable)
+  const hSymbol = makeCell("Symbol", ["col-symbol"]);
+  hSymbol.dataset.colKey = "symbol";
+  hSymbol.appendChild(makeResizer("symbol"));
   header.appendChild(hSymbol);
 
   const showTable = !!list.columns.table;
   columnKeys.forEach(k => {
-    const s = document.createElement("span");
-    s.className = "col";
-    s.textContent = columnLabels[k];
-    if (!showTable || !list.columns[k]) s.classList.add("col-hidden");
-    header.appendChild(s);
+    const cell = makeCell(columnLabels[k], ["col"]);
+    cell.dataset.colKey = k;
+    applyHidden(cell, !showTable || !list.columns[k]);
+    cell.appendChild(makeResizer(k));
+    header.appendChild(cell);
   });
 
   watchlistBody.appendChild(header);
 
+  // FILTER
   const filter = (watchlistSearch?.value || "").trim().toUpperCase();
-  list.symbols
-    .filter(sym => !filter || sym.includes(filter))
-    .forEach(sym => {
+
+  // SECTIONS + ROWS
+  list.sections.forEach(sec => {
+    const visibleSyms = sec.symbols.filter(sym => !filter || sym.includes(filter));
+    // If filter is active and section empty, hide section row for cleanliness
+    if (filter && visibleSyms.length === 0) return;
+
+    // Section row
+    const srow = document.createElement("div");
+    srow.className = "watchlist-section-row";
+    srow.dataset.sectionId = sec.id;
+    srow.draggable = true;
+
+    const sectionCell = document.createElement("span");
+    sectionCell.className = "section-cell";
+    sectionCell.innerHTML = `
+      <span class="section-name" title="Click to rename">${escapeHtml(sec.name)}</span>
+      <span class="section-actions">
+        <button class="section-btn" data-section-action="delete" title="Delete section">🗑</button>
+      </span>
+    `;
+    srow.appendChild(sectionCell);
+
+    srow.addEventListener("click", (e) => {
+      const nameEl = e.target.closest(".section-name");
+      if (nameEl) {
+        renameSection(sec.id);
+        return;
+      }
+      const del = e.target.closest('[data-section-action="delete"]');
+      if (del) {
+        deleteSection(sec.id);
+      }
+    });
+
+    // section drag/drop
+    wireSectionDnD(srow);
+
+    watchlistBody.appendChild(srow);
+
+    // Symbol rows
+    visibleSyms.forEach(sym => {
       const row = document.createElement("div");
       row.className = "watchlist-row";
       row.dataset.symbol = sym;
+      row.dataset.sectionId = sec.id;
+      row.draggable = true;
 
-      const cSymbol = document.createElement("span");
-      cSymbol.className = "col-symbol";
-      cSymbol.innerHTML = `
+      // Symbol cell
+      const symCell = document.createElement("span");
+      symCell.className = "watchlist-cell col-symbol";
+      symCell.innerHTML = `
         <span class="dot" style="background:${list.color}"></span>
-        <span class="symbol" title="${sym}">${sym}</span>
+        <span class="symbol" data-symbol="${sym}">${sym}</span>
+        <span class="note-icon" data-note-icon="${sym}" title="Note">📝</span>
       `;
-      row.appendChild(cSymbol);
 
+      // Update note icon state
+      const noteText = (list.notes && list.notes[sym]) ? String(list.notes[sym]) : "";
+      if (!noteText) {
+        symCell.querySelector(".note-icon").style.opacity = "0.25";
+        symCell.querySelector(".note-icon").title = "Add note";
+      } else {
+        symCell.querySelector(".note-icon").style.opacity = "0.85";
+        symCell.querySelector(".note-icon").title = "View note";
+      }
+
+      // Symbol click -> chart
+      symCell.querySelector(".symbol").addEventListener("click", () => {
+        loadSymbolIntoChart(sym);
+      });
+
+      // Note icon click
+      symCell.querySelector(".note-icon").addEventListener("click", (e) => {
+        e.stopPropagation();
+        openNoteModal(sym);
+      });
+
+      // Tooltip (company + note)
+      wireSymbolTooltip(symCell.querySelector(".symbol"), sym);
+
+      row.appendChild(symCell);
+
+      // Other columns
       const price = mockPrice(sym);
-      const change = sym === "AAPL" ? 0.76 : 0.00;
-      const chgPct = sym === "AAPL" ? 0.42 : 0.00;
+      const change = sym === "AAPL" ? 0.76 : (Math.random() - 0.5) * 1.4;
+      const chgPct = (change / price) * 100;
 
       const cells = {
         last: price.toFixed(2),
@@ -300,48 +488,327 @@ function renderWatchlistTable() {
       };
 
       columnKeys.forEach(k => {
-        const cell = document.createElement("span");
-        cell.className = "col";
-        cell.textContent = cells[k];
-        if (!showTable || !list.columns[k]) cell.classList.add("col-hidden");
+        const cell = makeCell(cells[k], ["col"]);
+        applyHidden(cell, !showTable || !list.columns[k]);
         row.appendChild(cell);
       });
 
-      // right click menu
+      // Right-click menu
       row.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         openRowMenu(e.clientX, e.clientY, sym);
       });
 
+      // Row click (optional highlight + chart)
+      row.addEventListener("click", () => loadSymbolIntoChart(sym));
+
+      // DnD
+      wireSymbolDnD(row);
+
       watchlistBody.appendChild(row);
     });
-}
-
-watchlistSearch?.addEventListener("input", renderWatchlistTable);
-
-function persistColumnsFromUI() {
-  const list = getActiveList();
-  list.columns.table = !!tableToggle?.checked;
-  columnKeys.forEach(k => {
-    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
-    list.columns[k] = !!cb?.checked;
   });
-  saveWatchlists();
+
+  wireColumnResizers(header);
 }
 
-tableToggle?.addEventListener("change", () => {
-  persistColumnsFromUI();
+/* ================= CHART LOAD (single click) ================= */
+function loadSymbolIntoChart(symbol) {
+  const list = getActiveList();
+  if (chartSub) chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
+}
+
+/* ================= SYMBOL TOOLTIP ================= */
+let tooltipTimer = null;
+
+function wireSymbolTooltip(el, symbol) {
+  if (!el || !symbolTooltip) return;
+
+  const show = (clientX, clientY) => {
+    const list = getActiveList();
+    const company = COMPANY_MAP[symbol] || "Company information";
+    const note = (list.notes && list.notes[symbol]) ? String(list.notes[symbol]) : "";
+
+    symbolTooltip.innerHTML = `
+      <div class="tooltip-title">${escapeHtml(symbol)} — ${escapeHtml(company)}</div>
+      <div class="tooltip-sub">Watchlist: ${escapeHtml(list.name)}</div>
+      ${note ? `<div class="tooltip-sub" style="margin-top:6px;">Note: ${escapeHtml(note)}</div>` : `<div class="tooltip-sub" style="margin-top:6px; opacity:0.8;">No note — right click → Add Note</div>`}
+    `;
+
+    const pad = 12;
+    const x = Math.min(window.innerWidth - 300, clientX + pad);
+    const y = Math.min(window.innerHeight - 140, clientY + pad);
+    symbolTooltip.style.left = x + "px";
+    symbolTooltip.style.top = y + "px";
+    symbolTooltip.classList.add("open");
+  };
+
+  const hide = () => symbolTooltip.classList.remove("open");
+
+  el.addEventListener("mouseenter", (e) => {
+    clearTimeout(tooltipTimer);
+    tooltipTimer = setTimeout(() => show(e.clientX, e.clientY), 180);
+  });
+  el.addEventListener("mousemove", (e) => {
+    if (!symbolTooltip.classList.contains("open")) return;
+    const pad = 12;
+    symbolTooltip.style.left = Math.min(window.innerWidth - 300, e.clientX + pad) + "px";
+    symbolTooltip.style.top = Math.min(window.innerHeight - 140, e.clientY + pad) + "px";
+  });
+  el.addEventListener("mouseleave", () => {
+    clearTimeout(tooltipTimer);
+    hide();
+  });
+}
+
+/* ================= COLUMN RESIZERS ================= */
+function makeResizer(colKey) {
+  const r = document.createElement("span");
+  r.className = "col-resizer";
+  r.dataset.resizeKey = colKey;
+  return r;
+}
+
+function wireColumnResizers(headerEl) {
+  if (!headerEl || !watchlistBody) return;
+
+  let active = null;
+
+  const onMove = (e) => {
+    if (!active) return;
+    const dx = e.clientX - active.startX;
+    const next = Math.max(active.min, active.startW + dx);
+    watchlistBody.style.setProperty(active.varName, `${next}px`);
+  };
+
+  const onUp = () => {
+    if (!active) return;
+    active = null;
+    document.body.style.cursor = "";
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onUp);
+  };
+
+  headerEl.querySelectorAll(".col-resizer").forEach(res => {
+    res.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const key = res.dataset.resizeKey;
+      const varName = COL_VAR[key];
+      if (!varName) return;
+
+      const current = getComputedStyle(watchlistBody).getPropertyValue(varName).trim();
+      const startW = parseInt(current.replace("px", ""), 10) || 80;
+
+      const min = (key === "symbol") ? 90 : 56;
+
+      active = { key, varName, startX: e.clientX, startW, min };
+      document.body.style.cursor = "col-resize";
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  });
+}
+
+/* ================= WATCHLIST MENU ACTIONS ================= */
+const watchlistMenu = document.getElementById("watchlist-menu");
+watchlistMenu?.addEventListener("click", (e) => {
+  const item = e.target.closest(".menu-item");
+  if (!item) return;
+  const action = item.dataset.wlAction;
+  if (!action) return;
+
+  // keep menu closed after click
+  document.querySelectorAll(".dropdown-menu.open").forEach(m => m.classList.remove("open"));
+
+  if (action === "rename") openRenameModal();
+  if (action === "create") openCreateWatchlistModal();
+  if (action === "delete") deleteActiveWatchlist();
+  if (action === "addSection") openAddSectionModal();
+  if (action === "clear") clearActiveWatchlist();
+});
+
+/* ================= SECTIONS ================= */
+const sectionOverlay = document.getElementById("section-overlay");
+const sectionInput = document.getElementById("section-input");
+const sectionSave = document.getElementById("section-save");
+const sectionCancel = document.getElementById("section-cancel");
+
+function openAddSectionModal() {
+  if (!sectionOverlay) return;
+  sectionOverlay.classList.add("open");
+  sectionInput.value = "";
+  setTimeout(() => sectionInput.focus(), 0);
+}
+function closeAddSectionModal() { sectionOverlay?.classList.remove("open"); }
+
+sectionCancel?.addEventListener("click", closeAddSectionModal);
+sectionOverlay?.addEventListener("click", (e) => { if (e.target === sectionOverlay) closeAddSectionModal(); });
+
+sectionSave?.addEventListener("click", () => {
+  const name = (sectionInput.value || "").trim();
+  if (!name) return;
+  const list = getActiveList();
+  list.sections.push({ id: uid(), name, symbols: [] });
+  saveWatchlists();
+  closeAddSectionModal();
   renderWatchlistTable();
 });
 
-document.querySelectorAll("#columns-menu input[data-col]").forEach(cb => {
-  cb.addEventListener("change", () => {
-    persistColumnsFromUI();
+function renameSection(sectionId) {
+  const list = getActiveList();
+  const sec = list.sections.find(s => s.id === sectionId);
+  if (!sec) return;
+  const next = prompt("Rename section", sec.name);
+  if (!next) return;
+  sec.name = next.trim() || sec.name;
+  saveWatchlists();
+  renderWatchlistTable();
+}
+
+function deleteSection(sectionId) {
+  const list = getActiveList();
+  if (list.sections.length <= 1) {
+    openConfirm("Cannot delete", "You must keep at least one section.", () => {});
+    return;
+  }
+  const sec = list.sections.find(s => s.id === sectionId);
+  if (!sec) return;
+
+  openConfirm("Delete section", `Delete section "${sec.name}"? Symbols will move to the first section.`, () => {
+    const first = list.sections[0];
+    sec.symbols.forEach(sym => {
+      if (!first.symbols.includes(sym)) first.symbols.push(sym);
+    });
+    list.sections = list.sections.filter(s => s.id !== sectionId);
+    saveWatchlists();
     renderWatchlistTable();
   });
-});
+}
 
-/* Add symbol modal (simple) */
+/* ================= SYMBOL DnD (within list + between sections) ================= */
+let dragPayload = null;
+
+function wireSymbolDnD(rowEl) {
+  rowEl.addEventListener("dragstart", (e) => {
+    dragPayload = {
+      type: "symbol",
+      symbol: rowEl.dataset.symbol,
+      fromSectionId: rowEl.dataset.sectionId
+    };
+    rowEl.classList.add("dragging");
+    e.dataTransfer?.setData("text/plain", dragPayload.symbol);
+    e.dataTransfer?.setDragImage(rowEl, 8, 8);
+  });
+
+  rowEl.addEventListener("dragend", () => {
+    rowEl.classList.remove("dragging");
+    dragPayload = null;
+    document.querySelectorAll(".drop-target").forEach(x => x.classList.remove("drop-target"));
+  });
+
+  rowEl.addEventListener("dragover", (e) => {
+    if (!dragPayload || dragPayload.type !== "symbol") return;
+    e.preventDefault();
+    rowEl.classList.add("drop-target");
+  });
+
+  rowEl.addEventListener("dragleave", () => rowEl.classList.remove("drop-target"));
+
+  rowEl.addEventListener("drop", (e) => {
+    if (!dragPayload || dragPayload.type !== "symbol") return;
+    e.preventDefault();
+    rowEl.classList.remove("drop-target");
+
+    const targetSymbol = rowEl.dataset.symbol;
+    const targetSectionId = rowEl.dataset.sectionId;
+
+    moveSymbolWithinList(dragPayload.symbol, dragPayload.fromSectionId, targetSectionId, targetSymbol);
+  });
+}
+
+function wireSectionDnD(sectionRowEl) {
+  // drop symbols onto section header -> move to top
+  sectionRowEl.addEventListener("dragover", (e) => {
+    if (!dragPayload) return;
+    e.preventDefault();
+    sectionRowEl.classList.add("drop-target");
+  });
+  sectionRowEl.addEventListener("dragleave", () => sectionRowEl.classList.remove("drop-target"));
+  sectionRowEl.addEventListener("drop", (e) => {
+    if (!dragPayload) return;
+    e.preventDefault();
+    sectionRowEl.classList.remove("drop-target");
+
+    const list = getActiveList();
+    const targetSectionId = sectionRowEl.dataset.sectionId;
+
+    if (dragPayload.type === "symbol") {
+      moveSymbolWithinList(dragPayload.symbol, dragPayload.fromSectionId, targetSectionId, null);
+    } else if (dragPayload.type === "section") {
+      moveSection(dragPayload.sectionId, targetSectionId);
+    }
+  });
+
+  // section drag
+  sectionRowEl.addEventListener("dragstart", (e) => {
+    dragPayload = { type: "section", sectionId: sectionRowEl.dataset.sectionId };
+    sectionRowEl.classList.add("dragging");
+    e.dataTransfer?.setData("text/plain", dragPayload.sectionId);
+  });
+  sectionRowEl.addEventListener("dragend", () => {
+    sectionRowEl.classList.remove("dragging");
+    dragPayload = null;
+    document.querySelectorAll(".drop-target").forEach(x => x.classList.remove("drop-target"));
+  });
+}
+
+function moveSection(fromId, beforeId) {
+  const list = getActiveList();
+  const fromIdx = list.sections.findIndex(s => s.id === fromId);
+  const toIdx = list.sections.findIndex(s => s.id === beforeId);
+  if (fromIdx < 0 || toIdx < 0 || fromId === beforeId) return;
+
+  const [sec] = list.sections.splice(fromIdx, 1);
+  const insertAt = (fromIdx < toIdx) ? toIdx - 1 : toIdx;
+  list.sections.splice(insertAt, 0, sec);
+  saveWatchlists();
+  renderWatchlistTable();
+}
+
+function moveSymbolWithinList(symbol, fromSectionId, toSectionId, beforeSymbol) {
+  const list = getActiveList();
+  const fromSec = list.sections.find(s => s.id === fromSectionId);
+  const toSec = list.sections.find(s => s.id === toSectionId);
+  if (!fromSec || !toSec) return;
+
+  // remove
+  fromSec.symbols = fromSec.symbols.filter(s => s !== symbol);
+
+  // insert
+  if (!beforeSymbol) {
+    toSec.symbols.unshift(symbol);
+  } else {
+    const idx = toSec.symbols.indexOf(beforeSymbol);
+    if (idx >= 0) toSec.symbols.splice(idx, 0, symbol);
+    else toSec.symbols.unshift(symbol);
+  }
+
+  // de-dup within list across sections
+  const seen = new Set();
+  list.sections.forEach(sec => {
+    sec.symbols = sec.symbols.filter(s => {
+      if (seen.has(s)) return false;
+      seen.add(s);
+      return true;
+    });
+  });
+
+  saveWatchlists();
+  renderWatchlistTable();
+}
+
+/* ================= ADD SYMBOL MODAL ================= */
 const addBtn = document.getElementById("add-symbol-btn");
 const overlay = document.getElementById("modal-overlay");
 const symbolInput = document.getElementById("symbol-input");
@@ -349,11 +816,11 @@ const symbolAddConfirm = document.getElementById("symbol-add-confirm");
 const symbolAddCancel = document.getElementById("symbol-add-cancel");
 
 function openAddSymbol() {
-  overlay.classList.add("open");
+  overlay?.classList.add("open");
   symbolInput.value = "";
   symbolInput.focus();
 }
-function closeAddSymbol() { overlay.classList.remove("open"); }
+function closeAddSymbol() { overlay?.classList.remove("open"); }
 
 addBtn?.addEventListener("click", openAddSymbol);
 symbolAddCancel?.addEventListener("click", closeAddSymbol);
@@ -364,8 +831,10 @@ function addSymbolToActive(sym) {
   if (!sym) return;
 
   const list = getActiveList();
-  if (!list.symbols.includes(sym)) {
-    list.symbols.unshift(sym);
+  const first = list.sections[0];
+  const exists = list.sections.some(s => s.symbols.includes(sym));
+  if (!exists) {
+    first.symbols.unshift(sym);
     saveWatchlists();
     renderWatchlistTable();
   }
@@ -381,6 +850,195 @@ symbolInput?.addEventListener("keydown", (e) => {
     closeAddSymbol();
   }
   if (e.key === "Escape") closeAddSymbol();
+});
+
+/* ================= WATCHLIST SEARCH + COLUMNS ================= */
+watchlistSearch?.addEventListener("input", renderWatchlistTable);
+
+tableToggle?.addEventListener("change", () => {
+  persistColumnsFromUI();
+  renderWatchlistTable();
+});
+
+document.querySelectorAll("#columns-menu input[data-col]").forEach(cb => {
+  cb.addEventListener("change", () => {
+    persistColumnsFromUI();
+    renderWatchlistTable();
+  });
+});
+
+/* ================= WATCHLIST CREATE / RENAME / DELETE ================= */
+const renameOverlay = document.getElementById("rename-overlay");
+const renameInput = document.getElementById("rename-input");
+const renameSave = document.getElementById("rename-save");
+const renameCancel = document.getElementById("rename-cancel");
+
+function openRenameModal() {
+  const list = getActiveList();
+  renameOverlay?.classList.add("open");
+  renameInput.value = list.name;
+  setTimeout(() => renameInput.focus(), 0);
+}
+function closeRenameModal() { renameOverlay?.classList.remove("open"); }
+
+renameCancel?.addEventListener("click", closeRenameModal);
+renameOverlay?.addEventListener("click", (e) => { if (e.target === renameOverlay) closeRenameModal(); });
+renameSave?.addEventListener("click", () => {
+  const list = getActiveList();
+  const next = (renameInput.value || "").trim();
+  if (!next) return;
+  list.name = next;
+  saveWatchlists();
+  closeRenameModal();
+  renderWatchlistHeader();
+});
+
+const createWlOverlay = document.getElementById("create-wl-overlay");
+const createWlName = document.getElementById("create-wl-name");
+const createWlColors = document.getElementById("create-wl-colors");
+const createWlSave = document.getElementById("create-wl-save");
+const createWlCancel = document.getElementById("create-wl-cancel");
+const createWlHint = document.getElementById("create-wl-color-hint");
+
+let selectedCreateColor = null;
+
+function openCreateWatchlistModal() {
+  createWlOverlay?.classList.add("open");
+  createWlName.value = "";
+  selectedCreateColor = null;
+  renderColorPicker();
+}
+function closeCreateWatchlistModal() { createWlOverlay?.classList.remove("open"); }
+
+createWlCancel?.addEventListener("click", closeCreateWatchlistModal);
+createWlOverlay?.addEventListener("click", (e) => { if (e.target === createWlOverlay) closeCreateWatchlistModal(); });
+
+function renderColorPicker() {
+  if (!createWlColors) return;
+  createWlColors.innerHTML = "";
+  const used = getUsedColors();
+
+  let availableCount = 0;
+
+  COLOR_PALETTE.forEach(c => {
+    const sw = document.createElement("div");
+    sw.className = "color-swatch";
+    sw.style.background = c;
+
+    const disabled = used.has(c);
+    if (disabled) sw.classList.add("disabled");
+    else availableCount++;
+
+    if (selectedCreateColor === c) sw.classList.add("selected");
+
+    sw.addEventListener("click", () => {
+      if (disabled) return;
+      selectedCreateColor = c;
+      renderColorPicker();
+    });
+
+    createWlColors.appendChild(sw);
+  });
+
+  if (createWlHint) {
+    createWlHint.textContent = availableCount === 0
+      ? "All 10 colors are already used. Delete a watchlist to free a color."
+      : "Pick a color (max 10, no duplicates).";
+  }
+}
+
+createWlSave?.addEventListener("click", () => {
+  if (!selectedCreateColor) {
+    openConfirm("Missing color", "Please select a color.", () => {});
+    return;
+  }
+  const name = (createWlName.value || "").trim();
+  const prettyName = name || `${colorName(selectedCreateColor)} list`;
+
+  const wl = {
+    id: uid(),
+    name: prettyName,
+    color: selectedCreateColor,
+    columns: { ...DEFAULT_COLUMNS },
+    sections: [{ id: uid(), name: "Main", symbols: [] }],
+    notes: {}
+  };
+
+  watchlists.push(wl);
+  activeWatchlistId = wl.id;
+
+  saveWatchlists();
+  closeCreateWatchlistModal();
+  renderWatchlistHeader();
+  renderWatchlistTable();
+});
+
+function deleteActiveWatchlist() {
+  if (watchlists.length <= 1) {
+    openConfirm("Cannot delete", "You must keep at least one watchlist.", () => {});
+    return;
+  }
+  const list = getActiveList();
+  openConfirm("Delete watchlist", `Are you sure you want to delete "${list.name}"?`, () => {
+    watchlists = watchlists.filter(w => w.id !== list.id);
+    activeWatchlistId = watchlists[0].id;
+    saveWatchlists();
+    renderWatchlistHeader();
+    renderWatchlistTable();
+  });
+}
+
+function clearActiveWatchlist() {
+  const list = getActiveList();
+  openConfirm("Clear list", `Remove all symbols from "${list.name}"?`, () => {
+    list.sections.forEach(s => s.symbols = []);
+    list.notes = {};
+    saveWatchlists();
+    renderWatchlistTable();
+  });
+}
+
+function colorName(hex) {
+  const map = {
+    "#ef4444":"Red", "#3b82f6":"Blue", "#22c55e":"Green", "#a855f7":"Purple", "#f59e0b":"Orange",
+    "#06b6d4":"Cyan", "#f43f5e":"Pink", "#84cc16":"Lime", "#eab308":"Yellow", "#94a3b8":"Gray"
+  };
+  return map[hex] || "New";
+}
+
+/* ================= NOTES ================= */
+const noteOverlay = document.getElementById("note-overlay");
+const noteTitle = document.getElementById("note-title");
+const noteText = document.getElementById("note-text");
+const noteSave = document.getElementById("note-save");
+const noteCancel = document.getElementById("note-cancel");
+let noteSymbol = null;
+
+function openNoteModal(symbol) {
+  const list = getActiveList();
+  noteSymbol = symbol;
+  noteTitle.textContent = `${symbol} — Add note`;
+  noteText.value = (list.notes && list.notes[symbol]) ? String(list.notes[symbol]) : "";
+  noteOverlay?.classList.add("open");
+  setTimeout(() => noteText.focus(), 0);
+}
+
+function closeNoteModal() {
+  noteOverlay?.classList.remove("open");
+  noteSymbol = null;
+}
+
+noteCancel?.addEventListener("click", closeNoteModal);
+noteOverlay?.addEventListener("click", (e) => { if (e.target === noteOverlay) closeNoteModal(); });
+noteSave?.addEventListener("click", () => {
+  if (!noteSymbol) return;
+  const list = getActiveList();
+  const txt = (noteText.value || "").trim();
+  if (txt) list.notes[noteSymbol] = txt;
+  else delete list.notes[noteSymbol];
+  saveWatchlists();
+  closeNoteModal();
+  renderWatchlistTable();
 });
 
 /* ================= ROW MENU (right click) ================= */
@@ -425,7 +1083,7 @@ function openRowMenu(x, y, symbol) {
     .forEach(w => {
       const item = document.createElement("div");
       item.className = "submenu-item";
-      item.innerHTML = `<span class="color-dot" style="background:${w.color}"></span><span>${w.name}</span>`;
+      item.innerHTML = `<span class="color-dot" style="background:${w.color}"></span><span>${escapeHtml(w.name)}</span>`;
       item.addEventListener("click", () => {
         moveSymbolToWatchlist(symbol, w.id);
         closeRowMenu();
@@ -433,8 +1091,14 @@ function openRowMenu(x, y, symbol) {
       rowSubmenu.appendChild(item);
     });
 
-  rowMenu.style.left = x + "px";
-  rowMenu.style.top = y + "px";
+  // Keep menu inside viewport
+  const menuW = 250;
+  const menuH = 160;
+  const left = Math.min(window.innerWidth - menuW - 8, x);
+  const top = Math.min(window.innerHeight - menuH - 8, y);
+
+  rowMenu.style.left = left + "px";
+  rowMenu.style.top = top + "px";
   rowMenu.classList.add("open");
 }
 
@@ -443,8 +1107,19 @@ function moveSymbolToWatchlist(symbol, targetId) {
   const to = watchlists.find(w => w.id === targetId);
   if (!to) return;
 
-  from.symbols = from.symbols.filter(s => s !== symbol);
-  if (!to.symbols.includes(symbol)) to.symbols.unshift(symbol);
+  // remove from all sections (from)
+  from.sections.forEach(s => s.symbols = s.symbols.filter(x => x !== symbol));
+
+  // add to first section (to)
+  const first = to.sections[0] || (to.sections = [{ id: uid(), name: "Main", symbols: [] }], to.sections[0]);
+  if (!first.symbols.includes(symbol)) first.symbols.unshift(symbol);
+
+  // move note if exists
+  if (from.notes && from.notes[symbol]) {
+    to.notes = to.notes || {};
+    to.notes[symbol] = from.notes[symbol];
+    delete from.notes[symbol];
+  }
 
   saveWatchlists();
   renderWatchlistTable();
@@ -466,7 +1141,7 @@ function moveSymbolToWatchlist(symbol, targetId) {
     clearTimeout(closeTimer);
     closeTimer = setTimeout(() => {
       if (!hoverInside) rowMenuMove.classList.remove("submenu-open");
-    }, 250);
+    }, 260);
   };
 
   rowMenuMove.addEventListener("mouseenter", () => {
@@ -491,6 +1166,7 @@ function moveSymbolToWatchlist(symbol, targetId) {
 /* Compare placeholder */
 rowMenuCompare?.addEventListener("click", () => {
   console.log("COMPARE", currentRowSymbol);
+  loadSymbolIntoChart(currentRowSymbol);
   closeRowMenu();
 });
 
@@ -526,16 +1202,17 @@ rowMenuDelete?.addEventListener("click", () => {
   closeRowMenu();
   openConfirm("Delete symbol", `Are you sure you want to delete ${sym}?`, () => {
     const list = getActiveList();
-    list.symbols = list.symbols.filter(s => s !== sym);
+    list.sections.forEach(s => s.symbols = s.symbols.filter(x => x !== sym));
+    if (list.notes) delete list.notes[sym];
     saveWatchlists();
     renderWatchlistTable();
   });
 });
 
-/* Note placeholder */
 rowMenuNote?.addEventListener("click", () => {
-  console.log("ADD NOTE", currentRowSymbol);
+  const sym = currentRowSymbol;
   closeRowMenu();
+  openNoteModal(sym);
 });
 
 /* ================= ALERTS (TradingView-like) ================= */
@@ -597,12 +1274,12 @@ function renderAlerts(zone = "zone1") {
         <div class="alert-main">
           <div class="alert-title">
             <span class="dot" style="background:#22c55e; opacity:${a.active ? 1 : 0.35}"></span>
-            <span>${a.symbol}</span>
+            <span>${escapeHtml(a.symbol)}</span>
           </div>
-          <div class="alert-sub">${formatCond(a)}</div>
+          <div class="alert-sub">${escapeHtml(formatCond(a))}</div>
           <div class="alert-meta">
             <span>Last: ${price.toFixed(2)}</span>
-            <span>Notify: ${a.notify}</span>
+            <span>Notify: ${escapeHtml(a.notify)}</span>
           </div>
         </div>
 
@@ -611,7 +1288,7 @@ function renderAlerts(zone = "zone1") {
             <div class="switch ${a.active ? "on" : ""}" data-alert-switch="${a.id}"></div>
           </div>
 
-          <button class="alert-menu-btn" data-alert-menu="${a.id}" title="More">⋯</button>
+          <button class="alert-menu-btn" data-alert-menu="${a.id}" title="Delete">⋯</button>
         </div>
       `;
 
@@ -629,8 +1306,8 @@ function renderAlerts(zone = "zone1") {
       const row = document.createElement("div");
       row.className = "log-row";
       row.innerHTML = `
-        <div>${l.msg}</div>
-        <div class="log-time">${l.time}</div>
+        <div>${escapeHtml(l.msg)}</div>
+        <div class="log-time">${escapeHtml(l.time)}</div>
       `;
       logEl.appendChild(row);
     });
@@ -648,7 +1325,7 @@ function renderAlerts(zone = "zone1") {
     });
   });
 
-  // Hook menu
+  // Hook menu = delete
   document.querySelectorAll(`[data-alert-menu]`).forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -665,15 +1342,14 @@ function renderAlerts(zone = "zone1") {
   });
 }
 
-/* Alerts tab switching */
-function setAlertsTab(tab) {
-  document.querySelectorAll(".alerts-tab").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(`.alerts-tab[data-alert-tab="${tab}"]`).forEach(b => b.classList.add("active"));
+function setAlertsTab(zone, tab) {
+  document.querySelectorAll(`.alerts-tab[data-alert-zone="${zone}"]`).forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(`.alerts-tab[data-alert-zone="${zone}"][data-alert-tab="${tab}"]`).forEach(b => b.classList.add("active"));
 
-  const list = document.getElementById("alerts-list-zone1");
-  const empty = document.getElementById("alerts-empty-zone1");
-  const log = document.getElementById("alerts-log-zone1");
-  const logEmpty = document.getElementById("alerts-log-empty-zone1");
+  const list = document.getElementById(`alerts-list-${zone}`);
+  const empty = document.getElementById(`alerts-empty-${zone}`);
+  const log = document.getElementById(`alerts-log-${zone}`);
+  const logEmpty = document.getElementById(`alerts-log-empty-${zone}`);
 
   if (tab === "alerts") {
     list?.classList.remove("panel-hidden");
@@ -689,9 +1365,7 @@ function setAlertsTab(tab) {
 }
 
 document.querySelectorAll(".alerts-tab").forEach(b => {
-  b.addEventListener("click", () => {
-    setAlertsTab(b.dataset.alertTab);
-  });
+  b.addEventListener("click", () => setAlertsTab(b.dataset.alertZone, b.dataset.alertTab));
 });
 
 /* Create alert modal */
@@ -740,20 +1414,20 @@ function createAlert() {
   saveAlerts();
   closeCreateAlert();
   renderAlerts("zone1");
+  renderAlerts("zone2");
 }
 
 alertCreateConfirm?.addEventListener("click", createAlert);
 
 document.getElementById("create-alert-btn-zone1")?.addEventListener("click", () => openCreateAlert());
 document.getElementById("alerts-add-btn-zone1")?.addEventListener("click", () => openCreateAlert());
-
 document.getElementById("alerts-search-zone1")?.addEventListener("input", () => renderAlerts("zone1"));
+document.getElementById("alerts-check-btn-zone1")?.addEventListener("click", () => { checkAlertsOnce(true); renderAlerts("zone1"); });
 
-/* Check now (manual) */
-document.getElementById("alerts-check-btn-zone1")?.addEventListener("click", () => {
-  checkAlertsOnce(true);
-  renderAlerts("zone1");
-});
+document.getElementById("create-alert-btn-zone2")?.addEventListener("click", () => openCreateAlert());
+document.getElementById("alerts-add-btn-zone2")?.addEventListener("click", () => openCreateAlert());
+document.getElementById("alerts-search-zone2")?.addEventListener("input", () => renderAlerts("zone2"));
+document.getElementById("alerts-check-btn-zone2")?.addEventListener("click", () => { checkAlertsOnce(true); renderAlerts("zone2"); });
 
 /* Mock feed + triggers */
 function stepPrices() {
@@ -764,10 +1438,8 @@ function stepPrices() {
   });
 }
 
-function checkAlertsOnce(forceLog = false) {
-  // Ensure price state exists for every alert symbol
+function checkAlertsOnce() {
   alerts.forEach(a => mockPrice(a.symbol));
-
   stepPrices();
 
   const now = Date.now();
@@ -777,7 +1449,7 @@ function checkAlertsOnce(forceLog = false) {
     const p = priceState[a.symbol].price;
     const threshold = Number(a.value);
 
-    const firedRecently = a.lastFiredAt && (now - a.lastFiredAt) < 3000; // spam guard
+    const firedRecently = a.lastFiredAt && (now - a.lastFiredAt) < 3000;
     if (firedRecently) return;
 
     const hit =
@@ -788,13 +1460,7 @@ function checkAlertsOnce(forceLog = false) {
       a.lastFiredAt = now;
       const msg = `[TRIGGER] ${a.symbol} — ${formatCond(a)} (last ${p.toFixed(2)})`;
       pushLog(msg);
-
-      // simple popup effect
-      if (a.notify === "popup") {
-        console.log(msg);
-      }
-    } else if (forceLog) {
-      // optional debug if you want later
+      if (a.notify === "popup") console.log(msg);
     }
   });
 
@@ -805,15 +1471,14 @@ function checkAlertsOnce(forceLog = false) {
 setInterval(() => {
   checkAlertsOnce(false);
   // keep UI fresh if alerts panel is open
-  const pAlerts = document.getElementById("panel-alerts-zone1");
-  if (pAlerts && !pAlerts.classList.contains("panel-hidden")) {
-    renderAlerts("zone1");
-  }
+  const pA1 = document.getElementById("panel-alerts-zone1");
+  const pA2 = document.getElementById("panel-alerts-zone2");
+  if (pA1 && !pA1.classList.contains("panel-hidden")) renderAlerts("zone1");
+  if (pA2 && !pA2.classList.contains("panel-hidden")) renderAlerts("zone2");
 }, 1500);
 
 /* ================= RIGHT BAR: WATCHLIST + ALERTS placement ================= */
 const ALERTS_BTN_ID = "btn-alerts";
-let alertsPlacement = "zone1"; // default = Zone 1 (top)
 
 function createAlertsButton() {
   const btn = document.createElement("button");
@@ -841,19 +1506,38 @@ function mountAlertsButton() {
 function showAlertsPanel() {
   const pWatch = document.getElementById("panel-watchlist");
   const pA1 = document.getElementById("panel-alerts-zone1");
+  const pA2 = document.getElementById("panel-alerts-zone2");
+  const zone2Placeholder = document.getElementById("zone2-placeholder");
 
-  pWatch?.classList.add("panel-hidden");
-  pA1?.classList.remove("panel-hidden");
-
-  renderAlerts("zone1");
-  setAlertsTab("alerts");
+  // Hide watchlist (zone1) only if alerts should show in zone1
+  if (alertsPlacement === "zone1") {
+    pWatch?.classList.add("panel-hidden");
+    pA1?.classList.remove("panel-hidden");
+    pA2?.classList.add("panel-hidden");
+    if (zone2Placeholder) zone2Placeholder.classList.remove("panel-hidden");
+    renderAlerts("zone1");
+    setAlertsTab("zone1", "alerts");
+  } else {
+    // alerts in zone2
+    pWatch?.classList.remove("panel-hidden"); // keep watchlist visible
+    pA1?.classList.add("panel-hidden");
+    if (zone2Placeholder) zone2Placeholder.classList.add("panel-hidden");
+    pA2?.classList.remove("panel-hidden");
+    renderAlerts("zone2");
+    setAlertsTab("zone2", "alerts");
+  }
 }
 
 function showWatchlistPanel() {
   const pWatch = document.getElementById("panel-watchlist");
   const pA1 = document.getElementById("panel-alerts-zone1");
+  const pA2 = document.getElementById("panel-alerts-zone2");
+  const zone2Placeholder = document.getElementById("zone2-placeholder");
+
   pWatch?.classList.remove("panel-hidden");
   pA1?.classList.add("panel-hidden");
+  pA2?.classList.add("panel-hidden");
+  if (zone2Placeholder) zone2Placeholder.classList.remove("panel-hidden");
 }
 
 document.getElementById("btn-watchlist")?.addEventListener("click", () => showWatchlistPanel());
@@ -879,14 +1563,27 @@ panelSettingsOverlay?.addEventListener("click", (e) => { if (e.target === panelS
 panelSettingsSave?.addEventListener("click", () => {
   const selected = document.querySelector('input[name="alertsPlacement"]:checked');
   if (selected) alertsPlacement = selected.value;
+  saveWatchlists();
   mountAlertsButton();
+  // keep UI consistent
+  showWatchlistPanel();
   closePanelSettings();
 });
 
+/* ================= HELPERS ================= */
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 /* ================= INIT ================= */
-ensureListState();
+normalizeWatchlists();
 renderWatchlistHeader();
 renderWatchlistTable();
 
 mountAlertsButton();
-showWatchlistPanel(); // default: watchlist visible
+showWatchlistPanel();
