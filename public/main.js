@@ -3,7 +3,6 @@ console.log("MAIN.JS LOADED");
 /* ================= DROPDOWNS ================= */
 
 document.addEventListener("click", (e) => {
-  // Close dropdowns except keepopen clicks
   document.querySelectorAll(".dropdown-menu.open").forEach(menu => {
     const btn = document.querySelector(`.dropdown-btn[data-dropdown="${menu.id}"]`);
     const keepOpen = e.target.closest('[data-keepopen="true"]');
@@ -14,7 +13,6 @@ document.addEventListener("click", (e) => {
     }
   });
 
-  // close context menu when clicking outside
   const rowMenu = document.getElementById("row-menu");
   if (rowMenu && !rowMenu.contains(e.target)) closeRowMenu();
 });
@@ -75,7 +73,6 @@ const chartTypes = {
   "Heikin Ashi": "./icons/heikin.svg"
 };
 
-// Build chart menu (icon -> label)
 const chartMenu = document.getElementById("chart-menu");
 if (chartMenu) {
   chartMenu.innerHTML = "";
@@ -127,7 +124,7 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
             img.className = "icon";
             btn.appendChild(img);
           } else {
-            btn.textContent = label; // ✅ timeframe = only "5m" (no star)
+            btn.textContent = label; // timeframe shows only "5m"
           }
 
           favoritesBar.appendChild(btn);
@@ -142,8 +139,9 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites", false);
 
-/* ================= WATCHLISTS DATA MODEL ================= */
+/* ================= WATCHLISTS MODEL ================= */
 
+// 10 colors MAX
 const WATCHLIST_COLORS = [
   { key: "red", label: "Red", css: "red" },
   { key: "blue", label: "Blue", css: "blue" },
@@ -151,6 +149,10 @@ const WATCHLIST_COLORS = [
   { key: "orange", label: "Orange", css: "orange" },
   { key: "purple", label: "Purple", css: "purple" },
   { key: "yellow", label: "Yellow", css: "yellow" },
+  { key: "cyan", label: "Cyan", css: "cyan" },
+  { key: "pink", label: "Pink", css: "pink" },
+  { key: "lime", label: "Lime", css: "lime" },
+  { key: "indigo", label: "Indigo", css: "indigo" },
 ];
 
 function defaultListName(colorKey) {
@@ -158,7 +160,6 @@ function defaultListName(colorKey) {
   return `${c ? c.label : "New"} list`;
 }
 
-// Example "company info" (you can expand later)
 const COMPANY_INFO = {
   AAPL: { name: "Apple Inc.", exchange: "NASDAQ", sector: "Technology", status: "Market open" },
   TSLA: { name: "Tesla, Inc.", exchange: "NASDAQ", sector: "Automotive", status: "Market open" },
@@ -173,6 +174,7 @@ const watchlists = [
     color: "red",
     items: [
       { symbol: "BCAL", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
+      { symbol: "TSLA", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
       { symbol: "AAPL", last: "182.34", change: "+0.76", changePct: "+0.42%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
     ],
   },
@@ -180,20 +182,29 @@ const watchlists = [
 
 let activeWatchlistId = "wl_red";
 
+/* ================= WATCHLIST STATE (search + sort) ================= */
+
+let searchTerm = "";
+let sortKey = "symbol";     // default
+let sortDir = "asc";        // asc/desc
+
+const chartArea = document.getElementById("chart-area");
+
 /* ================= WATCHLIST TABLE RENDER ================= */
 
 const watchlistBody = document.getElementById("watchlist-body");
 const tableToggle = document.getElementById("table-toggle");
+const searchInput = document.getElementById("watchlist-search");
 
 const columnsOrder = [
-  { key: "symbol", label: "Symbol", always: true },
-  { key: "last", label: "Last" },
-  { key: "change", label: "Change" },
-  { key: "changePct", label: "Change %" },
-  { key: "volume", label: "Volume" },
-  { key: "extended", label: "Extended" },
-  { key: "aiCote", label: "Ai Cote" },
-  { key: "aiProb", label: "Ai Prob" },
+  { key: "symbol", label: "Symbol", always: true, sortable: true },
+  { key: "last", label: "Last", sortable: true },
+  { key: "change", label: "Change", sortable: true },
+  { key: "changePct", label: "Change %", sortable: true },
+  { key: "volume", label: "Volume", sortable: true },
+  { key: "extended", label: "Extended", sortable: true },
+  { key: "aiCote", label: "Ai Cote", sortable: true },
+  { key: "aiProb", label: "Ai Prob", sortable: true },
 ];
 
 const colVarMap = {
@@ -211,18 +222,58 @@ function getActiveWatchlist() {
   return watchlists.find(w => w.id === activeWatchlistId) || watchlists[0];
 }
 
+function getUsedColorsSet() {
+  return new Set(watchlists.map(w => w.color));
+}
+
 function getVisibleColumns() {
   const on = !!(tableToggle && tableToggle.checked);
   const visible = new Set(["symbol"]);
   if (!on) return visible;
 
-  // map from checkbox data-col to key
   const keys = ["last","change","changePct","volume","extended","aiCote","aiProb"];
   keys.forEach(k => {
     const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
     if (cb && cb.checked) visible.add(k);
   });
   return visible;
+}
+
+/* ===== helpers: sort parsing ===== */
+
+function parseNum(val) {
+  if (val == null) return Number.NEGATIVE_INFINITY;
+  const s = String(val).trim();
+
+  if (s === "—" || s === "") return Number.NEGATIVE_INFINITY;
+
+  // percent
+  if (s.endsWith("%")) {
+    const n = parseFloat(s.replace("%",""));
+    return isNaN(n) ? Number.NEGATIVE_INFINITY : n;
+  }
+
+  // remove + and commas
+  let t = s.replace(/,/g, "").replace("+", "");
+
+  // suffix multipliers (K/M/B)
+  const m = t.match(/^(-?\d+(\.\d+)?)([KMB])$/i);
+  if (m) {
+    const base = parseFloat(m[1]);
+    const suf = m[3].toUpperCase();
+    const mult = suf === "K" ? 1e3 : suf === "M" ? 1e6 : 1e9;
+    return base * mult;
+  }
+
+  const n = parseFloat(t);
+  return isNaN(n) ? Number.NEGATIVE_INFINITY : n;
+}
+
+function compareItems(a, b, key) {
+  if (key === "symbol") {
+    return String(a.symbol).localeCompare(String(b.symbol));
+  }
+  return parseNum(a[key]) - parseNum(b[key]);
 }
 
 /* ===== Column resizers ===== */
@@ -233,14 +284,14 @@ let startW = 0;
 
 function attachHeaderResizers(headerEl) {
   if (!headerEl || !watchlistBody) return;
-
   const cells = Array.from(headerEl.children);
+
   // last is actions (no handle)
   cells.forEach((cell, idx) => {
     if (idx === cells.length - 1) return;
     if (cell.querySelector(".col-resizer")) return;
 
-    const key = idx === 0 ? "symbol" : columnsOrder[idx].key;
+    const key = columnsOrder[idx]?.key;
     const cssVar = colVarMap[key];
     if (!cssVar) return;
 
@@ -275,7 +326,7 @@ document.addEventListener("mouseup", () => {
   document.body.style.userSelect = "";
 });
 
-/* ===== Tooltip (company info + note) ===== */
+/* ===== Tooltip ===== */
 
 const tooltip = document.getElementById("symbol-tooltip");
 
@@ -286,18 +337,19 @@ function showTooltip(x, y, html) {
   tooltip.style.top = `${y + 12}px`;
   tooltip.classList.add("open");
 }
+function hideTooltip() { tooltip?.classList.remove("open"); }
 
-function hideTooltip() {
-  tooltip?.classList.remove("open");
+function escapeHtml(str) {
+  return (str || "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[m]));
 }
 
 function tooltipHtmlFor(symbol, noteText) {
   const info = COMPANY_INFO[symbol];
   const title = info ? info.name : symbol;
 
-  const line1 = info ? `<div style="font-weight:700;margin-bottom:4px">${title}</div>` :
-                       `<div style="font-weight:700;margin-bottom:4px">${symbol}</div>`;
-
+  const line1 = `<div style="font-weight:700;margin-bottom:4px">${title}</div>`;
   const line2 = info
     ? `<div style="opacity:.85">${info.exchange} · ${info.sector} · <span style="color:#22c55e">${info.status}</span></div>`
     : `<div style="opacity:.85">Info not available (demo)</div>`;
@@ -312,13 +364,7 @@ function tooltipHtmlFor(symbol, noteText) {
   return `${line1}${line2}${note}`;
 }
 
-function escapeHtml(str) {
-  return (str || "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-  }[m]));
-}
-
-/* ===== Render quick dots ===== */
+/* ===== Quick switch dots ===== */
 
 function renderQuickSwitch() {
   const wrap = document.getElementById("wl-quick-switch");
@@ -348,7 +394,19 @@ function setActiveHeader() {
   }
 }
 
-/* ===== Render watchlist table ===== */
+/* ===== Sorting click ===== */
+
+function toggleSort(key) {
+  if (sortKey === key) {
+    sortDir = (sortDir === "asc") ? "desc" : "asc";
+  } else {
+    sortKey = key;
+    sortDir = "asc";
+  }
+  renderWatchlistTable();
+}
+
+/* ===== Render table ===== */
 
 function renderWatchlistTable() {
   if (!watchlistBody) return;
@@ -356,23 +414,54 @@ function renderWatchlistTable() {
   const wl = getActiveWatchlist();
   const visible = getVisibleColumns();
 
+  // filter
+  let items = [...wl.items];
+  if (searchTerm.trim()) {
+    const q = searchTerm.trim().toUpperCase();
+    items = items.filter(it => String(it.symbol).toUpperCase().includes(q));
+  }
+
+  // sort
+  items.sort((a, b) => {
+    const base = compareItems(a, b, sortKey);
+    return sortDir === "asc" ? base : -base;
+  });
+
   watchlistBody.innerHTML = "";
 
+  // header
   const header = document.createElement("div");
   header.className = "watchlist-table-header";
 
-  columnsOrder.forEach((col, i) => {
+  columnsOrder.forEach((col) => {
     const cell = document.createElement("span");
-    cell.textContent = col.label;
+    const isVisible = (col.key === "symbol") ? true : visible.has(col.key);
 
-    if (col.key === "symbol") cell.className = "col-symbol";
-    else {
-      cell.className = `col ${col.key}`;
-      if (!visible.has(col.key)) cell.classList.add("col-hidden");
+    if (!isVisible) {
+      cell.className = `col ${col.key} col-hidden`;
+      cell.textContent = col.label;
+      header.appendChild(cell);
+      return;
     }
+
+    if (col.sortable) cell.classList.add("th-sort");
+    cell.dataset.key = col.key;
+
+    const ind = (sortKey === col.key) ? (sortDir === "asc" ? "▲" : "▼") : "";
+    cell.innerHTML = `${col.label}${ind ? ` <span class="sort-ind">${ind}</span>` : ""}`;
+
+    if (col.key === "symbol") cell.classList.add("col-symbol");
+    else cell.classList.add("col", col.key);
+
+    cell.addEventListener("click", () => {
+      if (!col.sortable) return;
+      toggleSort(col.key);
+    });
+
     header.appendChild(cell);
   });
 
+  // actions header empty
   const actionsH = document.createElement("span");
   actionsH.className = "col actions";
   actionsH.textContent = "";
@@ -381,21 +470,24 @@ function renderWatchlistTable() {
   watchlistBody.appendChild(header);
   attachHeaderResizers(header);
 
-  wl.items.forEach(item => {
+  // rows
+  items.forEach(item => {
     const row = document.createElement("div");
     row.className = "watchlist-row";
     row.dataset.symbol = item.symbol;
 
-    const noteIcon = item.note ? `<span class="note-icon" title="Personal note">📝</span>` : "";
-
+    // symbol cell
     const sym = document.createElement("span");
     sym.className = "col-symbol";
+
+    const noteIcon = item.note ? `<span class="note-icon" title="Personal note">📝</span>` : "";
     sym.innerHTML = `
       <span class="dot ${wl.color}"></span>
       <span class="symbol js-symbol" data-symbol="${item.symbol}">${item.symbol}${noteIcon}</span>
     `;
     row.appendChild(sym);
 
+    // other cells (in order)
     columnsOrder.slice(1).forEach(col => {
       const cell = document.createElement("span");
       cell.className = `cell ${col.key}`;
@@ -404,6 +496,7 @@ function renderWatchlistTable() {
       row.appendChild(cell);
     });
 
+    // actions cell
     const actions = document.createElement("span");
     actions.className = "row-actions";
     actions.innerHTML = `
@@ -412,13 +505,19 @@ function renderWatchlistTable() {
     `;
     row.appendChild(actions);
 
-    // hover tooltip on symbol area (company info + note)
-    row.querySelectorAll(".js-symbol").forEach(el => {
-      el.addEventListener("mousemove", (e) => {
+    // hover tooltip on symbol
+    const symEl = row.querySelector(".js-symbol");
+    if (symEl) {
+      symEl.addEventListener("mousemove", (e) => {
         showTooltip(e.clientX, e.clientY, tooltipHtmlFor(item.symbol, item.note));
       });
-      el.addEventListener("mouseleave", hideTooltip);
-    });
+      symEl.addEventListener("mouseleave", hideTooltip);
+
+      // ✅ 1 click: load chart
+      symEl.addEventListener("click", () => {
+        if (chartArea) chartArea.textContent = `Chart Area — ${item.symbol}`;
+      });
+    }
 
     // right click menu on row
     row.addEventListener("contextmenu", (e) => {
@@ -450,6 +549,13 @@ function renderAllWatchlistUI() {
 
 tableToggle?.addEventListener("change", renderWatchlistTable);
 document.querySelectorAll("#columns-menu input[data-col]").forEach(cb => cb.addEventListener("change", renderWatchlistTable));
+
+/* ================= SEARCH / FILTER ================= */
+
+searchInput?.addEventListener("input", () => {
+  searchTerm = searchInput.value || "";
+  renderWatchlistTable();
+});
 
 /* ================= ADD SYMBOL MODAL ================= */
 
@@ -498,7 +604,7 @@ symbolInput?.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeAddModal();
 });
 
-/* ================= WATCHLIST MENU (RENAME / CREATE) ================= */
+/* ================= WATCHLIST MENU (RENAME / CREATE / DELETE) ================= */
 
 const renameOverlay = document.getElementById("rename-overlay");
 const renameInput = document.getElementById("rename-input");
@@ -541,23 +647,44 @@ let selectedCreateColor = "blue";
 function openCreateModal() {
   createOverlay?.classList.add("open");
   createNameInput.value = "";
-  selectedCreateColor = "blue";
+
+  // auto pick first available color
+  const used = getUsedColorsSet();
+  const firstFree = WATCHLIST_COLORS.find(c => !used.has(c.key));
+  selectedCreateColor = firstFree ? firstFree.key : WATCHLIST_COLORS[0].key;
+
   renderCreateColorPicker();
+  updateCreateButtonState();
 }
 function closeCreateModal() { createOverlay?.classList.remove("open"); }
+
+function updateCreateButtonState() {
+  const used = getUsedColorsSet();
+  const canCreate = watchlists.length < WATCHLIST_COLORS.length && !used.has(selectedCreateColor);
+  if (createConfirm) createConfirm.disabled = !canCreate;
+}
 
 function renderCreateColorPicker() {
   if (!createPicker) return;
   createPicker.innerHTML = "";
 
+  const used = getUsedColorsSet();
+
   WATCHLIST_COLORS.forEach(c => {
     const d = document.createElement("div");
-    d.className = `color-choice ${c.css} ${c.key === selectedCreateColor ? "selected" : ""}`;
-    d.title = c.label;
+    const isUsed = used.has(c.key);
+    const isSelected = c.key === selectedCreateColor;
+
+    d.className = `color-choice ${c.css} ${isSelected ? "selected" : ""} ${isUsed && !isSelected ? "disabled" : ""}`;
+    d.title = isUsed ? `${c.label} (already used)` : c.label;
+
     d.addEventListener("click", () => {
+      if (isUsed && !isSelected) return; // cannot choose used color
       selectedCreateColor = c.key;
       renderCreateColorPicker();
+      updateCreateButtonState();
     });
+
     createPicker.appendChild(d);
   });
 }
@@ -566,6 +693,18 @@ createCancel?.addEventListener("click", closeCreateModal);
 createOverlay?.addEventListener("click", (e) => { if (e.target === createOverlay) closeCreateModal(); });
 
 createConfirm?.addEventListener("click", () => {
+  // max 10 lists (colors)
+  if (watchlists.length >= WATCHLIST_COLORS.length) {
+    alert("You already reached the maximum number of watchlists (10).");
+    return;
+  }
+
+  const used = getUsedColorsSet();
+  if (used.has(selectedCreateColor)) {
+    alert("This color is already used. Please select another color.");
+    return;
+  }
+
   const customName = (createNameInput.value || "").trim();
   const name = customName || defaultListName(selectedCreateColor);
 
@@ -582,6 +721,23 @@ createConfirm?.addEventListener("click", () => {
   renderAllWatchlistUI();
 });
 
+function deleteActiveWatchlist() {
+  if (watchlists.length <= 1) {
+    alert("You cannot delete the last watchlist.");
+    return;
+  }
+
+  const wl = getActiveWatchlist();
+  const ok = window.confirm(`Are you sure you want to delete "${wl.name}"?`);
+  if (!ok) return;
+
+  const idx = watchlists.findIndex(w => w.id === wl.id);
+  if (idx >= 0) watchlists.splice(idx, 1);
+
+  activeWatchlistId = watchlists[0].id;
+  renderAllWatchlistUI();
+}
+
 /* Handle watchlist menu clicks */
 const watchlistMenu = document.getElementById("watchlist-menu");
 watchlistMenu?.addEventListener("click", (e) => {
@@ -591,6 +747,7 @@ watchlistMenu?.addEventListener("click", (e) => {
   const action = item.dataset.wlAction;
   if (action === "rename") openRenameModal();
   if (action === "create") openCreateModal();
+  if (action === "delete") deleteActiveWatchlist();
 });
 
 /* ================= RIGHT CLICK MENU ================= */
@@ -607,13 +764,11 @@ let menuSymbol = null;
 function openRowMenu(x, y, symbol) {
   menuSymbol = symbol;
 
-  // dynamic text
   noteBtn.textContent = `${symbol}  Add Note`;
   moveText.textContent = `${symbol}  Move to watchlist`;
   compareBtn.textContent = `${symbol}  Compare`;
   deleteBtn.textContent = `${symbol}  Delete`;
 
-  // submenu = other watchlists
   rowSubmenu.innerHTML = "";
   const current = getActiveWatchlist();
 
@@ -631,7 +786,6 @@ function openRowMenu(x, y, symbol) {
       rowSubmenu.appendChild(b);
     });
 
-  // place menu
   rowMenu.style.left = `${x}px`;
   rowMenu.style.top = `${y}px`;
   rowMenu.classList.add("open");
@@ -653,7 +807,6 @@ function moveSymbolToWatchlist(symbol, targetWlId) {
   const [moved] = from.items.splice(idx, 1);
   to.items.push(moved);
 
-  // Option: switch active list? (TradingView keeps same, so we keep same)
   renderWatchlistTable();
   renderQuickSwitch();
 }
@@ -689,8 +842,6 @@ rowMenu?.addEventListener("click", (e) => {
     closeRowMenu();
     openNoteModal(sym);
   }
-
-  // move handled by submenu buttons
 });
 
 /* ================= NOTES (ADD NOTE MODAL) ================= */
