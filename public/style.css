@@ -21,7 +21,6 @@ html, body {
   padding: 6px 8px;
   cursor: pointer;
 }
-
 .btn:hover { background: #1f2937; }
 
 .icon { width: 16px; height: 16px; }
@@ -79,6 +78,8 @@ html, body {
   align-items: center;
 }
 
+#bottom-bar { background: #0f1623; padding: 6px; }
+
 /* ===== Watchlist header ===== */
 
 .watchlist-header {
@@ -86,6 +87,7 @@ html, body {
   justify-content: space-between;
   padding: 6px;
   border-bottom: 1px solid #1f2937;
+  gap: 10px;
 }
 
 .watchlist-left {
@@ -116,7 +118,7 @@ html, body {
 }
 
 .wl-name {
-  max-width: 160px;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -136,11 +138,7 @@ html, body {
   cursor: pointer;
   border: 1px solid rgba(255,255,255,0.15);
 }
-
-.wl-quick-dot:hover {
-  transform: scale(1.08);
-}
-
+.wl-quick-dot:hover { transform: scale(1.08); }
 .wl-quick-dot.active {
   border: 2px solid rgba(255,255,255,0.65);
   opacity: 1;
@@ -148,9 +146,21 @@ html, body {
 
 .watchlist-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
+
+.watchlist-search {
+  width: 140px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+  padding: 6px 8px;
+  border-radius: 8px;
+  outline: none;
+}
+.watchlist-search::placeholder { color: rgba(255,255,255,0.45); }
 
 .icon-btn {
   background: none;
@@ -160,22 +170,6 @@ html, body {
   padding: 4px 6px;
 }
 .icon-btn:hover { color: white; }
-
-.wl-color, .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-/* Colors */
-.red { background: #ef4444; }
-.blue { background: #3b82f6; }
-.green { background: #22c55e; }
-.orange { background: #f97316; }
-.purple { background: #a855f7; }
-.yellow { background: #facc15; }
-
-#bottom-bar { background: #0f1623; padding: 6px; }
 
 /* ===== Dropdowns ===== */
 
@@ -191,7 +185,6 @@ html, body {
   display: none;
   z-index: 1000;
 }
-
 .dropdown-menu.open { display: block; }
 
 .menu-item {
@@ -201,7 +194,6 @@ html, body {
   align-items: center;
   gap: 8px;
 }
-
 .menu-item:hover { background: #1f2937; }
 .menu-item.danger { color: #fca5a5; }
 
@@ -235,6 +227,24 @@ html, body {
 .star { color: #6b7280; font-size: 14px; margin-left: 8px; }
 .star.active { color: #facc15; }
 
+/* ===== Colors (10 max) ===== */
+.red { background: #ef4444; }
+.blue { background: #3b82f6; }
+.green { background: #22c55e; }
+.orange { background: #f97316; }
+.purple { background: #a855f7; }
+.yellow { background: #facc15; }
+.cyan { background: #06b6d4; }
+.pink { background: #ec4899; }
+.lime { background: #84cc16; }
+.indigo { background: #6366f1; }
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
 /* ===== Watchlist Table ===== */
 
 .watchlist-body {
@@ -242,7 +252,7 @@ html, body {
   display: flex;
   flex-direction: column;
 
-  --c-symbol: 170px;
+  --c-symbol: 160px;
   --c-last: 74px;
   --c-change: 74px;
   --c-changePct: 86px;
@@ -277,6 +287,7 @@ html, body {
   color: rgba(255,255,255,0.55);
   border-bottom: 1px solid #1f2937;
   padding: 6px 8px;
+  user-select: none;
 }
 
 .watchlist-row {
@@ -285,7 +296,6 @@ html, body {
   height: 26px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-
 .watchlist-row:hover { background: rgba(255,255,255,0.03); }
 
 .watchlist-table-header > span:not(:last-child),
@@ -317,6 +327,19 @@ html, body {
 .watchlist-table-header > span:hover .col-resizer { opacity: 1; }
 .watchlist-table-header > span:hover .col-resizer::before { background: rgba(59,130,246,0.65); }
 
+/* sortable header */
+.th-sort {
+  cursor: pointer;
+}
+.th-sort:hover {
+  color: rgba(255,255,255,0.85);
+}
+.th-sort .sort-ind {
+  margin-left: 6px;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
 .col-symbol {
   display: flex;
   align-items: center;
@@ -329,12 +352,13 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
 }
 
 .note-icon {
   font-size: 12px;
-  opacity: 0.8;
-  margin-left: 4px;
+  opacity: 0.85;
+  margin-left: 6px;
 }
 
 .cell { text-align: right; white-space: nowrap; }
@@ -435,6 +459,10 @@ html, body {
 }
 .color-choice.selected {
   border: 2px solid rgba(255,255,255,0.75);
+}
+.color-choice.disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
 }
 
 /* ===== Tooltip ===== */
