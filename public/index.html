@@ -16,7 +16,7 @@
     <button class="btn" title="Search">
       <img src="./icons/search.svg" class="icon" />
     </button>
-    <input type="text" value="AAPL" />
+    <input type="text" value="AAPL" aria-label="Symbol" />
   </div>
 
   <button class="btn" title="Compare">
@@ -26,7 +26,7 @@
   <div id="chart-favorites"></div>
 
   <div class="dropdown">
-    <button class="btn dropdown-btn" data-dropdown="chart-menu">
+    <button class="btn dropdown-btn" data-dropdown="chart-menu" title="Chart type">
       Chart <span class="arrow">▾</span>
     </button>
     <div class="dropdown-menu" id="chart-menu"></div>
@@ -35,15 +35,18 @@
   <div id="timeframe-favorites"></div>
 
   <div class="dropdown">
-    <button class="btn dropdown-btn" data-dropdown="timeframe-menu">
+    <button class="btn dropdown-btn" data-dropdown="timeframe-menu" title="Timeframe">
       Timeframe <span class="arrow">▾</span>
     </button>
     <div class="dropdown-menu" id="timeframe-menu">
+      <div class="menu-item">1s</div>
       <div class="menu-item">1m</div>
       <div class="menu-item">5m</div>
       <div class="menu-item">15m</div>
       <div class="menu-item">1h</div>
       <div class="menu-item">1D</div>
+      <div class="menu-item">1W</div>
+      <div class="menu-item">1M</div>
     </div>
   </div>
 
@@ -65,9 +68,14 @@
 
   <aside id="left-bar">tools</aside>
 
-  <main id="chart-area">Chart Area</main>
+  <main id="chart-area">
+    <div class="chart-placeholder">
+      Chart Area
+      <div class="chart-sub" id="chart-sub">Click a symbol in the watchlist to load it here.</div>
+    </div>
+  </main>
 
-  <div id="resizer-vertical"></div>
+  <div id="resizer-vertical" title="Resize panels"></div>
 
   <aside id="right-bar">
 
@@ -80,7 +88,6 @@
         <div id="panel-watchlist">
 
           <div class="watchlist-header">
-
             <div class="watchlist-left">
               <div class="dropdown">
                 <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu" title="Watchlist menu">
@@ -91,17 +98,17 @@
 
                 <div class="dropdown-menu" id="watchlist-menu">
                   <div class="menu-item" data-wl-action="rename"><span class="menu-icon">✎</span><span>Rename</span></div>
-                  <div class="menu-item"><span class="menu-icon">⇪</span><span>Share list</span></div>
-                  <div class="menu-item"><span class="menu-icon">🔔</span><span>Add alert on list</span></div>
-                  <div class="menu-item"><span class="menu-icon">⧉</span><span>Make a copy</span></div>
+                  <div class="menu-item" data-wl-action="share"><span class="menu-icon">⇪</span><span>Share list</span></div>
+                  <div class="menu-item" data-wl-action="addAlert"><span class="menu-icon">🔔</span><span>Add alert on list</span></div>
+                  <div class="menu-item" data-wl-action="copy"><span class="menu-icon">⧉</span><span>Make a copy</span></div>
                   <div class="menu-item" data-wl-action="addSection"><span class="menu-icon">＋</span><span>Add section</span></div>
 
                   <div class="menu-separator"></div>
 
-                  <div class="menu-item danger"><span class="menu-icon">🗑</span><span>Clear list</span></div>
+                  <div class="menu-item danger" data-wl-action="clear"><span class="menu-icon">🗑</span><span>Clear list</span></div>
                   <div class="menu-item" data-wl-action="create"><span class="menu-icon">▦</span><span>Create new list</span></div>
                   <div class="menu-item danger" data-wl-action="delete"><span class="menu-icon">🗑</span><span>Delete list</span></div>
-                  <div class="menu-item"><span class="menu-icon">⬆</span><span>Upload list</span></div>
+                  <div class="menu-item" data-wl-action="upload"><span class="menu-icon">⬆</span><span>Upload list</span></div>
                 </div>
               </div>
 
@@ -112,7 +119,7 @@
               <input id="watchlist-search" class="watchlist-search" placeholder="Search..." autocomplete="off" />
 
               <button class="icon-btn" id="add-symbol-btn" title="Add symbol">+</button>
-              <button class="icon-btn" title="Advanced view">⛶</button>
+              <button class="icon-btn" id="advanced-view-btn" title="Advanced view">⛶</button>
 
               <div class="dropdown">
                 <button class="icon-btn dropdown-btn" data-dropdown="columns-menu" title="Customize columns">⋯</button>
@@ -137,15 +144,15 @@
             </div>
           </div>
 
-          <div class="watchlist-body" id="watchlist-body"></div>
+          <div class="watchlist-body" id="watchlist-body" aria-label="Watchlist table"></div>
         </div>
 
-        <!-- ALERTS PANEL (hidden by default) -->
+        <!-- ALERTS PANEL ZONE 1 (hidden by default) -->
         <div id="panel-alerts-zone1" class="panel-hidden">
           <div class="alerts-topbar">
             <div class="alerts-tabs">
-              <button class="alerts-tab active" data-alert-tab="alerts">Alerts</button>
-              <button class="alerts-tab" data-alert-tab="log">Log</button>
+              <button class="alerts-tab active" data-alert-zone="zone1" data-alert-tab="alerts">Alerts</button>
+              <button class="alerts-tab" data-alert-zone="zone1" data-alert-tab="log">Log</button>
             </div>
 
             <div class="alerts-actions">
@@ -174,11 +181,43 @@
 
       </div>
 
-      <div id="resizer-horizontal"></div>
+      <div id="resizer-horizontal" title="Resize Zone 1 / Zone 2"></div>
 
       <!-- ================= ZONE 2 ================= -->
       <div id="zone-2">
-        Zone 2
+        <!-- ALERTS PANEL ZONE 2 (hidden by default) -->
+        <div id="panel-alerts-zone2" class="panel-hidden">
+          <div class="alerts-topbar">
+            <div class="alerts-tabs">
+              <button class="alerts-tab active" data-alert-zone="zone2" data-alert-tab="alerts">Alerts</button>
+              <button class="alerts-tab" data-alert-zone="zone2" data-alert-tab="log">Log</button>
+            </div>
+
+            <div class="alerts-actions">
+              <button class="icon-btn" id="alerts-add-btn-zone2" title="Create alert">+</button>
+              <button class="icon-btn" id="alerts-check-btn-zone2" title="Check now">⟳</button>
+              <input class="alerts-search" id="alerts-search-zone2" placeholder="Search alerts..." />
+            </div>
+          </div>
+
+          <div class="alerts-content">
+            <div id="alerts-list-zone2" class="alerts-list"></div>
+            <div id="alerts-empty-zone2" class="alerts-empty">
+              <div class="alerts-big">⏰</div>
+              <div class="alerts-title">Alerts</div>
+              <div class="alerts-sub">Create alerts to be notified when your conditions are met.</div>
+              <button class="btn" id="create-alert-btn-zone2">Create alert</button>
+            </div>
+
+            <div id="alerts-log-zone2" class="alerts-log panel-hidden"></div>
+            <div id="alerts-log-empty-zone2" class="alerts-empty panel-hidden">
+              <div class="alerts-title">Log</div>
+              <div class="alerts-sub">No triggered alerts yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone2-placeholder" id="zone2-placeholder">Zone 2</div>
       </div>
 
     </div>
@@ -220,12 +259,71 @@
 <div id="modal-overlay" class="modal-overlay" aria-hidden="true">
   <div class="modal">
     <div class="modal-title">Add symbol</div>
+    <input id="symbol-input" class="modal-input" placeholder="Ex: AMZN" autocomplete="off" />
     <div class="modal-row">
-      <input id="symbol-input" class="modal-input" placeholder="Ex: AMZN" autocomplete="off" />
       <button id="symbol-add-confirm" class="btn">Add</button>
       <button id="symbol-add-cancel" class="btn">Cancel</button>
     </div>
     <div class="modal-hint">Tip: use tickers like AAPL, AMZN, TSLA.</div>
+  </div>
+</div>
+
+<!-- ADD / EDIT NOTE MODAL -->
+<div id="note-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-title" id="note-title">Add note</div>
+    <textarea id="note-text" class="modal-textarea" placeholder="Write a personal note..."></textarea>
+    <div class="modal-row">
+      <button id="note-save" class="btn">Save</button>
+      <button id="note-cancel" class="btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- RENAME WATCHLIST MODAL -->
+<div id="rename-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-title">Rename watchlist</div>
+    <input id="rename-input" class="modal-input" placeholder="New name" autocomplete="off" />
+    <div class="modal-row">
+      <button id="rename-save" class="btn">Save</button>
+      <button id="rename-cancel" class="btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE WATCHLIST MODAL -->
+<div id="create-wl-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-title">Create new watchlist</div>
+
+    <div class="form-field">
+      <div class="form-label">Name (optional)</div>
+      <input id="create-wl-name" class="modal-input" placeholder="Ex: Tech" autocomplete="off" />
+    </div>
+
+    <div class="form-field" style="margin-top:10px;">
+      <div class="form-label">Color</div>
+      <div id="create-wl-colors" class="color-picker" aria-label="Color picker"></div>
+      <div class="modal-hint" id="create-wl-color-hint">Pick a color (max 10, no duplicates).</div>
+    </div>
+
+    <div class="modal-row">
+      <button id="create-wl-save" class="btn">Create</button>
+      <button id="create-wl-cancel" class="btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SECTION MODAL -->
+<div id="section-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-title">Add section</div>
+    <input id="section-input" class="modal-input" placeholder="Section name" autocomplete="off" />
+    <div class="modal-row">
+      <button id="section-save" class="btn">Add</button>
+      <button id="section-cancel" class="btn">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -292,7 +390,7 @@
 
     <div class="modal-block">
       <div class="modal-hint">Watchlist is always in Zone 1 (top).</div>
-      <div class="modal-label">Alerts button location</div>
+      <div class="form-label">Alerts button location</div>
 
       <label class="menu-row" style="cursor:default">
         <span>Top (Zone 1)</span>
