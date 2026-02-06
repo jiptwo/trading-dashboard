@@ -570,3 +570,95 @@ html, body {
   gap: 10px;
 }
 .submenu-item:hover { background: #1f2937; }
+
+/* ================= RIGHT ICONS SPLIT + ALERTS + SETTINGS + MENU FIX ================= */
+
+.right-icons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.right-icons-top,
+.right-icons-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.right-icons-bottom {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 10px;
+}
+
+/* Small helpers */
+.panel-hidden { display: none !important; }
+
+/* Alerts panel */
+.alerts-header {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.alerts-tab {
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: rgba(255,255,255,0.85);
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.alerts-tab.active {
+  border-color: rgba(255,255,255,0.25);
+  color: #fff;
+}
+
+.alerts-empty {
+  display: grid;
+  place-items: center;
+  padding: 28px 10px;
+  text-align: center;
+}
+
+.alerts-big {
+  font-size: 54px;
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+
+.alerts-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.alerts-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  max-width: 280px;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+/* ✅ FIX submenu stability: JS will add .submenu-open */
+.row-menu-item.has-submenu .row-submenu {
+  display: none;
+}
+
+.row-menu-item.has-submenu.submenu-open .row-submenu {
+  display: block;
+}
+
+/* Make submenu easier to hit */
+.row-submenu {
+  margin-left: 2px !important;
+  padding: 8px !important;
+}
+.submenu-item {
+  width: 100%;
+}
+
