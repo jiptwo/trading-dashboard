@@ -25,21 +25,15 @@
 
   <div id="chart-favorites"></div>
 
-  <!-- CHART DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="chart-menu">
       Chart <span class="arrow">▾</span>
     </button>
-    <div class="dropdown-menu" id="chart-menu">
-      <div class="menu-item">Candlestick</div>
-      <div class="menu-item">Bar</div>
-      <div class="menu-item">Line</div>
-    </div>
+    <div class="dropdown-menu" id="chart-menu"></div>
   </div>
 
   <div id="timeframe-favorites"></div>
 
-  <!-- TIMEFRAME DROPDOWN -->
   <div class="dropdown">
     <button class="btn dropdown-btn" data-dropdown="timeframe-menu">
       Timeframe <span class="arrow">▾</span>
@@ -73,147 +67,153 @@
 
   <main id="chart-area">Chart Area</main>
 
-  <!-- RESIZER CHART / RIGHT -->
   <div id="resizer-vertical"></div>
 
   <aside id="right-bar">
+
     <div class="right-panels">
 
-      <!-- ================= ZONE 1 : WATCHLIST ================= -->
+      <!-- ================= ZONE 1 ================= -->
       <div id="zone-1">
+        <!-- WATCHLIST (zone 1 panel) -->
+        <div id="panel-watchlist">
 
-        <div class="watchlist-header">
+          <div class="watchlist-header">
 
-          <!-- LEFT: name + dropdown + quick list dots -->
-          <div class="watchlist-left">
-            <div class="dropdown">
-              <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu" title="Watchlist menu">
-                <span class="wl-color-dot" id="active-watchlist-dot"></span>
-                <span class="wl-name" id="active-watchlist-name">Red list</span>
-                <span class="arrow">▾</span>
-              </button>
+            <div class="watchlist-left">
+              <div class="dropdown">
+                <button class="watchlist-title dropdown-btn" data-dropdown="watchlist-menu" title="Watchlist menu">
+                  <span class="wl-color-dot" id="active-watchlist-dot"></span>
+                  <span class="wl-name" id="active-watchlist-name">Red list</span>
+                  <span class="arrow">▾</span>
+                </button>
 
-              <div class="dropdown-menu" id="watchlist-menu">
-                <div class="menu-item" data-wl-action="rename">
-                  <span class="menu-icon">✎</span><span>Rename</span>
-                </div>
-                <div class="menu-item">
-                  <span class="menu-icon">⇪</span><span>Share list</span>
-                </div>
-                <div class="menu-item">
-                  <span class="menu-icon">🔔</span><span>Add alert on list</span>
-                </div>
-                <div class="menu-item">
-                  <span class="menu-icon">⧉</span><span>Make a copy</span>
-                </div>
+                <div class="dropdown-menu" id="watchlist-menu">
+                  <div class="menu-item" data-wl-action="rename"><span class="menu-icon">✎</span><span>Rename</span></div>
+                  <div class="menu-item"><span class="menu-icon">⇪</span><span>Share list</span></div>
+                  <div class="menu-item"><span class="menu-icon">🔔</span><span>Add alert on list</span></div>
+                  <div class="menu-item"><span class="menu-icon">⧉</span><span>Make a copy</span></div>
+                  <div class="menu-item" data-wl-action="addSection"><span class="menu-icon">＋</span><span>Add section</span></div>
 
-                <!-- ✅ IMPORTANT: Add section action -->
-                <div class="menu-item" data-wl-action="addSection">
-                  <span class="menu-icon">＋</span><span>Add section</span>
-                </div>
+                  <div class="menu-separator"></div>
 
-                <div class="menu-separator"></div>
-
-                <div class="menu-item danger">
-                  <span class="menu-icon">🗑</span><span>Clear list</span>
-                </div>
-
-                <div class="menu-item" data-wl-action="create">
-                  <span class="menu-icon">▦</span><span>Create new list</span>
-                </div>
-
-                <div class="menu-item danger" data-wl-action="delete">
-                  <span class="menu-icon">🗑</span><span>Delete list</span>
-                </div>
-
-                <div class="menu-item">
-                  <span class="menu-icon">⬆</span><span>Upload list</span>
+                  <div class="menu-item danger"><span class="menu-icon">🗑</span><span>Clear list</span></div>
+                  <div class="menu-item" data-wl-action="create"><span class="menu-icon">▦</span><span>Create new list</span></div>
+                  <div class="menu-item danger" data-wl-action="delete"><span class="menu-icon">🗑</span><span>Delete list</span></div>
+                  <div class="menu-item"><span class="menu-icon">⬆</span><span>Upload list</span></div>
                 </div>
               </div>
+
+              <div class="wl-quick-switch" id="wl-quick-switch" aria-label="Quick watchlist switch"></div>
             </div>
 
-            <!-- Quick switch dots (generated by JS) -->
-            <div class="wl-quick-switch" id="wl-quick-switch" aria-label="Quick watchlist switch"></div>
-          </div>
+            <div class="watchlist-actions">
+              <input id="watchlist-search" class="watchlist-search" placeholder="Search..." autocomplete="off" />
 
-          <!-- RIGHT: Search + actions -->
-          <div class="watchlist-actions">
-            <input id="watchlist-search" class="watchlist-search" placeholder="Search..." autocomplete="off" />
+              <button class="icon-btn" id="add-symbol-btn" title="Add symbol">+</button>
+              <button class="icon-btn" title="Advanced view">⛶</button>
 
-            <button class="icon-btn" id="add-symbol-btn" title="Add symbol">+</button>
-            <button class="icon-btn" title="Advanced view">⛶</button>
+              <div class="dropdown">
+                <button class="icon-btn dropdown-btn" data-dropdown="columns-menu" title="Customize columns">⋯</button>
+                <div class="dropdown-menu" id="columns-menu">
+                  <div class="menu-row" data-keepopen="true">
+                    <span>Table view</span>
+                    <input type="checkbox" id="table-toggle" checked />
+                  </div>
 
-            <!-- CUSTOMIZE COLUMNS -->
-            <div class="dropdown">
-              <button class="icon-btn dropdown-btn" data-dropdown="columns-menu" title="Customize columns">⋯</button>
+                  <div class="menu-separator"></div>
+                  <div class="menu-title">Customize columns</div>
 
-              <div class="dropdown-menu" id="columns-menu">
-                <div class="menu-row" data-keepopen="true">
-                  <span>Table view</span>
-                  <input type="checkbox" id="table-toggle" checked />
+                  <label class="menu-row" data-keepopen="true"><input type="checkbox" data-col="last" checked /> Last</label>
+                  <label class="menu-row" data-keepopen="true"><input type="checkbox" data-col="change" checked /> Change</label>
+                  <label class="menu-row" data-keepopen="true"><input type="checkbox" data-col="changePct" checked /> Change %</label>
+                  <label class="menu-row" data-keepopen="true"><input type="checkbox" data-col="volume" checked /> Volume</label>
+                  <label class="menu-row" data-keepopen="true"><input type="checkbox" data-col="extended" /> Extended Hours</label>
+                  <label class="menu-row" data-keepopen="true"><input type="checkbox" data-col="aiCote" /> Ai Cote</label>
+                  <label class="menu-row" data-keepopen="true"><input type="checkbox" data-col="aiProb" /> Ai Prob</label>
                 </div>
-
-                <div class="menu-separator"></div>
-                <div class="menu-title">Customize columns</div>
-
-                <label class="menu-row" data-keepopen="true">
-                  <input type="checkbox" data-col="last" checked /> Last
-                </label>
-                <label class="menu-row" data-keepopen="true">
-                  <input type="checkbox" data-col="change" checked /> Change
-                </label>
-                <label class="menu-row" data-keepopen="true">
-                  <input type="checkbox" data-col="changePct" checked /> Change %
-                </label>
-                <label class="menu-row" data-keepopen="true">
-                  <input type="checkbox" data-col="volume" checked /> Volume
-                </label>
-                <label class="menu-row" data-keepopen="true">
-                  <input type="checkbox" data-col="extended" /> Extended Hours
-                </label>
-                <label class="menu-row" data-keepopen="true">
-                  <input type="checkbox" data-col="aiCote" /> Ai Cote
-                </label>
-                <label class="menu-row" data-keepopen="true">
-                  <input type="checkbox" data-col="aiProb" /> Ai Prob
-                </label>
               </div>
             </div>
           </div>
 
+          <div class="watchlist-body" id="watchlist-body"></div>
         </div>
 
-        <!-- Watchlist table rendered by JS -->
-        <div class="watchlist-body" id="watchlist-body"></div>
-
+        <!-- ALERTS PANEL (zone 1) -->
+        <div id="panel-alerts-zone1" class="panel-hidden">
+          <div class="alerts-header">
+            <button class="alerts-tab active" data-alert-tab="alerts">Alerts</button>
+            <button class="alerts-tab" data-alert-tab="log">Log</button>
+          </div>
+          <div class="alerts-empty">
+            <div class="alerts-big">⏰</div>
+            <div class="alerts-title">Alerts</div>
+            <div class="alerts-sub">Alerts notify you instantly when your conditions are met.</div>
+            <button class="btn" id="create-alert-btn-zone1">Create alert</button>
+          </div>
+        </div>
       </div>
 
-      <!-- RESIZER ZONE 1 / ZONE 2 -->
       <div id="resizer-horizontal"></div>
 
       <!-- ================= ZONE 2 ================= -->
-      <div id="zone-2">Zone 2</div>
+      <div id="zone-2">
+        <div id="panel-alerts-zone2" class="panel-hidden">
+          <div class="alerts-header">
+            <button class="alerts-tab active" data-alert-tab="alerts">Alerts</button>
+            <button class="alerts-tab" data-alert-tab="log">Log</button>
+          </div>
+          <div class="alerts-empty">
+            <div class="alerts-big">⏰</div>
+            <div class="alerts-title">Alerts</div>
+            <div class="alerts-sub">Alerts notify you instantly when your conditions are met.</div>
+            <button class="btn" id="create-alert-btn-zone2">Create alert</button>
+          </div>
+        </div>
+
+        <div id="panel-zone2-default">
+          Zone 2
+        </div>
+      </div>
 
     </div>
 
     <!-- RIGHT ICON BAR -->
     <div class="right-icons">
-      <button class="btn active" title="Watchlist">
-        <img src="./icons/watchlist.svg" class="icon" />
-      </button>
-      <button class="btn" title="Calendar">
-        <img src="./icons/calendar.svg" class="icon" />
-      </button>
-      <button class="btn" title="Chat">
-        <img src="./icons/chat.svg" class="icon" />
-      </button>
+
+      <div class="right-icons-top" id="right-icons-top">
+        <!-- Watchlist is ALWAYS here -->
+        <button class="btn active" id="btn-watchlist" title="Watchlist">
+          <img src="./icons/watchlist.svg" class="icon" />
+        </button>
+
+        <!-- Alerts will be inserted here (if set to Zone 1) -->
+        <div id="slot-alert-top"></div>
+
+        <button class="btn" title="Calendar">
+          <img src="./icons/calendar.svg" class="icon" />
+        </button>
+        <button class="btn" title="Chat">
+          <img src="./icons/chat.svg" class="icon" />
+        </button>
+      </div>
+
+      <div class="right-icons-bottom" id="right-icons-bottom">
+        <!-- Alerts will be inserted here (if set to Zone 2) -->
+        <div id="slot-alert-bottom"></div>
+
+        <!-- Settings placement button -->
+        <button class="btn" id="btn-rightbar-settings" title="Panel settings">
+          <img src="./icons/settings.svg" class="icon" />
+        </button>
+      </div>
+
     </div>
+
   </aside>
 </div>
 
 <footer id="bottom-bar">Bottom tools</footer>
-
-<!-- ========= MODALS ========= -->
 
 <!-- ADD SYMBOL MODAL -->
 <div id="modal-overlay" class="modal-overlay" aria-hidden="true">
@@ -275,6 +275,34 @@
     <div class="modal-row">
       <button id="note-confirm" class="btn">Save</button>
       <button id="note-cancel" class="btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT BAR SETTINGS MODAL (Alerts placement) -->
+<div id="panel-settings-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-title">Panel placement</div>
+
+    <div class="modal-block">
+      <div class="modal-label">Alerts button location</div>
+
+      <label class="menu-row" style="cursor:default">
+        <span>Top (Zone 1)</span>
+        <input type="radio" name="alertsPlacement" value="zone1" />
+      </label>
+
+      <label class="menu-row" style="cursor:default">
+        <span>Bottom (Zone 2)</span>
+        <input type="radio" name="alertsPlacement" value="zone2" checked />
+      </label>
+
+      <div class="modal-hint">Watchlist is always in Zone 1 (top).</div>
+    </div>
+
+    <div class="modal-row">
+      <button id="panel-settings-save" class="btn">Save</button>
+      <button id="panel-settings-cancel" class="btn">Cancel</button>
     </div>
   </div>
 </div>
