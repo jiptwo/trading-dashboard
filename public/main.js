@@ -168,6 +168,72 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
 
+/* ================= USER MENU (TradingView-like) ================= */
+const THEME_KEY = "tp_theme_v1";
+const DRAWINGS_KEY = "tp_drawings_panel_v1";
+const LANG_KEY = "tp_language_v1";
+
+function applyTheme(mode) {
+  const isLight = mode === "light";
+  document.documentElement.classList.toggle("theme-light", isLight);
+}
+
+function initUserMenu() {
+  const themeToggle = document.getElementById("user-theme-toggle");
+  const drawingsToggle = document.getElementById("user-drawings-toggle");
+  const languageLabel = document.getElementById("user-language-label");
+  const langEn = document.getElementById("lang-en");
+  const langFr = document.getElementById("lang-fr");
+
+  const theme = LS.get(THEME_KEY, "dark");
+  applyTheme(theme);
+  if (themeToggle) themeToggle.checked = (theme === "dark");
+
+  const drawingsOn = LS.get(DRAWINGS_KEY, false);
+  if (drawingsToggle) drawingsToggle.checked = !!drawingsOn;
+
+  const lang = LS.get(LANG_KEY, "English");
+  if (languageLabel) languageLabel.textContent = lang;
+
+  themeToggle?.addEventListener("change", () => {
+    const mode = themeToggle.checked ? "dark" : "light";
+    LS.set(THEME_KEY, mode);
+    applyTheme(mode);
+  });
+
+  drawingsToggle?.addEventListener("change", () => {
+    LS.set(DRAWINGS_KEY, drawingsToggle.checked);
+    // Hook later: show/hide drawings panel.
+  });
+
+  function setLang(v) {
+    LS.set(LANG_KEY, v);
+    if (languageLabel) languageLabel.textContent = v;
+  }
+  langEn?.addEventListener("click", (e) => { e.stopPropagation(); setLang("English"); });
+  langFr?.addEventListener("click", (e) => { e.stopPropagation(); setLang("Français"); });
+
+  // Simple placeholders (no navigation yet)
+  document.querySelectorAll("[data-user-action]").forEach(el => {
+    el.addEventListener("click", (e) => {
+      const action = el.getAttribute("data-user-action");
+      if (action === "signout") {
+        openConfirm("Sign out", "Are you sure you want to sign out?", () => {
+          console.log("SIGN OUT");
+        });
+        return;
+      }
+      if (action === "shortcuts") {
+        openConfirm("Keyboard shortcuts", "Coming soon.", () => {});
+        return;
+      }
+      if (action === "billing" || action === "profile" || action === "refer" || action === "plans") {
+        openConfirm("Info", "Coming soon.", () => {});
+      }
+    });
+  });
+}
+
 /* ================= WATCHLIST DATA MODEL ================= */
 const watchlistBody = document.getElementById("watchlist-body");
 const tableToggle = document.getElementById("table-toggle");
@@ -1567,8 +1633,14 @@ function showWatchlistPanel() {
 
   pWatch?.classList.remove("panel-hidden");
   pA1?.classList.add("panel-hidden");
-  pA2?.classList.add("panel-hidden");
-  if (zone2Placeholder) zone2Placeholder.classList.remove("panel-hidden");
+
+  // IMPORTANT:
+  // Watchlist lives in Zone 1 only.
+  // If Alerts are placed in Zone 2, clicking Watchlist must NOT close Zone 2.
+  if (alertsPlacement !== "zone2") {
+    pA2?.classList.add("panel-hidden");
+    if (zone2Placeholder) zone2Placeholder.classList.remove("panel-hidden");
+  }
 }
 
 document.getElementById("btn-watchlist")?.addEventListener("click", () => showWatchlistPanel());
