@@ -229,12 +229,13 @@ function initUserMenu(){
   }
 
   // Profile modal
+  /* ---------- CHANGE USERNAME (used from Settings) ---------- */
   const profileOverlay = document.getElementById("profile-overlay");
   const profileCancel = document.getElementById("profile-cancel");
   const profileSave = document.getElementById("profile-save");
   const profileUsername = document.getElementById("profile-username");
 
-  function openProfile(){
+  function openChangeUsername(){
     if (!profileOverlay) return;
     if (profileUsername) profileUsername.value = state.username || "";
     openOverlay("profile-overlay");
@@ -245,20 +246,48 @@ function initUserMenu(){
   profileSave?.addEventListener("click", ()=>{
     const v=(profileUsername?.value||"").trim();
     if (v) state.username=v;
-    save(); applyUser(); closeOverlay("profile-overlay");
+    save(); applyUser();
+    // Keep Settings screen in sync
+    const settingsUsername = document.getElementById("settings-username");
+    if (settingsUsername) settingsUsername.textContent = state.username;
+    closeOverlay("profile-overlay");
   });
+
+  /* ---------- PUBLIC PROFILE (community) ---------- */
+  function openPublicProfile(){
+    const overlay = document.getElementById("public-profile-overlay");
+    if (!overlay) return;
+    // sync fields
+    const initials = (state.username || "JP").slice(0,2).toUpperCase();
+    const ppAvatar = document.getElementById("pp-avatar");
+    const ppUser = document.getElementById("pp-username");
+    if (ppAvatar) ppAvatar.textContent = initials;
+    if (ppUser) ppUser.textContent = state.username || "jpbeaudoin";
+    openOverlay("public-profile-overlay");
+  }
+  document.getElementById("public-profile-close")?.addEventListener("click", ()=>closeOverlay("public-profile-overlay"));
 
   // Settings modal
   const settingsOverlay = document.getElementById("settings-overlay");
   const settingsClose = document.getElementById("settings-close");
   const settingsUsername = document.getElementById("settings-username");
   const settingsAvatar = document.getElementById("settings-avatar");
-  const settingsSaveProfile = document.getElementById("settings-save-profile");
+  const settingsChangeUsername = document.getElementById("settings-change-username");
+  const settingsSavePublicProfile = document.getElementById("settings-save-public-profile");
+
+  const settingsX = document.getElementById("settings-x");
+  const settingsYouTube = document.getElementById("settings-youtube");
+  const settingsWebsite = document.getElementById("settings-website");
 
   function openSettings(){
     if (!settingsOverlay) return;
-    if (settingsUsername) settingsUsername.value = state.username || "";
+    if (settingsUsername) settingsUsername.textContent = state.username || "";
     if (settingsAvatar) settingsAvatar.textContent = initialsFrom(state.username);
+
+    // fill links
+    if (settingsX) settingsX.value = (state.socials?.x || "");
+    if (settingsYouTube) settingsYouTube.value = (state.socials?.youtube || "");
+    if (settingsWebsite) settingsWebsite.value = (state.socials?.website || "");
 
     settingsOverlay.querySelectorAll(".settings-nav-item").forEach(b=>b.classList.remove("active"));
     const first=settingsOverlay.querySelector('.settings-nav-item[data-settings-tab="publicProfile"]');
@@ -281,11 +310,16 @@ function initUserMenu(){
     });
   });
 
-  settingsSaveProfile?.addEventListener("click", ()=>{
-    const v=(settingsUsername?.value||"").trim();
-    if (v) state.username=v;
-    save(); applyUser();
-    if (settingsAvatar) settingsAvatar.textContent = initialsFrom(state.username);
+  settingsChangeUsername?.addEventListener("click", ()=>openUsernameModal());
+
+  settingsSavePublicProfile?.addEventListener("click", ()=>{
+    state.socials = state.socials || {x:"", youtube:"", website:""};
+    state.socials.x = (settingsX?.value || "").trim();
+    state.socials.youtube = (settingsYouTube?.value || "").trim();
+    state.socials.website = (settingsWebsite?.value || "").trim();
+    save();
+    // very light feedback
+    toast("Saved.");
   });
 
   // Language modal
