@@ -178,115 +178,173 @@ function applyTheme(mode) {
   document.documentElement.classList.toggle("theme-light", isLight);
 }
 
-function initUserMenu() {
-  const themeToggle = document.getElementById("user-theme-toggle");
-  const drawingsToggle = document.getElementById("user-drawings-toggle");
-  const languageLabel = document.getElementById("user-language-label");
+function initUserMenu(){
+  const userMenu = document.getElementById("user-menu");
+  const userBtn = document.querySelector('.dropdown-btn[data-dropdown="user-menu"]'); // uses global dropdown behavior
+  if (!userMenu || !userBtn) return;
 
-  // Modals
-  const langOverlay = document.getElementById("language-overlay");
-  const langClose = document.getElementById("language-close");
-  const langEn = document.getElementById("lang-en");
-  const langFr = document.getElementById("lang-fr");
-  const langEs = document.getElementById("lang-es");
+  const usernameEl = document.getElementById("user-username");
+  const initialsEl = document.getElementById("user-initials");
 
+  const LS_USER = "tp_user_v1";
+  const state = LS.get(LS_USER, { username: "jpbeaudoin", darkTheme: true, drawingsPanel: false, language: "en" });
+
+  function save(){ LS.set(LS_USER, state); }
+
+  function initialsFrom(name){
+    const s=(name||"").trim();
+    if(!s) return "JP";
+    const parts=s.split(/\s+/).slice(0,2);
+    return parts.map(p=>p[0].toUpperCase()).join("");
+  }
+
+  function applyUser(){
+    if (usernameEl) usernameEl.textContent = state.username || "jpbeaudoin";
+    if (initialsEl) initialsEl.textContent = initialsFrom(state.username);
+
+    document.body.classList.toggle("light", !state.darkTheme);
+    document.body.classList.toggle("dark", !!state.darkTheme);
+
+    const darkToggle = document.getElementById("user-dark-theme");
+    if (darkToggle) darkToggle.checked = !!state.darkTheme;
+
+    const drawToggle = document.getElementById("user-drawings-panel");
+    if (drawToggle) drawToggle.checked = !!state.drawingsPanel;
+
+    const langLabel = document.getElementById("user-language-label");
+    if (langLabel){
+      langLabel.textContent = state.language === "fr" ? "Français" : (state.language === "es" ? "Español" : "English");
+    }
+  }
+
+  function openOverlay(id){
+    const ov=document.getElementById(id);
+    if(!ov) return;
+    ov.classList.add("open");
+  }
+  function closeOverlay(id){
+    const ov=document.getElementById(id);
+    if(!ov) return;
+    ov.classList.remove("open");
+  }
+
+  // Profile modal
   const profileOverlay = document.getElementById("profile-overlay");
-  const profileClose = document.getElementById("profile-close");
-  const profileNav = document.getElementById("profile-nav");
-  const profileContent = document.getElementById("profile-content");
+  const profileCancel = document.getElementById("profile-cancel");
+  const profileSave = document.getElementById("profile-save");
+  const profileUsername = document.getElementById("profile-username");
 
-  const theme = LS.get(THEME_KEY, "dark");
-  applyTheme(theme);
-  if (themeToggle) themeToggle.checked = (theme === "dark");
-
-  const drawingsOn = LS.get(DRAWINGS_KEY, false);
-  if (drawingsToggle) drawingsToggle.checked = !!drawingsOn;
-
-  const lang = LS.get(LANG_KEY, "English");
-  if (languageLabel) languageLabel.textContent = lang;
-
-  themeToggle?.addEventListener("change", () => {
-    const mode = themeToggle.checked ? "dark" : "light";
-    LS.set(THEME_KEY, mode);
-    applyTheme(mode);
+  function openProfile(){
+    if (!profileOverlay) return;
+    if (profileUsername) profileUsername.value = state.username || "";
+    openOverlay("profile-overlay");
+    setTimeout(()=>profileUsername?.focus(),0);
+  }
+  profileCancel?.addEventListener("click", ()=>closeOverlay("profile-overlay"));
+  profileOverlay?.addEventListener("click", (e)=>{ if(e.target===profileOverlay) closeOverlay("profile-overlay"); });
+  profileSave?.addEventListener("click", ()=>{
+    const v=(profileUsername?.value||"").trim();
+    if (v) state.username=v;
+    save(); applyUser(); closeOverlay("profile-overlay");
   });
 
-  drawingsToggle?.addEventListener("change", () => {
-    LS.set(DRAWINGS_KEY, drawingsToggle.checked);
-    // Hook later: show/hide drawings panel.
-  });
+  // Settings modal
+  const settingsOverlay = document.getElementById("settings-overlay");
+  const settingsClose = document.getElementById("settings-close");
+  const settingsUsername = document.getElementById("settings-username");
+  const settingsAvatar = document.getElementById("settings-avatar");
+  const settingsSaveProfile = document.getElementById("settings-save-profile");
 
-  function setLang(v) {
-    LS.set(LANG_KEY, v);
-    if (languageLabel) languageLabel.textContent = v;
+  function openSettings(){
+    if (!settingsOverlay) return;
+    if (settingsUsername) settingsUsername.value = state.username || "";
+    if (settingsAvatar) settingsAvatar.textContent = initialsFrom(state.username);
+
+    settingsOverlay.querySelectorAll(".settings-nav-item").forEach(b=>b.classList.remove("active"));
+    const first=settingsOverlay.querySelector('.settings-nav-item[data-settings-tab="publicProfile"]');
+    first?.classList.add("active");
+    settingsOverlay.querySelectorAll(".settings-panel").forEach(p=>p.classList.add("panel-hidden"));
+    settingsOverlay.querySelector('.settings-panel[data-settings-panel="publicProfile"]')?.classList.remove("panel-hidden");
+
+    openOverlay("settings-overlay");
   }
 
-  function openLangModal() {
-    if (!langOverlay) return;
-    langOverlay.classList.add("open");
-  }
-  function closeLangModal() {
-    langOverlay?.classList.remove("open");
-  }
-  langClose?.addEventListener("click", closeLangModal);
-  langOverlay?.addEventListener("click", (e) => { if (e.target === langOverlay) closeLangModal(); });
-
-  langEn?.addEventListener("click", () => { setLang("English"); closeLangModal(); });
-  langFr?.addEventListener("click", () => { setLang("Français"); closeLangModal(); });
-  langEs?.addEventListener("click", () => { setLang("Español"); closeLangModal(); });
-
-  function openProfile(tab = "profile") {
-    if (!profileOverlay || !profileNav || !profileContent) return;
-    profileOverlay.classList.add("open");
-    profileNav.querySelectorAll(".profile-nav-item").forEach(b => b.classList.remove("active"));
-    profileContent.querySelectorAll(".profile-page").forEach(p => p.classList.add("panel-hidden"));
-    const btn = profileNav.querySelector(`[data-profile-tab="${tab}"]`);
-    const page = profileContent.querySelector(`[data-profile-page="${tab}"]`);
-    btn?.classList.add("active");
-    page?.classList.remove("panel-hidden");
-  }
-  function closeProfile() {
-    profileOverlay?.classList.remove("open");
-  }
-  profileClose?.addEventListener("click", closeProfile);
-  profileOverlay?.addEventListener("click", (e) => { if (e.target === profileOverlay) closeProfile(); });
-  profileNav?.addEventListener("click", (e) => {
-    const t = e.target.closest(".profile-nav-item");
-    if (!t) return;
-    openProfile(t.dataset.profileTab);
-  });
-
-  // Simple placeholders (no navigation yet)
-  document.querySelectorAll("[data-user-action]").forEach(el => {
-    el.addEventListener("click", (e) => {
-      const action = el.getAttribute("data-user-action");
-      if (action === "language") {
-        openLangModal();
-        return;
-      }
-      if (action === "profile") {
-        openProfile("profile");
-        return;
-      }
-      if (action === "settings") {
-        openProfile("settings");
-        return;
-      }
-      if (action === "signout") {
-        openConfirm("Sign out", "Are you sure you want to sign out?", () => {
-          console.log("SIGN OUT");
-        });
-        return;
-      }
-      if (action === "shortcuts") {
-        openConfirm("Keyboard shortcuts", "Coming soon.", () => {});
-        return;
-      }
-      if (action === "billing" || action === "refer" || action === "plans" || action === "home" || action === "help" || action === "whatsnew") {
-        openConfirm("Info", "Coming soon.", () => {});
-      }
+  settingsClose?.addEventListener("click", ()=>closeOverlay("settings-overlay"));
+  settingsOverlay?.addEventListener("click", (e)=>{ if(e.target===settingsOverlay) closeOverlay("settings-overlay"); });
+  settingsOverlay?.querySelectorAll(".settings-nav-item").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const tab=btn.dataset.settingsTab;
+      settingsOverlay.querySelectorAll(".settings-nav-item").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      settingsOverlay.querySelectorAll(".settings-panel").forEach(p=>p.classList.add("panel-hidden"));
+      settingsOverlay.querySelector(`.settings-panel[data-settings-panel="${tab}"]`)?.classList.remove("panel-hidden");
     });
   });
+
+  settingsSaveProfile?.addEventListener("click", ()=>{
+    const v=(settingsUsername?.value||"").trim();
+    if (v) state.username=v;
+    save(); applyUser();
+    if (settingsAvatar) settingsAvatar.textContent = initialsFrom(state.username);
+  });
+
+  // Language modal
+  const languageOverlay = document.getElementById("language-overlay");
+  const languageCancel = document.getElementById("language-cancel");
+  const languageSave = document.getElementById("language-save");
+
+  function openLanguage(){
+    if (!languageOverlay) return;
+    languageOverlay.querySelectorAll('input[name="appLanguage"]').forEach(r=>{
+      r.checked = (r.value === state.language);
+    });
+    openOverlay("language-overlay");
+  }
+  languageCancel?.addEventListener("click", ()=>closeOverlay("language-overlay"));
+  languageOverlay?.addEventListener("click", (e)=>{ if(e.target===languageOverlay) closeOverlay("language-overlay"); });
+  languageSave?.addEventListener("click", ()=>{
+    const sel = languageOverlay.querySelector('input[name="appLanguage"]:checked');
+    if (sel) state.language = sel.value;
+    save(); applyUser();
+    closeOverlay("language-overlay");
+  });
+
+  // Shortcuts modal
+  const shortcutsOverlay = document.getElementById("shortcuts-overlay");
+  const shortcutsClose = document.getElementById("shortcuts-close");
+  function openShortcuts(){ if(shortcutsOverlay) openOverlay("shortcuts-overlay"); }
+  shortcutsClose?.addEventListener("click", ()=>closeOverlay("shortcuts-overlay"));
+  shortcutsOverlay?.addEventListener("click",(e)=>{ if(e.target===shortcutsOverlay) closeOverlay("shortcuts-overlay"); });
+
+  // toggles
+  const darkToggle = document.getElementById("user-dark-theme");
+  darkToggle?.addEventListener("change", ()=>{
+    state.darkTheme = !!darkToggle.checked;
+    save(); applyUser();
+  });
+  const drawToggle = document.getElementById("user-drawings-panel");
+  drawToggle?.addEventListener("change", ()=>{
+    state.drawingsPanel = !!drawToggle.checked;
+    save(); applyUser();
+  });
+
+  // menu item clicks (delegation)
+  userMenu.addEventListener("click", (e)=>{
+    const item = e.target.closest("[data-user-action]");
+    if (!item || !userMenu.contains(item)) return;
+
+    const act = item.dataset.userAction;
+    if (act === "profile") openProfile();
+    else if (act === "settings") openSettings();
+    else if (act === "language") openLanguage();
+    else if (act === "shortcuts") openShortcuts();
+    else if (act === "home") console.log("HOME");
+    else if (act === "help") console.log("HELP");
+    else if (act === "whatsnew") console.log("WHATS NEW");
+    else if (act === "signout") openConfirm("Sign out", "Are you sure you want to sign out?", ()=>console.log("SIGN OUT"));
+  });
+
+  applyUser();
 }
 
 /* ================= WATCHLIST DATA MODEL ================= */
@@ -1739,6 +1797,7 @@ function escapeHtml(str) {
 }
 
 /* ================= INIT ================= */
+initUserMenu();
 normalizeWatchlists();
 renderWatchlistHeader();
 renderWatchlistTable();
