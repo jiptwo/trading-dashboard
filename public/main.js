@@ -124,7 +124,7 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
             img.className = "icon";
             btn.appendChild(img);
           } else {
-            btn.textContent = label; // timeframe shows only "5m"
+            btn.textContent = label;
           }
 
           favoritesBar.appendChild(btn);
@@ -141,7 +141,6 @@ initFavorites("timeframe-menu", "timeframe-favorites", false);
 
 /* ================= WATCHLISTS MODEL ================= */
 
-// 10 colors MAX
 const WATCHLIST_COLORS = [
   { key: "red", label: "Red", css: "red" },
   { key: "blue", label: "Blue", css: "blue" },
@@ -167,34 +166,61 @@ const COMPANY_INFO = {
   AMZN: { name: "Amazon.com, Inc.", exchange: "NASDAQ", sector: "Consumer", status: "Market open" },
 };
 
+function makeDefaultColumnSettings() {
+  return {
+    tableView: true,
+    cols: {
+      last: true,
+      change: true,
+      changePct: true,
+      volume: true,
+      extended: false,
+      aiCote: false,
+      aiProb: false,
+    }
+  };
+}
+
+function makeDefaultSection(items = []) {
+  return {
+    id: `sec_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+    name: "Symbols",
+    items
+  };
+}
+
 const watchlists = [
   {
     id: "wl_red",
     name: "Red list",
     color: "red",
-    items: [
-      { symbol: "BCAL", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
-      { symbol: "TSLA", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
-      { symbol: "AAPL", last: "182.34", change: "+0.76", changePct: "+0.42%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
+    sections: [
+      makeDefaultSection([
+        { symbol: "BCAL", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
+        { symbol: "TSLA", last: "0", change: "+0.00", changePct: "+0.00%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
+        { symbol: "AAPL", last: "182.34", change: "+0.76", changePct: "+0.42%", volume: "—", extended: "—", aiCote: "—", aiProb: "—", note: "" },
+      ])
     ],
+    ui: {
+      columns: makeDefaultColumnSettings(),
+      sort: { mode: "auto", key: "symbol", dir: "asc" } // auto or manual
+    }
   },
 ];
 
 let activeWatchlistId = "wl_red";
 
-/* ================= WATCHLIST STATE (search + sort) ================= */
+/* ================= UI STATE ================= */
 
 let searchTerm = "";
-let sortKey = "symbol";     // default
-let sortDir = "asc";        // asc/desc
 
 const chartArea = document.getElementById("chart-area");
-
-/* ================= WATCHLIST TABLE RENDER ================= */
-
 const watchlistBody = document.getElementById("watchlist-body");
-const tableToggle = document.getElementById("table-toggle");
 const searchInput = document.getElementById("watchlist-search");
+
+const tableToggle = document.getElementById("table-toggle");
+
+/* ================= COLUMNS ================= */
 
 const columnsOrder = [
   { key: "symbol", label: "Symbol", always: true, sortable: true },
@@ -222,41 +248,51 @@ function getActiveWatchlist() {
   return watchlists.find(w => w.id === activeWatchlistId) || watchlists[0];
 }
 
-function getUsedColorsSet() {
-  return new Set(watchlists.map(w => w.color));
+function ensureWatchlistIntegrity(wl) {
+  if (!wl.ui) wl.ui = { columns: makeDefaultColumnSettings(), sort: { mode: "auto", key: "symbol", dir: "asc" } };
+  if (!wl.ui.columns) wl.ui.columns = makeDefaultColumnSettings();
+  if (!wl.sections || !wl.sections.length) wl.sections = [makeDefaultSection([])];
 }
 
-function getVisibleColumns() {
-  const on = !!(tableToggle && tableToggle.checked);
-  const visible = new Set(["symbol"]);
-  if (!on) return visible;
+function getVisibleColumnsFor(wl) {
+  ensureWatchlistIntegrity(wl);
 
-  const keys = ["last","change","changePct","volume","extended","aiCote","aiProb"];
-  keys.forEach(k => {
-    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
-    if (cb && cb.checked) visible.add(k);
+  const visible = new Set(["symbol"]);
+  if (!wl.ui.columns.tableView) return visible;
+
+  Object.keys(wl.ui.columns.cols).forEach(k => {
+    if (wl.ui.columns.cols[k]) visible.add(k);
   });
   return visible;
 }
 
-/* ===== helpers: sort parsing ===== */
+function applyColumnUIFromWatchlist(wl) {
+  ensureWatchlistIntegrity(wl);
+
+  // table view checkbox
+  if (tableToggle) tableToggle.checked = !!wl.ui.columns.tableView;
+
+  // column checkboxes
+  Object.keys(wl.ui.columns.cols).forEach(k => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
+    if (cb) cb.checked = !!wl.ui.columns.cols[k];
+  });
+}
+
+/* ================= SORT + MANUAL ORDER ================= */
 
 function parseNum(val) {
   if (val == null) return Number.NEGATIVE_INFINITY;
   const s = String(val).trim();
-
   if (s === "—" || s === "") return Number.NEGATIVE_INFINITY;
 
-  // percent
   if (s.endsWith("%")) {
     const n = parseFloat(s.replace("%",""));
     return isNaN(n) ? Number.NEGATIVE_INFINITY : n;
   }
 
-  // remove + and commas
   let t = s.replace(/,/g, "").replace("+", "");
 
-  // suffix multipliers (K/M/B)
   const m = t.match(/^(-?\d+(\.\d+)?)([KMB])$/i);
   if (m) {
     const base = parseFloat(m[1]);
@@ -270,13 +306,26 @@ function parseNum(val) {
 }
 
 function compareItems(a, b, key) {
-  if (key === "symbol") {
-    return String(a.symbol).localeCompare(String(b.symbol));
-  }
+  if (key === "symbol") return String(a.symbol).localeCompare(String(b.symbol));
   return parseNum(a[key]) - parseNum(b[key]);
 }
 
-/* ===== Column resizers ===== */
+function toggleSort(key) {
+  const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
+
+  wl.ui.sort.mode = "auto";
+  if (wl.ui.sort.key === key) {
+    wl.ui.sort.dir = (wl.ui.sort.dir === "asc") ? "desc" : "asc";
+  } else {
+    wl.ui.sort.key = key;
+    wl.ui.sort.dir = "asc";
+  }
+
+  renderWatchlist();
+}
+
+/* ================= COLUMN RESIZE ================= */
 
 let resizingCol = null;
 let startX = 0;
@@ -285,10 +334,8 @@ let startW = 0;
 function attachHeaderResizers(headerEl) {
   if (!headerEl || !watchlistBody) return;
   const cells = Array.from(headerEl.children);
-
-  // last is actions (no handle)
   cells.forEach((cell, idx) => {
-    if (idx === cells.length - 1) return;
+    if (idx === cells.length - 1) return; // actions
     if (cell.querySelector(".col-resizer")) return;
 
     const key = columnsOrder[idx]?.key;
@@ -326,7 +373,7 @@ document.addEventListener("mouseup", () => {
   document.body.style.userSelect = "";
 });
 
-/* ===== Tooltip ===== */
+/* ================= TOOLTIP ================= */
 
 const tooltip = document.getElementById("symbol-tooltip");
 
@@ -364,7 +411,7 @@ function tooltipHtmlFor(symbol, noteText) {
   return `${line1}${line2}${note}`;
 }
 
-/* ===== Quick switch dots ===== */
+/* ================= QUICK SWITCH DOTS ================= */
 
 function renderQuickSwitch() {
   const wrap = document.getElementById("wl-quick-switch");
@@ -385,8 +432,11 @@ function renderQuickSwitch() {
 
 function setActiveHeader() {
   const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
+
   const nameEl = document.getElementById("active-watchlist-name");
   const dotEl = document.getElementById("active-watchlist-dot");
+
   if (nameEl) nameEl.textContent = wl.name;
   if (dotEl) {
     dotEl.className = "wl-color-dot";
@@ -394,39 +444,87 @@ function setActiveHeader() {
   }
 }
 
-/* ===== Sorting click ===== */
+/* ================= SECTIONS + ROW DRAG ================= */
 
-function toggleSort(key) {
-  if (sortKey === key) {
-    sortDir = (sortDir === "asc") ? "desc" : "asc";
-  } else {
-    sortKey = key;
-    sortDir = "asc";
-  }
-  renderWatchlistTable();
+let dragRowPayload = null;     // { symbol, fromSectionId }
+let dragSectionId = null;      // sectionId
+
+function onRowDragStart(e, symbol, fromSectionId) {
+  dragRowPayload = { symbol, fromSectionId };
+  e.dataTransfer.effectAllowed = "move";
+  try { e.dataTransfer.setData("text/plain", symbol); } catch {}
 }
 
-/* ===== Render table ===== */
+function onRowDropToSection(e, toSectionId, insertBeforeSymbol = null) {
+  e.preventDefault();
+  const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
 
-function renderWatchlistTable() {
+  if (!dragRowPayload) return;
+  const { symbol, fromSectionId } = dragRowPayload;
+
+  const fromSec = wl.sections.find(s => s.id === fromSectionId);
+  const toSec = wl.sections.find(s => s.id === toSectionId);
+  if (!fromSec || !toSec) return;
+
+  const idx = fromSec.items.findIndex(it => it.symbol === symbol);
+  if (idx < 0) return;
+
+  const [moved] = fromSec.items.splice(idx, 1);
+
+  // insert position
+  if (insertBeforeSymbol) {
+    const targetIdx = toSec.items.findIndex(it => it.symbol === insertBeforeSymbol);
+    if (targetIdx >= 0) toSec.items.splice(targetIdx, 0, moved);
+    else toSec.items.push(moved);
+  } else {
+    toSec.items.push(moved);
+  }
+
+  // user manually sorted by drag
+  wl.ui.sort.mode = "manual";
+
+  dragRowPayload = null;
+  renderWatchlist();
+}
+
+function onSectionDragStart(e, sectionId) {
+  dragSectionId = sectionId;
+  e.dataTransfer.effectAllowed = "move";
+}
+
+function onSectionDrop(e, toSectionId) {
+  e.preventDefault();
+  const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
+  if (!dragSectionId) return;
+  if (dragSectionId === toSectionId) return;
+
+  const fromIdx = wl.sections.findIndex(s => s.id === dragSectionId);
+  const toIdx = wl.sections.findIndex(s => s.id === toSectionId);
+  if (fromIdx < 0 || toIdx < 0) return;
+
+  const [sec] = wl.sections.splice(fromIdx, 1);
+  wl.sections.splice(toIdx, 0, sec);
+
+  dragSectionId = null;
+  renderWatchlist();
+}
+
+/* ================= RENDER WATCHLIST ================= */
+
+function renderWatchlist() {
   if (!watchlistBody) return;
 
   const wl = getActiveWatchlist();
-  const visible = getVisibleColumns();
+  ensureWatchlistIntegrity(wl);
 
-  // filter
-  let items = [...wl.items];
-  if (searchTerm.trim()) {
-    const q = searchTerm.trim().toUpperCase();
-    items = items.filter(it => String(it.symbol).toUpperCase().includes(q));
-  }
+  const visible = getVisibleColumnsFor(wl);
 
-  // sort
-  items.sort((a, b) => {
-    const base = compareItems(a, b, sortKey);
-    return sortDir === "asc" ? base : -base;
-  });
+  // collect all items for filtering
+  const q = (searchTerm || "").trim().toUpperCase();
 
+  // clear
   watchlistBody.innerHTML = "";
 
   // header
@@ -435,7 +533,7 @@ function renderWatchlistTable() {
 
   columnsOrder.forEach((col) => {
     const cell = document.createElement("span");
-    const isVisible = (col.key === "symbol") ? true : visible.has(col.key);
+    const isVisible = col.key === "symbol" ? true : visible.has(col.key);
 
     if (!isVisible) {
       cell.className = `col ${col.key} col-hidden`;
@@ -447,7 +545,7 @@ function renderWatchlistTable() {
     if (col.sortable) cell.classList.add("th-sort");
     cell.dataset.key = col.key;
 
-    const ind = (sortKey === col.key) ? (sortDir === "asc" ? "▲" : "▼") : "";
+    const ind = (wl.ui.sort.mode === "auto" && wl.ui.sort.key === col.key) ? (wl.ui.sort.dir === "asc" ? "▲" : "▼") : "";
     cell.innerHTML = `${col.label}${ind ? ` <span class="sort-ind">${ind}</span>` : ""}`;
 
     if (col.key === "symbol") cell.classList.add("col-symbol");
@@ -461,7 +559,6 @@ function renderWatchlistTable() {
     header.appendChild(cell);
   });
 
-  // actions header empty
   const actionsH = document.createElement("span");
   actionsH.className = "col actions";
   actionsH.textContent = "";
@@ -470,91 +567,190 @@ function renderWatchlistTable() {
   watchlistBody.appendChild(header);
   attachHeaderResizers(header);
 
-  // rows
-  items.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "watchlist-row";
-    row.dataset.symbol = item.symbol;
+  // sections
+  wl.sections.forEach(section => {
+    // section wrapper
+    const secWrap = document.createElement("div");
+    secWrap.className = "section";
+    secWrap.dataset.sectionId = section.id;
 
-    // symbol cell
-    const sym = document.createElement("span");
-    sym.className = "col-symbol";
+    // section header
+    const secHeader = document.createElement("div");
+    secHeader.className = "section-header";
+    secHeader.draggable = true;
 
-    const noteIcon = item.note ? `<span class="note-icon" title="Personal note">📝</span>` : "";
-    sym.innerHTML = `
-      <span class="dot ${wl.color}"></span>
-      <span class="symbol js-symbol" data-symbol="${item.symbol}">${item.symbol}${noteIcon}</span>
+    secHeader.addEventListener("dragstart", (e) => onSectionDragStart(e, section.id));
+    secHeader.addEventListener("dragover", (e) => e.preventDefault());
+    secHeader.addEventListener("drop", (e) => onSectionDrop(e, section.id));
+
+    secHeader.innerHTML = `
+      <span class="section-drag" title="Drag section">⋮⋮</span>
+      <span class="section-name" data-edit="true">${escapeHtml(section.name)}</span>
+      <div class="section-actions">
+        <button class="section-btn" data-action="deleteSection">Delete</button>
+      </div>
     `;
-    row.appendChild(sym);
 
-    // other cells (in order)
-    columnsOrder.slice(1).forEach(col => {
-      const cell = document.createElement("span");
-      cell.className = `cell ${col.key}`;
-      cell.textContent = item[col.key] ?? "—";
-      if (!visible.has(col.key)) cell.classList.add("col-hidden");
-      row.appendChild(cell);
+    // rename on click
+    const nameEl = secHeader.querySelector(".section-name");
+    nameEl.addEventListener("click", () => {
+      const current = section.name;
+      const next = window.prompt("Section name:", current);
+      if (next == null) return;
+      const t = next.trim();
+      if (!t) return;
+      section.name = t;
+      renderWatchlist();
     });
 
-    // actions cell
-    const actions = document.createElement("span");
-    actions.className = "row-actions";
-    actions.innerHTML = `
-      <button class="row-btn" data-action="move" title="Move to watchlist">⇄</button>
-      <button class="row-btn" data-action="delete" title="Delete">🗑</button>
-    `;
-    row.appendChild(actions);
+    // delete section
+    secHeader.querySelector('[data-action="deleteSection"]').addEventListener("click", () => {
+      if (wl.sections.length <= 1) {
+        alert("You cannot delete the last section.");
+        return;
+      }
+      const ok = window.confirm(`Delete section "${section.name}"?\nSymbols in this section will be moved to the first section.`);
+      if (!ok) return;
 
-    // hover tooltip on symbol
-    const symEl = row.querySelector(".js-symbol");
-    if (symEl) {
-      symEl.addEventListener("mousemove", (e) => {
-        showTooltip(e.clientX, e.clientY, tooltipHtmlFor(item.symbol, item.note));
-      });
-      symEl.addEventListener("mouseleave", hideTooltip);
+      const idx = wl.sections.findIndex(s => s.id === section.id);
+      if (idx < 0) return;
 
-      // ✅ 1 click: load chart
-      symEl.addEventListener("click", () => {
-        if (chartArea) chartArea.textContent = `Chart Area — ${item.symbol}`;
+      const removed = wl.sections.splice(idx, 1)[0];
+      // move items to first section
+      wl.sections[0].items.push(...removed.items);
+
+      renderWatchlist();
+    });
+
+    secWrap.appendChild(secHeader);
+
+    // section drop zone (drop row into empty space)
+    secWrap.addEventListener("dragover", (e) => e.preventDefault());
+    secWrap.addEventListener("drop", (e) => onRowDropToSection(e, section.id, null));
+
+    // items (filter + sort/manual)
+    let items = [...section.items];
+
+    if (q) items = items.filter(it => String(it.symbol).toUpperCase().includes(q));
+
+    if (wl.ui.sort.mode === "auto") {
+      items.sort((a, b) => {
+        const base = compareItems(a, b, wl.ui.sort.key);
+        return wl.ui.sort.dir === "asc" ? base : -base;
       });
     }
 
-    // right click menu on row
-    row.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      openRowMenu(e.clientX, e.clientY, item.symbol);
+    items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "watchlist-row";
+      row.dataset.symbol = item.symbol;
+      row.dataset.sectionId = section.id;
+      row.draggable = true;
+
+      row.addEventListener("dragstart", (e) => onRowDragStart(e, item.symbol, section.id));
+      row.addEventListener("dragover", (e) => e.preventDefault());
+
+      // Drop before this symbol (gives precise ordering)
+      row.addEventListener("drop", (e) => onRowDropToSection(e, section.id, item.symbol));
+
+      const noteIcon = item.note ? `<span class="note-icon" title="Personal note">📝</span>` : "";
+
+      const symbolCell = document.createElement("span");
+      symbolCell.className = "col-symbol";
+      symbolCell.innerHTML = `
+        <span class="dot ${wl.color}"></span>
+        <span class="symbol js-symbol" data-symbol="${item.symbol}">${item.symbol}${noteIcon}</span>
+      `;
+      row.appendChild(symbolCell);
+
+      columnsOrder.slice(1).forEach(col => {
+        const cell = document.createElement("span");
+        cell.className = `cell ${col.key}`;
+        cell.textContent = item[col.key] ?? "—";
+        if (!visible.has(col.key)) cell.classList.add("col-hidden");
+        row.appendChild(cell);
+      });
+
+      const actions = document.createElement("span");
+      actions.className = "row-actions";
+      actions.innerHTML = `
+        <button class="row-btn" data-action="move" title="Move to watchlist">⇄</button>
+        <button class="row-btn" data-action="delete" title="Delete">🗑</button>
+      `;
+      row.appendChild(actions);
+
+      // tooltip + click to load chart
+      const symEl = row.querySelector(".js-symbol");
+      if (symEl) {
+        symEl.addEventListener("mousemove", (e) => showTooltip(e.clientX, e.clientY, tooltipHtmlFor(item.symbol, item.note)));
+        symEl.addEventListener("mouseleave", hideTooltip);
+        symEl.addEventListener("click", () => {
+          if (chartArea) chartArea.textContent = `Chart Area — ${item.symbol}`;
+        });
+      }
+
+      // right click menu
+      row.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        openRowMenu(e.clientX, e.clientY, item.symbol);
+      });
+
+      actions.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        const act = btn.dataset.action;
+        if (act === "delete") confirmDelete(item.symbol);
+        if (act === "move") alert(`${item.symbol} Move to watchlist (use right click menu for list)`);
+      });
+
+      secWrap.appendChild(row);
     });
 
-    // row buttons
-    actions.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-action]");
-      if (!btn) return;
-      const act = btn.dataset.action;
-
-      if (act === "delete") confirmDelete(item.symbol);
-      if (act === "move") alert(`${item.symbol} Move to watchlist (use right click menu for list)`);
-    });
-
-    watchlistBody.appendChild(row);
+    watchlistBody.appendChild(secWrap);
   });
 }
 
 function renderAllWatchlistUI() {
+  const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
+
   setActiveHeader();
   renderQuickSwitch();
-  renderWatchlistTable();
+  applyColumnUIFromWatchlist(wl);
+  renderWatchlist();
 }
 
-/* ================= CUSTOMIZE COLUMNS EVENTS ================= */
+/* ================= CUSTOMIZE COLUMNS (PER WATCHLIST) ================= */
 
-tableToggle?.addEventListener("change", renderWatchlistTable);
-document.querySelectorAll("#columns-menu input[data-col]").forEach(cb => cb.addEventListener("change", renderWatchlistTable));
+function saveColumnSettingsFromUI() {
+  const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
 
-/* ================= SEARCH / FILTER ================= */
+  wl.ui.columns.tableView = !!(tableToggle && tableToggle.checked);
+
+  Object.keys(wl.ui.columns.cols).forEach(k => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
+    if (cb) wl.ui.columns.cols[k] = !!cb.checked;
+  });
+}
+
+tableToggle?.addEventListener("change", () => {
+  saveColumnSettingsFromUI();
+  renderWatchlist();
+});
+
+document.querySelectorAll("#columns-menu input[data-col]").forEach(cb => {
+  cb.addEventListener("change", () => {
+    saveColumnSettingsFromUI();
+    renderWatchlist();
+  });
+});
+
+/* ================= SEARCH ================= */
 
 searchInput?.addEventListener("input", () => {
   searchTerm = searchInput.value || "";
-  renderWatchlistTable();
+  renderWatchlist();
 });
 
 /* ================= ADD SYMBOL MODAL ================= */
@@ -581,9 +777,13 @@ addConfirm?.addEventListener("click", () => {
   if (!sym) return;
 
   const wl = getActiveWatchlist();
-  if (wl.items.some(x => x.symbol === sym)) { closeAddModal(); return; }
+  ensureWatchlistIntegrity(wl);
 
-  wl.items.push({
+  const exists = wl.sections.some(sec => sec.items.some(x => x.symbol === sym));
+  if (exists) { closeAddModal(); return; }
+
+  // add to first section
+  wl.sections[0].items.push({
     symbol: sym,
     last: "0",
     change: "+0.00",
@@ -596,7 +796,7 @@ addConfirm?.addEventListener("click", () => {
   });
 
   closeAddModal();
-  renderWatchlistTable();
+  renderWatchlist();
 });
 
 symbolInput?.addEventListener("keydown", (e) => {
@@ -604,7 +804,7 @@ symbolInput?.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeAddModal();
 });
 
-/* ================= WATCHLIST MENU (RENAME / CREATE / DELETE) ================= */
+/* ================= WATCHLIST MENU (RENAME / CREATE / DELETE / ADD SECTION) ================= */
 
 const renameOverlay = document.getElementById("rename-overlay");
 const renameInput = document.getElementById("rename-input");
@@ -613,6 +813,8 @@ const renameCancel = document.getElementById("rename-cancel");
 
 function openRenameModal() {
   const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
+
   renameOverlay?.classList.add("open");
   renameInput.value = wl.name || "";
   renameInput.focus();
@@ -624,9 +826,12 @@ renameOverlay?.addEventListener("click", (e) => { if (e.target === renameOverlay
 
 renameConfirm?.addEventListener("click", () => {
   const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
+
   const name = (renameInput.value || "").trim();
   if (!name) return;
   wl.name = name;
+
   closeRenameModal();
   renderAllWatchlistUI();
 });
@@ -644,11 +849,14 @@ const createCancel = document.getElementById("create-cancel");
 
 let selectedCreateColor = "blue";
 
+function getUsedColorsSet() {
+  return new Set(watchlists.map(w => w.color));
+}
+
 function openCreateModal() {
   createOverlay?.classList.add("open");
   createNameInput.value = "";
 
-  // auto pick first available color
   const used = getUsedColorsSet();
   const firstFree = WATCHLIST_COLORS.find(c => !used.has(c.key));
   selectedCreateColor = firstFree ? firstFree.key : WATCHLIST_COLORS[0].key;
@@ -679,7 +887,7 @@ function renderCreateColorPicker() {
     d.title = isUsed ? `${c.label} (already used)` : c.label;
 
     d.addEventListener("click", () => {
-      if (isUsed && !isSelected) return; // cannot choose used color
+      if (isUsed && !isSelected) return;
       selectedCreateColor = c.key;
       renderCreateColorPicker();
       updateCreateButtonState();
@@ -693,7 +901,6 @@ createCancel?.addEventListener("click", closeCreateModal);
 createOverlay?.addEventListener("click", (e) => { if (e.target === createOverlay) closeCreateModal(); });
 
 createConfirm?.addEventListener("click", () => {
-  // max 10 lists (colors)
   if (watchlists.length >= WATCHLIST_COLORS.length) {
     alert("You already reached the maximum number of watchlists (10).");
     return;
@@ -709,11 +916,16 @@ createConfirm?.addEventListener("click", () => {
   const name = customName || defaultListName(selectedCreateColor);
 
   const id = `wl_${Date.now()}`;
+
   watchlists.push({
     id,
     name,
     color: selectedCreateColor,
-    items: []
+    sections: [makeDefaultSection([])],
+    ui: {
+      columns: makeDefaultColumnSettings(),
+      sort: { mode: "auto", key: "symbol", dir: "asc" }
+    }
   });
 
   activeWatchlistId = id;
@@ -738,7 +950,25 @@ function deleteActiveWatchlist() {
   renderAllWatchlistUI();
 }
 
-/* Handle watchlist menu clicks */
+function addSectionToActiveWatchlist() {
+  const wl = getActiveWatchlist();
+  ensureWatchlistIntegrity(wl);
+
+  const name = window.prompt("Section name:", "New section");
+  if (name == null) return;
+
+  const t = name.trim();
+  if (!t) return;
+
+  wl.sections.push({
+    id: `sec_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+    name: t,
+    items: []
+  });
+
+  renderWatchlist();
+}
+
 const watchlistMenu = document.getElementById("watchlist-menu");
 watchlistMenu?.addEventListener("click", (e) => {
   const item = e.target.closest(".menu-item");
@@ -748,6 +978,7 @@ watchlistMenu?.addEventListener("click", (e) => {
   if (action === "rename") openRenameModal();
   if (action === "create") openCreateModal();
   if (action === "delete") deleteActiveWatchlist();
+  if (action === "addSection") addSectionToActiveWatchlist();
 });
 
 /* ================= RIGHT CLICK MENU ================= */
@@ -796,19 +1027,29 @@ function closeRowMenu() {
   menuSymbol = null;
 }
 
+function findSymbolInWatchlist(wl, symbol) {
+  for (const sec of wl.sections) {
+    const idx = sec.items.findIndex(x => x.symbol === symbol);
+    if (idx >= 0) return { section: sec, idx };
+  }
+  return null;
+}
+
 function moveSymbolToWatchlist(symbol, targetWlId) {
   const from = getActiveWatchlist();
   const to = watchlists.find(w => w.id === targetWlId);
   if (!to) return;
 
-  const idx = from.items.findIndex(x => x.symbol === symbol);
-  if (idx < 0) return;
+  ensureWatchlistIntegrity(from);
+  ensureWatchlistIntegrity(to);
 
-  const [moved] = from.items.splice(idx, 1);
-  to.items.push(moved);
+  const found = findSymbolInWatchlist(from, symbol);
+  if (!found) return;
 
-  renderWatchlistTable();
-  renderQuickSwitch();
+  const [moved] = found.section.items.splice(found.idx, 1);
+  to.sections[0].items.push(moved);
+
+  renderAllWatchlistUI();
 }
 
 function confirmDelete(symbol) {
@@ -816,8 +1057,13 @@ function confirmDelete(symbol) {
   if (!ok) return;
 
   const wl = getActiveWatchlist();
-  wl.items = wl.items.filter(x => x.symbol !== symbol);
-  renderWatchlistTable();
+  ensureWatchlistIntegrity(wl);
+
+  const found = findSymbolInWatchlist(wl, symbol);
+  if (!found) return;
+
+  found.section.items.splice(found.idx, 1);
+  renderWatchlist();
 }
 
 rowMenu?.addEventListener("click", (e) => {
@@ -844,7 +1090,7 @@ rowMenu?.addEventListener("click", (e) => {
   }
 });
 
-/* ================= NOTES (ADD NOTE MODAL) ================= */
+/* ================= NOTES ================= */
 
 const noteOverlay = document.getElementById("note-overlay");
 const noteTitle = document.getElementById("note-title");
@@ -859,7 +1105,10 @@ function openNoteModal(symbol) {
   noteTitle.textContent = `${symbol}  Add Note`;
 
   const wl = getActiveWatchlist();
-  const item = wl.items.find(x => x.symbol === symbol);
+  ensureWatchlistIntegrity(wl);
+
+  const found = findSymbolInWatchlist(wl, symbol);
+  const item = found ? found.section.items[found.idx] : null;
 
   noteText.value = item?.note || "";
   noteOverlay.classList.add("open");
@@ -878,12 +1127,14 @@ noteConfirm?.addEventListener("click", () => {
   if (!noteSymbol) return;
 
   const wl = getActiveWatchlist();
-  const item = wl.items.find(x => x.symbol === noteSymbol);
-  if (!item) return;
+  ensureWatchlistIntegrity(wl);
 
-  item.note = (noteText.value || "").trim();
+  const found = findSymbolInWatchlist(wl, noteSymbol);
+  if (!found) return;
+
+  found.section.items[found.idx].note = (noteText.value || "").trim();
   closeNoteModal();
-  renderWatchlistTable();
+  renderWatchlist();
 });
 
 /* ================= INIT ================= */
