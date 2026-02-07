@@ -62,8 +62,7 @@ html.theme-light .alerts-tab:hover {
 
 /* make monochrome icons readable in dark mode */
 .icon { filter: invert(1) brightness(1.05); }
-html.theme-light .icon,
-html[data-theme="light"] .icon { filter: none; }
+html.theme-light .icon { filter: none; }
 
 /* ================= SMALL TOGGLE (user menu) ================= */
 .toggle{
@@ -203,69 +202,14 @@ html.theme-light .toggle-knob{ background: rgba(11,15,20,0.75); }
   position: relative;
 }
 
-/* Chart status line (top of chart area) */
-.chart-statusline{
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  box-sizing: border-box;
-  background: rgba(0,0,0,0.55);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  z-index: 10;
-  font-size: 12px;
-  color: rgba(255,255,255,0.9);
-}
-.cs-left,.cs-right{ display:flex; align-items:center; gap:8px; min-width:0; }
-.cs-symbol{ font-weight: 800; letter-spacing: .02em; }
-.cs-sep{ opacity: .55; }
-.cs-ohlc{ opacity: .75; white-space: nowrap; }
-html[data-theme="light"] .chart-statusline{
-  background: rgba(255,255,255,0.70);
-  border-bottom-color: rgba(11,15,20,0.10);
-  color: rgba(11,15,20,0.92);
-}
-
-/* Ensure placeholder is not hidden behind status line */
-.chart-placeholder{ padding-top: 28px; }
-
-/* Drawings overlay canvas */
-#drawings-canvas{
-  position: absolute;
-  inset: 0;
-  z-index: 9; /* under status line */
-  pointer-events: none;
-}
-
-#drawings-canvas.active{
-  pointer-events: auto;
-  cursor: crosshair;
-}
-
 .chart-placeholder {
   position: absolute;
-  inset: 28px 0 0 0;
+  inset: 0;
   display: grid;
   place-items: center;
   color: rgba(255,255,255,0.75);
   font-weight: 700;
   gap: 10px;
-}
-
-#drawings-canvas{
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 28px;
-  bottom: 0;
-  width: 100%;
-  height: calc(100% - 28px);
-  pointer-events: none;
 }
 .chart-sub {
   font-weight: 400;
@@ -1161,17 +1105,7 @@ html.theme-light .profile-card { border-color: rgba(17,24,39,0.10); background: 
 }
 
 
-/* ================= THEME (dark/light) =================
-   Legacy compatibility: older builds used body.light.
-   We now standardize on html[data-theme="light"].
-*/
-body{ background:var(--bg); color:var(--text); }
 
-html[data-theme="light"] #chart-area{ background: #ffffff; }
-html[data-theme="light"] .btn{ color: #0b1220; }
-html[data-theme="light"] .dropdown-menu,
-html[data-theme="light"] .row-menu,
-html[data-theme="light"] .modal{ background: var(--panel); color: var(--text); }
 
 /* User menu checkbox -> switch */
 .user-toggle{
