@@ -888,7 +888,7 @@ html.theme-light .toggle-knob{ background: rgba(11,15,20,0.75); }
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 6000;
 }
 body.modal-open {
   overflow: hidden;
@@ -1399,4 +1399,10 @@ body.light .icon{ filter: invert(1); } /* simple icon invert for light mode */
   border-color: rgba(255,255,255,0.92);
 }
 .tv-btn.primary:hover { background: #fff; }
+
+body.modal-open .row-menu,
+body.modal-open .symbol-tooltip {
+  display: none !important;
+}
+
 
