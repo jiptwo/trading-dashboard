@@ -119,8 +119,21 @@
   <aside id="left-bar">tools</aside>
 
   <main id="chart-area">
+    <!-- Status line (TradingView-like) -->
+    <div id="chart-statusline" class="chart-statusline" aria-label="Chart status">
+      <div class="cs-left">
+        <span class="cs-symbol" id="cs-symbol">AAPL</span>
+        <span class="cs-sep">•</span>
+        <span class="cs-tf" id="cs-tf">1D</span>
+      </div>
+      <div class="cs-right" id="cs-ohlc">O — H — L — C —</div>
+    </div>
+
+    <!-- Drawings overlay (future tools will draw here) -->
+    <canvas id="drawings-canvas" class="drawings-canvas" aria-hidden="true"></canvas>
+
     <div class="chart-placeholder">
-      Chart Area
+      <div id="chart-title">Chart Area</div>
       <div class="chart-sub" id="chart-sub">Click a symbol in the watchlist to load it here.</div>
     </div>
   </main>
@@ -1311,6 +1324,9 @@
     </div>
   </div>
 </div>
+
+<!-- Toasts (alerts, confirmations, etc.) -->
+<div id="toast-host" aria-live="polite" aria-atomic="true"></div>
   
 <script src="./main.js"></script>
 </body>
