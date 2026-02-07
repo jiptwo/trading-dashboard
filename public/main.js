@@ -176,6 +176,9 @@ let chartState = LS.get(CHART_STATE_KEY, {
   type: "Candles",
 });
 
+// Will be initialized lazily once the charting library is ready.
+let chartManager = null;
+
 function saveChartState(){ LS.set(CHART_STATE_KEY, chartState); }
 
 function setChartState(patch){
@@ -982,6 +985,34 @@ const ChartManager = (() => {
     applyThemeOrSettings,
   };
 })();
+
+// Expose the chart API under the name used elsewhere in the file.
+chartManager = ChartManager;
+
+// Dynamically load Lightweight Charts with CDN fallback.
+// This avoids hard failures when a CDN or browser cache has issues.
+function ensureLightweightCharts(cb) {
+  try {
+    if (window.LightweightCharts) { cb?.(true); return; }
+  } catch (_) {}
+
+  const urls = [
+    "https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js",
+    "https://cdn.jsdelivr.net/npm/lightweight-charts/dist/lightweight-charts.standalone.production.js",
+  ];
+
+  const inject = (i) => {
+    if (i >= urls.length) { cb?.(false); return; }
+    const s = document.createElement("script");
+    s.src = urls[i];
+    s.async = true;
+    s.onload = () => cb?.(true);
+    s.onerror = () => inject(i + 1);
+    document.head.appendChild(s);
+  };
+
+  inject(0);
+}
 
 /* Load symbol into chart on single click */
 function loadSymbolIntoChart(symbol) {
@@ -2417,7 +2448,7 @@ function applyChartSettingsToUI() {
   }
 
   // Apply to real chart if available
-  try { chartManager?.applyThemeOrSettings?.(); } catch (_) {}
+  try { chartState?.applyThemeOrSettings?.(); } catch (_) {}
 }
 
 btnCsOk?.addEventListener("click", () => {
@@ -2438,9 +2469,16 @@ applyChartSettingsToUI();
     catch (err) { console.warn(`[BOOT] ${label}`, err); }
   };
 
-  safe("chartManager.init", () => chartManager.init());
-  safe("chartManager.theme", () => chartManager.applyThemeOrSettings());
-  safe("chartManager.series", () => chartManager.setSeriesType(chartState.type));
-  safe("chartManager.load", () => chartManager.load(chartState.symbol, chartState.timeframe));
+  // Load the charting library with fallback, then initialize the chart.
+  ensureLightweightCharts((ok) => {
+    if (!ok) {
+      // still show the placeholder and let the UI run
+      safe("chart.placeholder", () => chartManager?.load?.(chartState.symbol, chartState.timeframe));
+      return;
+    }
+    safe("chart.theme", () => chartManager?.applyThemeOrSettings?.());
+    safe("chart.series", () => chartManager?.setSeriesType?.(chartState.type));
+    safe("chart.load", () => chartManager?.load?.(chartState.symbol, chartState.timeframe));
+  });
 })();
 
