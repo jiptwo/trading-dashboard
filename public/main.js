@@ -1838,3 +1838,340 @@ renderWatchlistTable();
 
 mountAlertsButton();
 showWatchlistPanel();
+
+/* ================= CHART SETTINGS (TradingView-like) ================= */
+const CS_KEY = "tp_chart_settings_v1";
+
+const csDefaults = {
+  prevclose: false,
+  bodyOn: true,
+  bodyUp: "#22c55e",
+  bodyDown: "#ef4444",
+  bordersOn: true,
+  bordersUp: "#22c55e",
+  bordersDown: "#ef4444",
+  wickOn: true,
+  wickUp: "#22c55e",
+  wickDown: "#ef4444",
+  dividends: true,
+  precision: "default",
+  timezone: "exchange",
+
+  logo: true,
+  title: true,
+  titleMode: "description",
+  chartValues: true,
+  barChange: true,
+  statusVolume: false,
+  lastday: false,
+  indTitles: true,
+  indInputs: true,
+  indValues: true,
+  indBg: true,
+  indBgAlpha: 35,
+
+  currency: "always",
+  scaleModes: "hover",
+  lockRatio: false,
+  scalesPlacement: "auto",
+  noOverlap: true,
+  plusBtn: true,
+  countdown: true,
+  dow: true,
+  datefmt: "mon_dd_yy",
+  timefmt: "24",
+  saveLeftEdge: false,
+
+  bgMode: "solid",
+  bgColor: "#000000",
+  grid: "both",
+  separators: true,
+  crosshair: "default",
+  watermark: "replay",
+  nav: "hover",
+  pane: "hover",
+  mt: 10,
+  mb: 8,
+
+  buysell: true,
+  oneclick: false,
+  sound: true,
+  volume: 60,
+  soundType: "Alarm Clock",
+  rejectonly: true,
+  posorders: true,
+  reverse: true,
+  project: false,
+  pl: true,
+  exmarks: true,
+  exlabels: false,
+  extendedlines: true,
+  screenshots: false,
+
+  alertLines: true,
+  alertColor: "#ef4444",
+  onlyActiveAlerts: true,
+  alertVolumeOn: true,
+  alertVolume: 70,
+  autohideToasts: true,
+
+  evIdeas: false,
+  evDividends: true,
+  evSplits: true,
+  evEarnings: true,
+  evEarningsBreaks: false,
+  evNews: false,
+  evNewsNotif: false,
+};
+
+let chartSettings = LS.get(CS_KEY, csDefaults);
+
+function saveChartSettings() {
+  LS.set(CS_KEY, chartSettings);
+}
+
+function qs(id) { return document.getElementById(id); }
+
+const csOverlay = qs("chart-settings-overlay");
+const btnChartSettings = qs("btn-chart-settings");
+const btnCsClose = qs("chart-settings-close");
+const btnCsCancel = qs("chart-settings-cancel");
+const btnCsOk = qs("chart-settings-ok");
+
+function openChartSettings() {
+  if (!csOverlay) return;
+  hydrateChartSettingsUI();
+  csOverlay.classList.add("open");
+}
+
+function closeChartSettings() {
+  csOverlay?.classList.remove("open");
+}
+
+btnChartSettings?.addEventListener("click", openChartSettings);
+btnCsClose?.addEventListener("click", closeChartSettings);
+btnCsCancel?.addEventListener("click", closeChartSettings);
+
+csOverlay?.addEventListener("click", (e) => {
+  if (e.target === csOverlay) closeChartSettings();
+});
+
+function bindTvTabs() {
+  document.querySelectorAll(".tv-nav-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tvtab;
+      document.querySelectorAll(".tv-nav-item").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".tv-tab").forEach(t => t.classList.remove("active"));
+      document.querySelector(`.tv-tab[data-tvtab="${tab}"]`)?.classList.add("active");
+    });
+  });
+}
+bindTvTabs();
+
+function hydrateChartSettingsUI() {
+  // Symbol
+  qs("cs-prevclose").checked = !!chartSettings.prevclose;
+
+  qs("cs-body-on").checked = !!chartSettings.bodyOn;
+  qs("cs-body-up").value = chartSettings.bodyUp;
+  qs("cs-body-down").value = chartSettings.bodyDown;
+
+  qs("cs-borders-on").checked = !!chartSettings.bordersOn;
+  qs("cs-borders-up").value = chartSettings.bordersUp;
+  qs("cs-borders-down").value = chartSettings.bordersDown;
+
+  qs("cs-wick-on").checked = !!chartSettings.wickOn;
+  qs("cs-wick-up").value = chartSettings.wickUp;
+  qs("cs-wick-down").value = chartSettings.wickDown;
+
+  qs("cs-dividends").checked = !!chartSettings.dividends;
+  qs("cs-precision").value = chartSettings.precision;
+  qs("cs-timezone").value = chartSettings.timezone;
+
+  // Status line
+  qs("cs-logo").checked = !!chartSettings.logo;
+  qs("cs-title").checked = !!chartSettings.title;
+  qs("cs-title-mode").value = chartSettings.titleMode;
+  qs("cs-chart-values").checked = !!chartSettings.chartValues;
+  qs("cs-bar-change").checked = !!chartSettings.barChange;
+  qs("cs-status-volume").checked = !!chartSettings.statusVolume;
+  qs("cs-lastday").checked = !!chartSettings.lastday;
+
+  qs("cs-ind-titles").checked = !!chartSettings.indTitles;
+  qs("cs-ind-inputs").checked = !!chartSettings.indInputs;
+  qs("cs-ind-values").checked = !!chartSettings.indValues;
+  qs("cs-ind-bg").checked = !!chartSettings.indBg;
+  qs("cs-ind-bg-alpha").value = chartSettings.indBgAlpha;
+
+  // Scales
+  qs("cs-currency").value = chartSettings.currency;
+  qs("cs-scale-modes").value = chartSettings.scaleModes;
+  qs("cs-lock-ratio").checked = !!chartSettings.lockRatio;
+  qs("cs-scales-placement").value = chartSettings.scalesPlacement;
+
+  qs("cs-no-overlap").checked = !!chartSettings.noOverlap;
+  qs("cs-plus-btn").checked = !!chartSettings.plusBtn;
+  qs("cs-countdown").checked = !!chartSettings.countdown;
+
+  qs("cs-dow").checked = !!chartSettings.dow;
+  qs("cs-datefmt").value = chartSettings.datefmt;
+  qs("cs-timefmt").value = chartSettings.timefmt;
+  qs("cs-save-left-edge").checked = !!chartSettings.saveLeftEdge;
+
+  // Canvas
+  qs("cs-bg-mode").value = chartSettings.bgMode;
+  qs("cs-bg-color").value = chartSettings.bgColor;
+  qs("cs-grid").value = chartSettings.grid;
+  qs("cs-separators").checked = !!chartSettings.separators;
+  qs("cs-crosshair").value = chartSettings.crosshair;
+  qs("cs-watermark").value = chartSettings.watermark;
+  qs("cs-nav").value = chartSettings.nav;
+  qs("cs-pane").value = chartSettings.pane;
+  qs("cs-mt").value = chartSettings.mt;
+  qs("cs-mb").value = chartSettings.mb;
+
+  // Trading
+  qs("cs-buysell").checked = !!chartSettings.buysell;
+  qs("cs-oneclick").checked = !!chartSettings.oneclick;
+  qs("cs-sound").checked = !!chartSettings.sound;
+  qs("cs-volume").value = chartSettings.volume;
+  qs("cs-sound-type").value = chartSettings.soundType;
+  qs("cs-rejectonly").checked = !!chartSettings.rejectonly;
+
+  qs("cs-posorders").checked = !!chartSettings.posorders;
+  qs("cs-reverse").checked = !!chartSettings.reverse;
+  qs("cs-project").checked = !!chartSettings.project;
+  qs("cs-pl").checked = !!chartSettings.pl;
+  qs("cs-exmarks").checked = !!chartSettings.exmarks;
+  qs("cs-exlabels").checked = !!chartSettings.exlabels;
+  qs("cs-extendedlines").checked = !!chartSettings.extendedlines;
+  qs("cs-screenshots").checked = !!chartSettings.screenshots;
+
+  // Alerts
+  qs("cs-alert-lines").checked = !!chartSettings.alertLines;
+  qs("cs-alert-color").value = chartSettings.alertColor;
+  qs("cs-only-active-alerts").checked = !!chartSettings.onlyActiveAlerts;
+  qs("cs-alert-volume-on").checked = !!chartSettings.alertVolumeOn;
+  qs("cs-alert-volume").value = chartSettings.alertVolume;
+  qs("cs-autohide-toasts").checked = !!chartSettings.autohideToasts;
+
+  // Events
+  qs("cs-ev-ideas").checked = !!chartSettings.evIdeas;
+  qs("cs-ev-dividends").checked = !!chartSettings.evDividends;
+  qs("cs-ev-splits").checked = !!chartSettings.evSplits;
+  qs("cs-ev-earnings").checked = !!chartSettings.evEarnings;
+  qs("cs-ev-earnings-breaks").checked = !!chartSettings.evEarningsBreaks;
+  qs("cs-ev-news").checked = !!chartSettings.evNews;
+  qs("cs-ev-news-notif").checked = !!chartSettings.evNewsNotif;
+}
+
+function readChartSettingsUI() {
+  chartSettings.prevclose = qs("cs-prevclose").checked;
+
+  chartSettings.bodyOn = qs("cs-body-on").checked;
+  chartSettings.bodyUp = qs("cs-body-up").value;
+  chartSettings.bodyDown = qs("cs-body-down").value;
+
+  chartSettings.bordersOn = qs("cs-borders-on").checked;
+  chartSettings.bordersUp = qs("cs-borders-up").value;
+  chartSettings.bordersDown = qs("cs-borders-down").value;
+
+  chartSettings.wickOn = qs("cs-wick-on").checked;
+  chartSettings.wickUp = qs("cs-wick-up").value;
+  chartSettings.wickDown = qs("cs-wick-down").value;
+
+  chartSettings.dividends = qs("cs-dividends").checked;
+  chartSettings.precision = qs("cs-precision").value;
+  chartSettings.timezone = qs("cs-timezone").value;
+
+  chartSettings.logo = qs("cs-logo").checked;
+  chartSettings.title = qs("cs-title").checked;
+  chartSettings.titleMode = qs("cs-title-mode").value;
+  chartSettings.chartValues = qs("cs-chart-values").checked;
+  chartSettings.barChange = qs("cs-bar-change").checked;
+  chartSettings.statusVolume = qs("cs-status-volume").checked;
+  chartSettings.lastday = qs("cs-lastday").checked;
+
+  chartSettings.indTitles = qs("cs-ind-titles").checked;
+  chartSettings.indInputs = qs("cs-ind-inputs").checked;
+  chartSettings.indValues = qs("cs-ind-values").checked;
+  chartSettings.indBg = qs("cs-ind-bg").checked;
+  chartSettings.indBgAlpha = Number(qs("cs-ind-bg-alpha").value || 35);
+
+  chartSettings.currency = qs("cs-currency").value;
+  chartSettings.scaleModes = qs("cs-scale-modes").value;
+  chartSettings.lockRatio = qs("cs-lock-ratio").checked;
+  chartSettings.scalesPlacement = qs("cs-scales-placement").value;
+
+  chartSettings.noOverlap = qs("cs-no-overlap").checked;
+  chartSettings.plusBtn = qs("cs-plus-btn").checked;
+  chartSettings.countdown = qs("cs-countdown").checked;
+
+  chartSettings.dow = qs("cs-dow").checked;
+  chartSettings.datefmt = qs("cs-datefmt").value;
+  chartSettings.timefmt = qs("cs-timefmt").value;
+  chartSettings.saveLeftEdge = qs("cs-save-left-edge").checked;
+
+  chartSettings.bgMode = qs("cs-bg-mode").value;
+  chartSettings.bgColor = qs("cs-bg-color").value;
+  chartSettings.grid = qs("cs-grid").value;
+  chartSettings.separators = qs("cs-separators").checked;
+  chartSettings.crosshair = qs("cs-crosshair").value;
+  chartSettings.watermark = qs("cs-watermark").value;
+  chartSettings.nav = qs("cs-nav").value;
+  chartSettings.pane = qs("cs-pane").value;
+  chartSettings.mt = Number(qs("cs-mt").value || 10);
+  chartSettings.mb = Number(qs("cs-mb").value || 8);
+
+  chartSettings.buysell = qs("cs-buysell").checked;
+  chartSettings.oneclick = qs("cs-oneclick").checked;
+  chartSettings.sound = qs("cs-sound").checked;
+  chartSettings.volume = Number(qs("cs-volume").value || 60);
+  chartSettings.soundType = qs("cs-sound-type").value;
+  chartSettings.rejectonly = qs("cs-rejectonly").checked;
+
+  chartSettings.posorders = qs("cs-posorders").checked;
+  chartSettings.reverse = qs("cs-reverse").checked;
+  chartSettings.project = qs("cs-project").checked;
+  chartSettings.pl = qs("cs-pl").checked;
+  chartSettings.exmarks = qs("cs-exmarks").checked;
+  chartSettings.exlabels = qs("cs-exlabels").checked;
+  chartSettings.extendedlines = qs("cs-extendedlines").checked;
+  chartSettings.screenshots = qs("cs-screenshots").checked;
+
+  chartSettings.alertLines = qs("cs-alert-lines").checked;
+  chartSettings.alertColor = qs("cs-alert-color").value;
+  chartSettings.onlyActiveAlerts = qs("cs-only-active-alerts").checked;
+  chartSettings.alertVolumeOn = qs("cs-alert-volume-on").checked;
+  chartSettings.alertVolume = Number(qs("cs-alert-volume").value || 70);
+  chartSettings.autohideToasts = qs("cs-autohide-toasts").checked;
+
+  chartSettings.evIdeas = qs("cs-ev-ideas").checked;
+  chartSettings.evDividends = qs("cs-ev-dividends").checked;
+  chartSettings.evSplits = qs("cs-ev-splits").checked;
+  chartSettings.evEarnings = qs("cs-ev-earnings").checked;
+  chartSettings.evEarningsBreaks = qs("cs-ev-earnings-breaks").checked;
+  chartSettings.evNews = qs("cs-ev-news").checked;
+  chartSettings.evNewsNotif = qs("cs-ev-news-notif").checked;
+}
+
+function applyChartSettingsToUI() {
+  // Pour l’instant : on applique ce qu’on peut sans vrai chart
+  // (quand on intègre le chart réel, on branchera chartSettings -> chart API)
+  const chartArea = document.getElementById("chart-area");
+  if (chartArea) {
+    chartArea.style.background = chartSettings.bgColor || "#000";
+  }
+}
+
+btnCsOk?.addEventListener("click", () => {
+  readChartSettingsUI();
+  saveChartSettings();
+  applyChartSettingsToUI();
+  closeChartSettings();
+});
+
+// applique au démarrage
+applyChartSettingsToUI();
+
