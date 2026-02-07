@@ -119,18 +119,12 @@
   <aside id="left-bar">tools</aside>
 
   <main id="chart-area">
-    <!-- Chart host (Phase A/B/C) -->
-    <div id="chart-host" aria-label="Chart"></div>
+    <!-- Overlay layer for drawings/annotations (AI, tools, etc.).
+         Kept separate so we can add/remove layers without touching the chart itself. -->
+    <div id="drawings-overlay" aria-hidden="true"></div>
 
-    <!-- Drawings overlay placeholder (we'll plug real drawings/tools later) -->
-    <div id="chart-drawings-overlay" aria-hidden="true"></div>
-
-    <!-- Status line (like TradingView) -->
-    <div id="chart-statusline" aria-live="polite"></div>
-
-    <!-- Placeholder shown until first symbol is loaded -->
-    <div class="chart-placeholder" id="chart-placeholder">
-      Chart Area
+    <div class="chart-placeholder">
+      <div class="chart-title" id="chart-title">Chart Area</div>
       <div class="chart-sub" id="chart-sub">Click a symbol in the watchlist to load it here.</div>
     </div>
   </main>
@@ -1322,8 +1316,6 @@
   </div>
 </div>
   
-<!-- Lightweight Charts is loaded dynamically in main.js (with CDN fallback) -->
-
 <script src="./main.js"></script>
 </body>
 </html>
