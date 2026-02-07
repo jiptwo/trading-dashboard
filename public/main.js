@@ -61,11 +61,7 @@ document.addEventListener("mouseup", () => resizingV = false);
 document.addEventListener("mousemove", e => {
   if (!resizingV) return;
   const w = window.innerWidth - e.clientX;
-  if (w > 260 && w < 900) {
-    rightBar.style.width = w + "px";
-    // Keep the chart inside its container while resizing panels.
-    try { chartManager?.resize?.(); } catch (_) {}
-  }
+  if (w > 260 && w < 900) rightBar.style.width = w + "px";
 });
 
 resizerH?.addEventListener("mousedown", () => resizingH = true);
@@ -172,59 +168,6 @@ function initFavorites(menuId, favoritesContainerId, iconMode = false) {
 initFavorites("chart-menu", "chart-favorites", true);
 initFavorites("timeframe-menu", "timeframe-favorites");
 
-/* ================= CHART STATE (Phase A/B/C) ================= */
-const CHART_STATE_KEY = "tp_chart_state_v1";
-let chartState = LS.get(CHART_STATE_KEY, {
-  symbol: "AAPL",
-  timeframe: "1D",
-  type: "Candles",
-});
-
-// Will be initialized lazily once the charting library is ready.
-let chartManager = null;
-
-function saveChartState(){ LS.set(CHART_STATE_KEY, chartState); }
-
-function setChartState(patch){
-  chartState = { ...chartState, ...patch };
-  saveChartState();
-  window.dispatchEvent(new CustomEvent("tp:chart-state", { detail: { ...chartState } }));
-}
-
-// React to any chart-state update
-window.addEventListener("tp:chart-state", (e) => {
-  const st = e.detail || chartState;
-  try { chartManager?.setSeriesType(st.type); } catch (_) {}
-  try { chartManager?.load(st.symbol, st.timeframe); } catch (_) {}
-});
-
-// Timeframe favorites (one click)
-document.getElementById("timeframe-favorites")?.addEventListener("click", (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
-  const tf = (btn.dataset.label || btn.textContent || "").trim();
-  if (!tf) return;
-  setChartState({ timeframe: tf });
-});
-
-// Chart type favorites (icons)
-document.getElementById("chart-favorites")?.addEventListener("click", (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
-  const t = (btn.dataset.label || "").trim();
-  if (!t) return;
-  setChartState({ type: t });
-});
-
-// Chart type from menu
-document.getElementById("chart-menu")?.addEventListener("click", (e) => {
-  const item = e.target.closest(".menu-item");
-  if (!item) return;
-  const t = (item.dataset.type || "").trim();
-  if (!t) return;
-  setChartState({ type: t });
-});
-
 /* ================= USER MENU (TradingView-like) ================= */
 const THEME_KEY = "tp_theme_v1";
 const DRAWINGS_KEY = "tp_drawings_panel_v1";
@@ -259,18 +202,22 @@ function initUserMenu(){
     if (usernameEl) usernameEl.textContent = state.username || "jpbeaudoin";
     if (initialsEl) initialsEl.textContent = initialsFrom(state.username);
 
-    document.body.classList.toggle("light", !state.darkTheme);
-    document.body.classList.toggle("dark", !!state.darkTheme);
+    const isLight = !state.darkTheme;
+    document.body.classList.toggle("light", isLight);
+    document.body.classList.toggle("dark", !isLight);
 
-    // Keep both theme systems in sync
-    applyTheme(state.darkTheme ? "dark" : "light");
-    try { chartManager?.applyThemeOrSettings?.(); } catch (_) {}
+    // Keep CSS theme hooks consistent (some parts use html.theme-light, others use body.light)
+    document.documentElement.classList.toggle("theme-light", isLight);
+    document.documentElement.setAttribute("data-theme", isLight ? "light" : "dark");
 
     const darkToggle = document.getElementById("user-dark-theme");
     if (darkToggle) darkToggle.checked = !!state.darkTheme;
 
     const drawToggle = document.getElementById("user-drawings-panel");
     if (drawToggle) drawToggle.checked = !!state.drawingsPanel;
+
+    // Drawings overlay (future tools/AI). For now it's just a layer that can be hidden.
+    document.body.classList.toggle("drawings-off", !state.drawingsPanel);
 
     const langLabel = document.getElementById("user-language-label");
     if (langLabel){
@@ -325,6 +272,12 @@ function initUserMenu(){
     if (ppAvatar) ppAvatar.textContent = initials;
     if (ppUser) ppUser.textContent = state.username || "jpbeaudoin";
     openOverlay("public-profile-overlay");
+  }
+
+  // Backward-compat alias: some menu handlers call openProfile()
+  // Keep this as a thin wrapper so nothing breaks.
+  function openProfile(){
+    openPublicProfile();
   }
   document.getElementById("public-profile-close")?.addEventListener("click", ()=>closeOverlay("public-profile-overlay"));
 
@@ -791,236 +744,10 @@ function renderWatchlistTable() {
   wireColumnResizers(header);
 }
 
-/* ================= CHART AREA (Phase A/B/C) ================= */
-function isLightTheme() {
-  return document.documentElement.classList.contains("theme-light") || document.body.classList.contains("light");
-}
-
-function seedFromString(str) {
-  // Simple, stable 32-bit hash
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return (h >>> 0);
-}
-
-function mulberry32(seed) {
-  return function () {
-    let t = seed += 0x6D2B79F5;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function tfToMinutes(tf) {
-  const m = String(tf || "").trim().toUpperCase();
-  if (m.endsWith("M")) return parseInt(m, 10) || 1;
-  if (m.endsWith("H")) return (parseInt(m, 10) || 1) * 60;
-  if (m === "1D" || m === "D") return 60 * 24;
-  if (m === "1W" || m === "W") return 60 * 24 * 7;
-  return 60 * 24; // default
-}
-
-function generateMockCandles(symbol, timeframe, points = 240) {
-  const seed = seedFromString(`${symbol}|${timeframe}`);
-  const rnd = mulberry32(seed);
-
-  const tfMin = tfToMinutes(timeframe);
-  const nowSec = Math.floor(Date.now() / 1000);
-  const stepSec = tfMin * 60;
-
-  // Base price per symbol (stable)
-  const baseSeed = seedFromString(`${symbol}|base`);
-  const baseRnd = mulberry32(baseSeed);
-  let price = 20 + baseRnd() * 280; // $20-$300
-
-  const data = [];
-  for (let i = points - 1; i >= 0; i--) {
-    const time = nowSec - i * stepSec;
-    const vol = 0.4 + rnd(); // volatility factor
-    const drift = (rnd() - 0.5) * vol;
-    const open = price;
-    const close = Math.max(0.1, open + drift * open * 0.01);
-    const high = Math.max(open, close) * (1 + rnd() * vol * 0.01);
-    const low = Math.min(open, close) * (1 - rnd() * vol * 0.01);
-    price = close;
-    data.push({ time, open, high, low, close });
-  }
-  return data;
-}
-
-const ChartManager = (() => {
-  let chart = null;
-  let series = null;
-  let host = null;
-  let ro = null;
-
-  function ensureHost() {
-    if (!host) host = document.getElementById("chart-host");
-    return host;
-  }
-
-  function buildOptions() {
-    const light = isLightTheme();
-    const bg = chartSettings?.appearance?.backgroundColor || (light ? "#ffffff" : "#000000");
-    const txt = light ? "#0b1220" : "rgba(255,255,255,0.85)";
-    return {
-      layout: {
-        background: { type: "solid", color: bg },
-        textColor: txt,
-        fontFamily: "Arial, sans-serif",
-      },
-      grid: {
-        vertLines: { color: light ? "rgba(11,18,32,0.08)" : "rgba(255,255,255,0.06)" },
-        horzLines: { color: light ? "rgba(11,18,32,0.08)" : "rgba(255,255,255,0.06)" },
-      },
-      rightPriceScale: { borderColor: light ? "rgba(11,18,32,0.12)" : "rgba(255,255,255,0.10)" },
-      timeScale: {
-        borderColor: light ? "rgba(11,18,32,0.12)" : "rgba(255,255,255,0.10)",
-        timeVisible: true,
-        secondsVisible: false,
-      },
-      crosshair: { mode: 0 },
-      handleScroll: true,
-      handleScale: true,
-    };
-  }
-
-  function createIfNeeded() {
-    const el = ensureHost();
-    if (!el) return false;
-
-    // NOTE: We intentionally do NOT auto-load any external chart library.
-    // If LightweightCharts is present (added later as a local file), we use it.
-    // Otherwise we stay in "placeholder" mode (no console errors).
-    if (!window.LightweightCharts || typeof window.LightweightCharts.createChart !== "function") {
-      return false;
-    }
-
-    if (chart) return true;
-
-    chart = window.LightweightCharts.createChart(el, buildOptions());
-
-    // Safety: if the library API doesn't match what we expect, fall back silently.
-    if (!chart || (typeof chart.addCandlestickSeries !== "function" && typeof chart.addLineSeries !== "function")) {
-      chart = null;
-      return false;
-    }
-
-    setSeriesType(chartState.type || "Candles");
-
-    // ResizeObserver keeps chart responsive with your resizers
-    ro = new ResizeObserver(() => {
-      if (!chart || !host) return;
-      const r = host.getBoundingClientRect();
-      chart.applyOptions({ width: Math.floor(r.width), height: Math.floor(r.height) });
-    });
-    ro.observe(el);
-
-    return true;
-  }
-
-  function setSeriesType(type) {
-    if (!chart) return;
-    const t = String(type || "Candles");
-    if (series) {
-      try { chart.removeSeries(series); } catch {}
-      series = null;
-    }
-
-    // Guard against API differences between library versions.
-    if (t === "Line" && typeof chart.addLineSeries === "function") {
-      series = chart.addLineSeries({ lineWidth: 2 });
-      return;
-    }
-
-    if (t === "Bars" && typeof chart.addBarSeries === "function") {
-      series = chart.addBarSeries();
-      return;
-    }
-
-    // Default: Candles. If not available, fall back to line.
-    if (typeof chart.addCandlestickSeries === "function") {
-      series = chart.addCandlestickSeries();
-    } else if (typeof chart.addLineSeries === "function") {
-      series = chart.addLineSeries({ lineWidth: 2 });
-    }
-  }
-
-  function setData(candles) {
-    if (!chart || !series) return;
-    const t = String(chartState.type || "Candles");
-
-    if (t === "Line") {
-      const line = candles.map(c => ({ time: c.time, value: c.close }));
-      series.setData(line);
-    } else if (t === "Bars") {
-      series.setData(candles);
-    } else {
-      series.setData(candles);
-    }
-
-    chart.timeScale().fitContent();
-  }
-
-  function updateStatusline(candles) {
-    const st = document.getElementById("chart-statusline");
-    if (!st) return;
-    const last = candles?.[candles.length - 1];
-    if (!last) {
-      st.textContent = "";
-      return;
-    }
-    const sym = chartState.symbol || "";
-    const tf = chartState.timeframe || "";
-    st.textContent = `${sym}  •  ${tf}  •  O:${last.open.toFixed(2)} H:${last.high.toFixed(2)} L:${last.low.toFixed(2)} C:${last.close.toFixed(2)}`;
-  }
-
-  function load(symbol, timeframe) {
-    const data = generateMockCandles(symbol, timeframe, 260);
-
-    // Always update the status line (works even before the real chart is added)
-    updateStatusline(data);
-
-    // If chart library isn't present yet, stay in placeholder mode.
-    if (!createIfNeeded()) {
-      const list = getActiveList();
-      if (chartSub) {
-        chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
-      }
-      return;
-    }
-
-    // Hide placeholder once the real chart exists
-    const placeholder = document.querySelector("#chart-area .chart-placeholder");
-    if (placeholder) placeholder.style.display = "none";
-
-    setData(data);
-    updateStatusline(data);
-  }
-
-  function applyThemeOrSettings() {
-    if (!chart) return;
-    chart.applyOptions(buildOptions());
-  }
-
-  return {
-    load,
-    setSeriesType: (t) => { setSeriesType(t); },
-    applyThemeOrSettings,
-    resize,
-  };
-})();
-
-// Expose the chart API under the name used elsewhere in the file.
-chartManager = ChartManager;
-
-/* Load symbol into chart on single click */
+/* ================= CHART LOAD (single click) ================= */
 function loadSymbolIntoChart(symbol) {
-  setChartState({ symbol });
+  const list = getActiveList();
+  if (chartSub) chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
 }
 
 /* ================= SYMBOL TOOLTIP ================= */
@@ -1719,6 +1446,52 @@ rowMenuNote?.addEventListener("click", () => {
   closeRowMenu();
   openNoteModal(sym);
 });
+
+/* ================= COLUMN UI HELPERS (missing in boot) =================
+   These functions are referenced by the BOOT() block at the bottom.
+   They were missing, which caused the whole app to freeze (JS error stops execution).
+*/
+function hydrateColumnsMenuFromState() {
+  const list = getActiveList();
+
+  // Table view toggle
+  if (tableToggle) tableToggle.checked = !!(list.columns && list.columns.table);
+
+  // Per-column toggles
+  columnKeys.forEach(k => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
+    if (cb) cb.checked = !!(list.columns && list.columns[k]);
+  });
+}
+
+// In our current implementation the watchlist table is re-rendered when columns change,
+// so this is a safe wrapper used by the BOOT() block.
+function applyColumnVisibility() {
+  renderWatchlistTable();
+}
+
+/* ================= COLUMN UI HELPERS (missing in boot) =================
+   These functions are referenced by the BOOT() block at the bottom.
+   They were missing, which caused the whole app to freeze (JS error stops execution).
+*/
+function hydrateColumnsMenuFromState() {
+  const list = getActiveList();
+
+  // Table view toggle
+  if (tableToggle) tableToggle.checked = !!(list.columns && list.columns.table);
+
+  // Per-column toggles
+  columnKeys.forEach(k => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
+    if (cb) cb.checked = !!(list.columns && list.columns[k]);
+  });
+}
+
+// In our current implementation the table re-renders when columns change,
+// so this is a safe wrapper used by the BOOT() block.
+function applyColumnVisibility() {
+  renderWatchlistTable();
+}
 
 /* ================= ALERTS (TradingView-like) ================= */
 const ALERTS_LS_KEY = "tp_alerts_v1";
@@ -2446,13 +2219,12 @@ function readChartSettingsUI() {
 }
 
 function applyChartSettingsToUI() {
+  // Pour l’instant : on applique ce qu’on peut sans vrai chart
+  // (quand on intègre le chart réel, on branchera chartSettings -> chart API)
   const chartArea = document.getElementById("chart-area");
   if (chartArea) {
     chartArea.style.background = chartSettings.bgColor || "#000";
   }
-
-  // Apply to real chart if available
-  try { chartState?.applyThemeOrSettings?.(); } catch (_) {}
 }
 
 btnCsOk?.addEventListener("click", () => {
@@ -2465,17 +2237,25 @@ btnCsOk?.addEventListener("click", () => {
 // applique au démarrage
 applyChartSettingsToUI();
 
-/* ================= BOOT: REAL CHART (Phase A/B/C) ================= */
-(function bootChartArea(){
-  // Professional mode: no external CDN loading here.
-  // If you later add a local charting library (e.g. LightweightCharts),
-  // ChartManager will detect it automatically.
-  try {
-    chartManager?.setSeriesType?.(chartState.type);
-    chartManager?.applyThemeOrSettings?.();
-    chartManager?.load?.(chartState.symbol, chartState.timeframe);
-  } catch (err) {
-    console.warn("[BOOT] chartArea", err);
-  }
-})();
 
+
+/* ================= BOOT =================
+   Important: keep the app usable even if one feature fails.
+*/
+(function boot(){
+  const safe = (label, fn) => {
+    try { fn(); }
+    catch (err) { console.error("[BOOT]", label, err); }
+  };
+
+  safe("initUserMenu", () => initUserMenu());
+  safe("normalizeWatchlists", () => normalizeWatchlists());
+  safe("hydrateColumnsMenuFromState", () => hydrateColumnsMenuFromState());
+  safe("applyColumnVisibility", () => applyColumnVisibility());
+  safe("renderWatchlistHeader", () => renderWatchlistHeader());
+  safe("renderWatchlistTable", () => renderWatchlistTable());
+  safe("mountAlertsButton", () => mountAlertsButton());
+
+  // Default: show Watchlist in Zone 1 (user can switch to Alerts using the right bar icon)
+  safe("showWatchlistPanel", () => showWatchlistPanel());
+})();
