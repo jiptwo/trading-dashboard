@@ -57,6 +57,10 @@
       <img src="./icons/settings.svg" class="icon" />
     </button>
 
+<button class="btn" id="btn-chart-settings" title="Chart settings">
+  <img src="./icons/sliders.svg" class="icon" />
+</button>
+    
     <!-- USER MENU -->
     <div class="dropdown">
       <button class="btn dropdown-btn" data-dropdown="user-menu" title="User">
@@ -809,6 +813,509 @@
   <button class="row-menu-item danger" data-action="delete" id="row-menu-delete">Delete</button>
 </div>
 
+<!-- CHART SETTINGS (TradingView-like) -->
+<div id="chart-settings-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="tv-modal tv-settings">
+    <div class="tv-modal-header">
+      <div class="tv-modal-title">Settings</div>
+      <button class="tv-close" id="chart-settings-close" title="Close">✕</button>
+    </div>
+
+    <div class="tv-modal-body">
+      <aside class="tv-nav" aria-label="Settings navigation">
+        <button class="tv-nav-item active" data-tvtab="symbol">
+          <img class="tv-nav-icon" src="./icons/sliders.svg" alt="" />
+          <span>Symbol</span>
+        </button>
+        <button class="tv-nav-item" data-tvtab="status">
+          <img class="tv-nav-icon" src="./icons/align-left.svg" alt="" />
+          <span>Status line</span>
+        </button>
+        <button class="tv-nav-item" data-tvtab="scales">
+          <img class="tv-nav-icon" src="./icons/line-chart.svg" alt="" />
+          <span>Scales and lines</span>
+        </button>
+        <button class="tv-nav-item" data-tvtab="canvas">
+          <img class="tv-nav-icon" src="./icons/paintbrush.svg" alt="" />
+          <span>Canvas</span>
+        </button>
+        <button class="tv-nav-item" data-tvtab="trading">
+          <img class="tv-nav-icon" src="./icons/trending-up.svg" alt="" />
+          <span>Trading</span>
+        </button>
+        <button class="tv-nav-item" data-tvtab="alerts">
+          <img class="tv-nav-icon" src="./icons/alarm-clock.svg" alt="" />
+          <span>Alerts</span>
+        </button>
+        <button class="tv-nav-item" data-tvtab="events">
+          <img class="tv-nav-icon" src="./icons/calendar.svg" alt="" />
+          <span>Events</span>
+        </button>
+      </aside>
+
+      <section class="tv-content">
+        <!-- TAB: Symbol -->
+        <div class="tv-tab active" data-tvtab="symbol">
+          <div class="tv-section-title">Candles</div>
+
+          <label class="tv-row">
+            <span>Color bars based on previous close</span>
+            <input type="checkbox" id="cs-prevclose" />
+          </label>
+
+          <div class="tv-section-title">Body / Borders / Wick</div>
+
+          <label class="tv-row">
+            <span>Body</span>
+            <input type="checkbox" id="cs-body-on" checked />
+            <span class="tv-colorpair">
+              <input type="color" id="cs-body-up" value="#22c55e" />
+              <input type="color" id="cs-body-down" value="#ef4444" />
+            </span>
+          </label>
+
+          <label class="tv-row">
+            <span>Borders</span>
+            <input type="checkbox" id="cs-borders-on" checked />
+            <span class="tv-colorpair">
+              <input type="color" id="cs-borders-up" value="#22c55e" />
+              <input type="color" id="cs-borders-down" value="#ef4444" />
+            </span>
+          </label>
+
+          <label class="tv-row">
+            <span>Wick</span>
+            <input type="checkbox" id="cs-wick-on" checked />
+            <span class="tv-colorpair">
+              <input type="color" id="cs-wick-up" value="#22c55e" />
+              <input type="color" id="cs-wick-down" value="#ef4444" />
+            </span>
+          </label>
+
+          <div class="tv-section-title">Data modification</div>
+
+          <label class="tv-row">
+            <span>Adjust data for dividends</span>
+            <input type="checkbox" id="cs-dividends" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Precision</span>
+            <select id="cs-precision" class="tv-select">
+              <option value="default">Default</option>
+              <option value="2">2 decimals</option>
+              <option value="3">3 decimals</option>
+              <option value="4">4 decimals</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Timezone</span>
+            <select id="cs-timezone" class="tv-select">
+              <option value="exchange">Exchange</option>
+              <option value="local">Local</option>
+              <option value="utc">UTC</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- TAB: Status line -->
+        <div class="tv-tab" data-tvtab="status">
+          <div class="tv-section-title">Symbol</div>
+
+          <label class="tv-row">
+            <span>Logo</span>
+            <input type="checkbox" id="cs-logo" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Title</span>
+            <input type="checkbox" id="cs-title" checked />
+            <select id="cs-title-mode" class="tv-select">
+              <option value="description">Description</option>
+              <option value="ticker">Ticker</option>
+              <option value="ticker_desc">Ticker + Description</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Chart values</span>
+            <input type="checkbox" id="cs-chart-values" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Bar change values</span>
+            <input type="checkbox" id="cs-bar-change" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Volume</span>
+            <input type="checkbox" id="cs-status-volume" />
+          </label>
+
+          <label class="tv-row">
+            <span>Last day change values</span>
+            <input type="checkbox" id="cs-lastday" />
+          </label>
+
+          <div class="tv-section-title">Indicators</div>
+
+          <label class="tv-row">
+            <span>Titles</span>
+            <input type="checkbox" id="cs-ind-titles" checked />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Inputs</span>
+            <input type="checkbox" id="cs-ind-inputs" checked />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Values</span>
+            <input type="checkbox" id="cs-ind-values" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Background</span>
+            <input type="checkbox" id="cs-ind-bg" checked />
+            <input type="range" id="cs-ind-bg-alpha" min="0" max="100" value="35" />
+          </label>
+        </div>
+
+        <!-- TAB: Scales and lines -->
+        <div class="tv-tab" data-tvtab="scales">
+          <div class="tv-section-title">Price scale</div>
+
+          <label class="tv-row">
+            <span>Currency and Unit</span>
+            <select id="cs-currency" class="tv-select">
+              <option value="always">Always visible</option>
+              <option value="hover">Visible on mouse over</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Scale modes (A and L)</span>
+            <select id="cs-scale-modes" class="tv-select">
+              <option value="hover">Visible on mouse over</option>
+              <option value="always">Always visible</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Lock price to bar ratio</span>
+            <input type="checkbox" id="cs-lock-ratio" />
+            <input type="text" class="tv-input" placeholder="0.000000" disabled />
+          </label>
+
+          <label class="tv-row">
+            <span>Scales placement</span>
+            <select id="cs-scales-placement" class="tv-select">
+              <option value="auto">Auto</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+
+          <div class="tv-section-title">Price labels & lines</div>
+
+          <label class="tv-row">
+            <span>No overlapping labels</span>
+            <input type="checkbox" id="cs-no-overlap" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Plus button</span>
+            <input type="checkbox" id="cs-plus-btn" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Countdown to bar close</span>
+            <input type="checkbox" id="cs-countdown" checked />
+          </label>
+
+          <div class="tv-section-title">Time scale</div>
+
+          <label class="tv-row">
+            <span>Day of week on labels</span>
+            <input type="checkbox" id="cs-dow" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Date format</span>
+            <select id="cs-datefmt" class="tv-select">
+              <option value="mon_dd_yy">Mon 29 Sep '97</option>
+              <option value="yyyy_mm_dd">YYYY-MM-DD</option>
+              <option value="dd_mm_yyyy">DD/MM/YYYY</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Time hours format</span>
+            <select id="cs-timefmt" class="tv-select">
+              <option value="24">24-hours</option>
+              <option value="12">12-hours</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Save chart left edge position when changing interval</span>
+            <input type="checkbox" id="cs-save-left-edge" />
+          </label>
+        </div>
+
+        <!-- TAB: Canvas -->
+        <div class="tv-tab" data-tvtab="canvas">
+          <div class="tv-section-title">Chart basic styles</div>
+
+          <label class="tv-row">
+            <span>Background</span>
+            <select id="cs-bg-mode" class="tv-select">
+              <option value="solid">Solid</option>
+              <option value="gradient">Gradient</option>
+            </select>
+            <input type="color" id="cs-bg-color" value="#000000" />
+          </label>
+
+          <label class="tv-row">
+            <span>Grid lines</span>
+            <select id="cs-grid" class="tv-select">
+              <option value="both">Vert and horz</option>
+              <option value="vert">Vertical only</option>
+              <option value="horz">Horizontal only</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Pane separators</span>
+            <input type="checkbox" id="cs-separators" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Crosshair</span>
+            <select id="cs-crosshair" class="tv-select">
+              <option value="default">Default</option>
+              <option value="thin">Thin</option>
+              <option value="none">Hidden</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Watermark</span>
+            <select id="cs-watermark" class="tv-select">
+              <option value="replay">Replay mode</option>
+              <option value="ticker">Ticker</option>
+              <option value="none">Hidden</option>
+            </select>
+          </label>
+
+          <div class="tv-section-title">Buttons</div>
+
+          <label class="tv-row">
+            <span>Navigation</span>
+            <select id="cs-nav" class="tv-select">
+              <option value="hover">Visible on mouse over</option>
+              <option value="always">Always visible</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Pane</span>
+            <select id="cs-pane" class="tv-select">
+              <option value="hover">Visible on mouse over</option>
+              <option value="always">Always visible</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </label>
+
+          <div class="tv-section-title">Margins</div>
+
+          <label class="tv-row">
+            <span>Top</span>
+            <input type="number" id="cs-mt" class="tv-input" value="10" /> <span class="tv-unit">%</span>
+          </label>
+          <label class="tv-row">
+            <span>Bottom</span>
+            <input type="number" id="cs-mb" class="tv-input" value="8" /> <span class="tv-unit">%</span>
+          </label>
+        </div>
+
+        <!-- TAB: Trading -->
+        <div class="tv-tab" data-tvtab="trading">
+          <div class="tv-section-title">General</div>
+
+          <label class="tv-row">
+            <span>Buy/sell buttons</span>
+            <input type="checkbox" id="cs-buysell" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>One-click trading</span>
+            <input type="checkbox" id="cs-oneclick" />
+          </label>
+
+          <label class="tv-row">
+            <span>Execution sound</span>
+            <input type="checkbox" id="cs-sound" checked />
+            <input type="range" id="cs-volume" min="0" max="100" value="60" />
+            <select id="cs-sound-type" class="tv-select">
+              <option>Alarm Clock</option>
+              <option>Click</option>
+              <option>Pop</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Show only rejection notifications</span>
+            <input type="checkbox" id="cs-rejectonly" checked />
+          </label>
+
+          <div class="tv-section-title">Appearance</div>
+
+          <label class="tv-row">
+            <span>Positions and orders</span>
+            <input type="checkbox" id="cs-posorders" checked />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Reverse position button</span>
+            <input type="checkbox" id="cs-reverse" checked />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Project order for market orders</span>
+            <input type="checkbox" id="cs-project" />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Profit and loss value</span>
+            <input type="checkbox" id="cs-pl" checked />
+            <select class="tv-select">
+              <option>Money</option>
+              <option>Points</option>
+              <option>Percent</option>
+            </select>
+          </label>
+
+          <label class="tv-row indent">
+            <span>Execution marks</span>
+            <input type="checkbox" id="cs-exmarks" checked />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Execution labels</span>
+            <input type="checkbox" id="cs-exlabels" />
+          </label>
+
+          <label class="tv-row">
+            <span>Extended price lines across the entire chart width</span>
+            <input type="checkbox" id="cs-extendedlines" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Order and position alignment</span>
+            <select class="tv-select">
+              <option>Right</option>
+              <option>Left</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Orders, executions and positions in screenshots</span>
+            <input type="checkbox" id="cs-screenshots" />
+          </label>
+        </div>
+
+        <!-- TAB: Alerts -->
+        <div class="tv-tab" data-tvtab="alerts">
+          <div class="tv-section-title">Chart line visibility</div>
+
+          <label class="tv-row">
+            <span>Alert lines</span>
+            <input type="checkbox" id="cs-alert-lines" checked />
+            <input type="color" id="cs-alert-color" value="#ef4444" />
+          </label>
+
+          <label class="tv-row">
+            <span>Only active alerts</span>
+            <input type="checkbox" id="cs-only-active-alerts" checked />
+          </label>
+
+          <div class="tv-section-title">Notifications</div>
+
+          <label class="tv-row">
+            <span>Alert volume</span>
+            <input type="checkbox" id="cs-alert-volume-on" checked />
+            <input type="range" id="cs-alert-volume" min="0" max="100" value="70" />
+          </label>
+
+          <label class="tv-row">
+            <span>Automatically hide toasts</span>
+            <input type="checkbox" id="cs-autohide-toasts" checked />
+          </label>
+        </div>
+
+        <!-- TAB: Events -->
+        <div class="tv-tab" data-tvtab="events">
+          <div class="tv-section-title">Events</div>
+
+          <label class="tv-row">
+            <span>Ideas</span>
+            <input type="checkbox" id="cs-ev-ideas" />
+            <select class="tv-select" disabled>
+              <option>All ideas</option>
+            </select>
+          </label>
+
+          <label class="tv-row">
+            <span>Dividends</span>
+            <input type="checkbox" id="cs-ev-dividends" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Splits</span>
+            <input type="checkbox" id="cs-ev-splits" checked />
+          </label>
+
+          <label class="tv-row">
+            <span>Earnings</span>
+            <input type="checkbox" id="cs-ev-earnings" checked />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Earnings breaks</span>
+            <input type="checkbox" id="cs-ev-earnings-breaks" />
+          </label>
+
+          <label class="tv-row indent">
+            <span>Latest news</span>
+            <input type="checkbox" id="cs-ev-news" />
+          </label>
+
+          <label class="tv-row indent">
+            <span>News notification</span>
+            <input type="checkbox" id="cs-ev-news-notif" />
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <div class="tv-modal-footer">
+      <div class="tv-footer-left">
+        <button class="tv-template-btn">Template <span class="arrow">▾</span></button>
+      </div>
+      <div class="tv-footer-right">
+        <button class="tv-btn" id="chart-settings-cancel">Cancel</button>
+        <button class="tv-btn primary" id="chart-settings-ok">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
 <script src="./main.js"></script>
 </body>
 </html>
