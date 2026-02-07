@@ -56,50 +56,29 @@ const zone1 = document.getElementById("zone-1");
 let resizingV = false;
 let resizingH = false;
 
-function emitLayoutResize() {
-  // Most chart libs listen to this
-  window.dispatchEvent(new Event("resize"));
-  // And we also expose a custom hook
-  window.dispatchEvent(new CustomEvent("layout:resize"));
-}
+resizerV?.addEventListener("mousedown", () => resizingV = true);
+document.addEventListener("mouseup", () => resizingV = false);
+document.addEventListener("mousemove", e => {
+  if (!resizingV) return;
+  const w = window.innerWidth - e.clientX;
+  if (w > 260 && w < 900) rightBar.style.width = w + "px";
+});
 
-// Pointer-based resizing (mouse + touch) + chart resize events
-resizerV?.addEventListener("pointerdown", (e) => {
-  resizingV = true;
-  resizerV.setPointerCapture?.(e.pointerId);
-});
-document.addEventListener("pointerup", () => {
-  if (resizingV || resizingH) emitLayoutResize();
-  resizingV = false;
-  resizingH = false;
-});
-document.addEventListener("pointermove", (e) => {
-  if (resizingV) {
-    const w = window.innerWidth - e.clientX;
-    if (w > 260 && w < 900) {
-      rightBar.style.width = w + "px";
-      emitLayoutResize();
-    }
-    return;
+resizerH?.addEventListener("mousedown", () => resizingH = true);
+document.addEventListener("mouseup", () => resizingH = false);
+document.addEventListener("mousemove", e => {
+  if (!resizingH) return;
+
+  const rect = rightBar.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+
+  const min = 120;
+  const max = rect.height - 120;
+
+  if (y > min && y < max) {
+    zone1.style.flex = "none";
+    zone1.style.height = y + "px";
   }
-  if (resizingH) {
-    const rect = rightBar.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-
-    const min = 120;
-    const max = rect.height - 120;
-
-    if (y > min && y < max) {
-      zone1.style.flex = "none";
-      zone1.style.height = y + "px";
-      emitLayoutResize();
-    }
-  }
-});
-
-resizerH?.addEventListener("pointerdown", (e) => {
-  resizingH = true;
-  resizerH.setPointerCapture?.(e.pointerId);
 });
 
 /* ================= FAVORITES (Chart & Timeframe) ================= */
@@ -196,9 +175,6 @@ const LANG_KEY = "tp_language_v1";
 
 function applyTheme(mode) {
   const isLight = mode === "light";
-  // Single source of truth: html[data-theme]
-  document.documentElement.dataset.theme = isLight ? "light" : "dark";
-  // Backward compatibility (some CSS uses .theme-light)
   document.documentElement.classList.toggle("theme-light", isLight);
 }
 
@@ -226,16 +202,14 @@ function initUserMenu(){
     if (usernameEl) usernameEl.textContent = state.username || "jpbeaudoin";
     if (initialsEl) initialsEl.textContent = initialsFrom(state.username);
 
-    applyTheme(state.darkTheme ? "dark" : "light");
+    document.body.classList.toggle("light", !state.darkTheme);
+    document.body.classList.toggle("dark", !!state.darkTheme);
 
     const darkToggle = document.getElementById("user-dark-theme");
     if (darkToggle) darkToggle.checked = !!state.darkTheme;
 
     const drawToggle = document.getElementById("user-drawings-panel");
     if (drawToggle) drawToggle.checked = !!state.drawingsPanel;
-
-    // Show / hide drawings overlay (model only for now)
-    setDrawingsPanel(!!state.drawingsPanel);
 
     const langLabel = document.getElementById("user-language-label");
     if (langLabel){
@@ -412,87 +386,7 @@ const watchlistBody = document.getElementById("watchlist-body");
 const tableToggle = document.getElementById("table-toggle");
 const watchlistSearch = document.getElementById("watchlist-search");
 const chartSub = document.getElementById("chart-sub");
-const csSymbol = document.getElementById("cs-symbol");
-const csTf = document.getElementById("cs-tf");
-const symbolInput = document.getElementById("symbol-input");
 const symbolTooltip = document.getElementById("symbol-tooltip");
-
-/* ================= DRAWINGS OVERLAY (starter model) =================
-   This is a minimal, safe foundation for future tools:
-   - A canvas overlay locked to the chart-area size
-   - Optional freehand drawing when enabled
-*/
-const drawingsCanvas = document.getElementById("drawings-canvas");
-let drawingsEnabled = false;
-let drawIsDown = false;
-let drawLast = null;
-
-function resizeDrawingsCanvas() {
-  if (!drawingsCanvas) return;
-  const r = drawingsCanvas.getBoundingClientRect();
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
-  drawingsCanvas.width = Math.floor(r.width * dpr);
-  drawingsCanvas.height = Math.floor(r.height * dpr);
-  const ctx = drawingsCanvas.getContext("2d");
-  if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-
-function clearDrawings() {
-  if (!drawingsCanvas) return;
-  const ctx = drawingsCanvas.getContext("2d");
-  if (!ctx) return;
-  ctx.clearRect(0, 0, drawingsCanvas.width, drawingsCanvas.height);
-}
-
-function setDrawingsPanel(on) {
-  drawingsEnabled = !!on;
-  if (!drawingsCanvas) return;
-  drawingsCanvas.style.pointerEvents = drawingsEnabled ? "auto" : "none";
-  if (drawingsEnabled) {
-    resizeDrawingsCanvas();
-  }
-}
-
-// Basic freehand draw (dark theme default colors).
-// This is temporary scaffolding — tools/favorites will be added later.
-function drawLine(from, to) {
-  if (!drawingsCanvas) return;
-  const ctx = drawingsCanvas.getContext("2d");
-  if (!ctx) return;
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "rgba(96,165,250,0.95)";
-  ctx.beginPath();
-  ctx.moveTo(from.x, from.y);
-  ctx.lineTo(to.x, to.y);
-  ctx.stroke();
-}
-
-if (drawingsCanvas) {
-  drawingsCanvas.addEventListener("pointerdown", (e) => {
-    if (!drawingsEnabled) return;
-    drawIsDown = true;
-    drawingsCanvas.setPointerCapture(e.pointerId);
-    drawLast = { x: e.offsetX, y: e.offsetY };
-  });
-  drawingsCanvas.addEventListener("pointermove", (e) => {
-    if (!drawingsEnabled || !drawIsDown || !drawLast) return;
-    const p = { x: e.offsetX, y: e.offsetY };
-    drawLine(drawLast, p);
-    drawLast = p;
-  });
-  drawingsCanvas.addEventListener("pointerup", () => {
-    drawIsDown = false;
-    drawLast = null;
-  });
-  drawingsCanvas.addEventListener("pointercancel", () => {
-    drawIsDown = false;
-    drawLast = null;
-  });
-}
-
-window.addEventListener("resize", () => resizeDrawingsCanvas());
-window.addEventListener("layout:resize", () => resizeDrawingsCanvas());
 
 const columnKeys = ["last","change","changePct","volume","extended","aiCote","aiProb"];
 const columnLabels = {
@@ -838,20 +732,8 @@ function renderWatchlistTable() {
 
 /* ================= CHART LOAD (single click) ================= */
 function loadSymbolIntoChart(symbol) {
-  currentSymbol = symbol;
   const list = getActiveList();
-
-  // Update top symbol box + search input
-  if (symbolInput) symbolInput.value = symbol;
-  if (csSymbol) csSymbol.textContent = symbol;
-
-  // Placeholder message (until the real chart is mounted)
-  if (chartSub) {
-    chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
-  }
-
-  // Notify future chart module (TradingView, Lightweight Charts, etc.)
-  window.dispatchEvent(new CustomEvent("chart:symbol", { detail: { symbol } }));
+  if (chartSub) chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
 }
 
 /* ================= SYMBOL TOOLTIP ================= */
@@ -2295,3 +2177,25 @@ btnCsOk?.addEventListener("click", () => {
 // applique au démarrage
 applyChartSettingsToUI();
 
+
+
+/* ================= BOOT =================
+   Important: keep the app usable even if one feature fails.
+*/
+(function boot(){
+  const safe = (label, fn) => {
+    try { fn(); }
+    catch (err) { console.error("[BOOT]", label, err); }
+  };
+
+  safe("initUserMenu", () => initUserMenu());
+  safe("normalizeWatchlists", () => normalizeWatchlists());
+  safe("hydrateColumnsMenuFromState", () => hydrateColumnsMenuFromState());
+  safe("applyColumnVisibility", () => applyColumnVisibility());
+  safe("renderWatchlistHeader", () => renderWatchlistHeader());
+  safe("renderWatchlistTable", () => renderWatchlistTable());
+  safe("mountAlertsButton", () => mountAlertsButton());
+
+  // Default: show Watchlist in Zone 1 (user can switch to Alerts using the right bar icon)
+  safe("showWatchlistPanel", () => showWatchlistPanel());
+})();
