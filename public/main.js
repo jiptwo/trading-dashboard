@@ -1942,10 +1942,12 @@ function openChartSettings() {
   if (!csOverlay) return;
   hydrateChartSettingsUI();
   csOverlay.classList.add("open");
+  document.body.classList.add("modal-open"); // ✅ ajoute ça
 }
 
 function closeChartSettings() {
   csOverlay?.classList.remove("open");
+  document.body.classList.remove("modal-open"); // ✅ ajoute ça
 }
 
 btnChartSettings?.addEventListener("click", openChartSettings);
