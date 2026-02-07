@@ -890,6 +890,10 @@ html.theme-light .toggle-knob{ background: rgba(11,15,20,0.75); }
   justify-content: center;
   z-index: 2000;
 }
+body.modal-open {
+  overflow: hidden;
+}
+
 .modal-overlay.open { display: flex; }
 
 .modal {
