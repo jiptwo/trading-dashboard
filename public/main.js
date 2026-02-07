@@ -1433,6 +1433,52 @@ rowMenuNote?.addEventListener("click", () => {
   openNoteModal(sym);
 });
 
+/* ================= COLUMN UI HELPERS (missing in boot) =================
+   These functions are referenced by the BOOT() block at the bottom.
+   They were missing, which caused the whole app to freeze (JS error stops execution).
+*/
+function hydrateColumnsMenuFromState() {
+  const list = getActiveList();
+
+  // Table view toggle
+  if (tableToggle) tableToggle.checked = !!(list.columns && list.columns.table);
+
+  // Per-column toggles
+  columnKeys.forEach(k => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
+    if (cb) cb.checked = !!(list.columns && list.columns[k]);
+  });
+}
+
+// In our current implementation the watchlist table is re-rendered when columns change,
+// so this is a safe wrapper used by the BOOT() block.
+function applyColumnVisibility() {
+  renderWatchlistTable();
+}
+
+/* ================= COLUMN UI HELPERS (missing in boot) =================
+   These functions are referenced by the BOOT() block at the bottom.
+   They were missing, which caused the whole app to freeze (JS error stops execution).
+*/
+function hydrateColumnsMenuFromState() {
+  const list = getActiveList();
+
+  // Table view toggle
+  if (tableToggle) tableToggle.checked = !!(list.columns && list.columns.table);
+
+  // Per-column toggles
+  columnKeys.forEach(k => {
+    const cb = document.querySelector(`#columns-menu input[data-col="${k}"]`);
+    if (cb) cb.checked = !!(list.columns && list.columns[k]);
+  });
+}
+
+// In our current implementation the table re-renders when columns change,
+// so this is a safe wrapper used by the BOOT() block.
+function applyColumnVisibility() {
+  renderWatchlistTable();
+}
+
 /* ================= ALERTS (TradingView-like) ================= */
 const ALERTS_LS_KEY = "tp_alerts_v1";
 const ALERTS_LOG_LS_KEY = "tp_alerts_log_v1";
