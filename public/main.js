@@ -265,6 +265,12 @@ function initUserMenu(){
     if (ppUser) ppUser.textContent = state.username || "jpbeaudoin";
     openOverlay("public-profile-overlay");
   }
+
+  // Backward-compat alias: some menu handlers call openProfile()
+  // Keep this as a thin wrapper so nothing breaks.
+  function openProfile(){
+    openPublicProfile();
+  }
   document.getElementById("public-profile-close")?.addEventListener("click", ()=>closeOverlay("public-profile-overlay"));
 
   // Settings modal
