@@ -884,7 +884,7 @@ html.theme-light .toggle-knob{ background: rgba(11,15,20,0.75); }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.72);
   display: none;
   align-items: center;
   justify-content: center;
