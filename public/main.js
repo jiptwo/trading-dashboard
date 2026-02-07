@@ -61,7 +61,11 @@ document.addEventListener("mouseup", () => resizingV = false);
 document.addEventListener("mousemove", e => {
   if (!resizingV) return;
   const w = window.innerWidth - e.clientX;
-  if (w > 260 && w < 900) rightBar.style.width = w + "px";
+  if (w > 260 && w < 900) {
+    rightBar.style.width = w + "px";
+    // Keep the chart inside its container while resizing panels.
+    try { chartManager?.resize?.(); } catch (_) {}
+  }
 });
 
 resizerH?.addEventListener("mousedown", () => resizingH = true);
@@ -889,14 +893,23 @@ const ChartManager = (() => {
     const el = ensureHost();
     if (!el) return false;
 
-    if (!window.LightweightCharts) {
-      // Library not loaded – keep placeholder UI
+    // NOTE: We intentionally do NOT auto-load any external chart library.
+    // If LightweightCharts is present (added later as a local file), we use it.
+    // Otherwise we stay in "placeholder" mode (no console errors).
+    if (!window.LightweightCharts || typeof window.LightweightCharts.createChart !== "function") {
       return false;
     }
 
     if (chart) return true;
 
     chart = window.LightweightCharts.createChart(el, buildOptions());
+
+    // Safety: if the library API doesn't match what we expect, fall back silently.
+    if (!chart || (typeof chart.addCandlestickSeries !== "function" && typeof chart.addLineSeries !== "function")) {
+      chart = null;
+      return false;
+    }
+
     setSeriesType(chartState.type || "Candles");
 
     // ResizeObserver keeps chart responsive with your resizers
@@ -918,13 +931,22 @@ const ChartManager = (() => {
       series = null;
     }
 
-    if (t === "Line") {
+    // Guard against API differences between library versions.
+    if (t === "Line" && typeof chart.addLineSeries === "function") {
       series = chart.addLineSeries({ lineWidth: 2 });
-    } else if (t === "Bars") {
+      return;
+    }
+
+    if (t === "Bars" && typeof chart.addBarSeries === "function") {
       series = chart.addBarSeries();
-    } else {
-      // Default: Candles (Heikin Ashi later)
+      return;
+    }
+
+    // Default: Candles. If not available, fall back to line.
+    if (typeof chart.addCandlestickSeries === "function") {
       series = chart.addCandlestickSeries();
+    } else if (typeof chart.addLineSeries === "function") {
+      series = chart.addLineSeries({ lineWidth: 2 });
     }
   }
 
@@ -958,10 +980,17 @@ const ChartManager = (() => {
   }
 
   function load(symbol, timeframe) {
+    const data = generateMockCandles(symbol, timeframe, 260);
+
+    // Always update the status line (works even before the real chart is added)
+    updateStatusline(data);
+
+    // If chart library isn't present yet, stay in placeholder mode.
     if (!createIfNeeded()) {
-      // fallback placeholder text
       const list = getActiveList();
-      if (chartSub) chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
+      if (chartSub) {
+        chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
+      }
       return;
     }
 
@@ -969,7 +998,6 @@ const ChartManager = (() => {
     const placeholder = document.querySelector("#chart-area .chart-placeholder");
     if (placeholder) placeholder.style.display = "none";
 
-    const data = generateMockCandles(symbol, timeframe, 260);
     setData(data);
     updateStatusline(data);
   }
@@ -983,36 +1011,12 @@ const ChartManager = (() => {
     load,
     setSeriesType: (t) => { setSeriesType(t); },
     applyThemeOrSettings,
+    resize,
   };
 })();
 
 // Expose the chart API under the name used elsewhere in the file.
 chartManager = ChartManager;
-
-// Dynamically load Lightweight Charts with CDN fallback.
-// This avoids hard failures when a CDN or browser cache has issues.
-function ensureLightweightCharts(cb) {
-  try {
-    if (window.LightweightCharts) { cb?.(true); return; }
-  } catch (_) {}
-
-  const urls = [
-    "https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js",
-    "https://cdn.jsdelivr.net/npm/lightweight-charts/dist/lightweight-charts.standalone.production.js",
-  ];
-
-  const inject = (i) => {
-    if (i >= urls.length) { cb?.(false); return; }
-    const s = document.createElement("script");
-    s.src = urls[i];
-    s.async = true;
-    s.onload = () => cb?.(true);
-    s.onerror = () => inject(i + 1);
-    document.head.appendChild(s);
-  };
-
-  inject(0);
-}
 
 /* Load symbol into chart on single click */
 function loadSymbolIntoChart(symbol) {
@@ -2463,22 +2467,15 @@ applyChartSettingsToUI();
 
 /* ================= BOOT: REAL CHART (Phase A/B/C) ================= */
 (function bootChartArea(){
-  // Lightweight chart is optional; if the CDN fails, we keep the placeholder.
-  const safe = (label, fn) => {
-    try { fn(); }
-    catch (err) { console.warn(`[BOOT] ${label}`, err); }
-  };
-
-  // Load the charting library with fallback, then initialize the chart.
-  ensureLightweightCharts((ok) => {
-    if (!ok) {
-      // still show the placeholder and let the UI run
-      safe("chart.placeholder", () => chartManager?.load?.(chartState.symbol, chartState.timeframe));
-      return;
-    }
-    safe("chart.theme", () => chartManager?.applyThemeOrSettings?.());
-    safe("chart.series", () => chartManager?.setSeriesType?.(chartState.type));
-    safe("chart.load", () => chartManager?.load?.(chartState.symbol, chartState.timeframe));
-  });
+  // Professional mode: no external CDN loading here.
+  // If you later add a local charting library (e.g. LightweightCharts),
+  // ChartManager will detect it automatically.
+  try {
+    chartManager?.setSeriesType?.(chartState.type);
+    chartManager?.applyThemeOrSettings?.();
+    chartManager?.load?.(chartState.symbol, chartState.timeframe);
+  } catch (err) {
+    console.warn("[BOOT] chartArea", err);
+  }
 })();
 
