@@ -119,7 +119,17 @@
   <aside id="left-bar">tools</aside>
 
   <main id="chart-area">
-    <div class="chart-placeholder">
+    <!-- Chart host (Phase A/B/C) -->
+    <div id="chart-host" aria-label="Chart"></div>
+
+    <!-- Drawings overlay placeholder (we'll plug real drawings/tools later) -->
+    <div id="chart-drawings-overlay" aria-hidden="true"></div>
+
+    <!-- Status line (like TradingView) -->
+    <div id="chart-statusline" aria-live="polite"></div>
+
+    <!-- Placeholder shown until first symbol is loaded -->
+    <div class="chart-placeholder" id="chart-placeholder">
       Chart Area
       <div class="chart-sub" id="chart-sub">Click a symbol in the watchlist to load it here.</div>
     </div>
@@ -1312,6 +1322,9 @@
   </div>
 </div>
   
+<!-- Lightweight Charts (TradingView OSS library) -->
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
 <script src="./main.js"></script>
 </body>
 </html>
