@@ -202,6 +202,13 @@ html.theme-light .toggle-knob{ background: rgba(11,15,20,0.75); }
   position: relative;
 }
 
+/* Chart engine host (Lightweight Charts) */
+#tv-chart{
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
 /* Drawings/annotation overlay (future: AI lines, drawing tools, etc.) */
 #drawings-overlay{
   position: absolute;
@@ -223,6 +230,7 @@ body.drawings-hidden #drawings-overlay{ display:none; }
   color: rgba(255,255,255,0.75);
   font-weight: 700;
   gap: 10px;
+  z-index: 2;
 }
 .chart-sub {
   font-weight: 400;
