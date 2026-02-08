@@ -123,6 +123,9 @@
          Kept separate so we can add/remove layers without touching the chart itself. -->
     <div id="drawings-overlay" aria-hidden="true"></div>
 
+    <!-- Chart host (Lightweight Charts). -->
+    <div id="tv-chart" aria-label="Chart"></div>
+
     <div class="chart-placeholder">
       <div class="chart-title" id="chart-title">Chart Area</div>
       <div class="chart-sub" id="chart-sub">Click a symbol in the watchlist to load it here.</div>
@@ -1316,6 +1319,8 @@
   </div>
 </div>
   
+<!-- Chart engine (CDN). If the CDN can't load, the app still runs and shows the placeholder. -->
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script src="./main.js"></script>
 </body>
 </html>
