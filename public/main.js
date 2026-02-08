@@ -748,6 +748,14 @@ function renderWatchlistTable() {
 function loadSymbolIntoChart(symbol) {
   const list = getActiveList();
   if (chartSub) chartSub.textContent = `Loaded: ${symbol} — ${COMPANY_MAP[symbol] || "Company"} (from ${list.name})`;
+
+  // Try to render a basic chart for this symbol. If the chart engine isn't
+  // available (e.g. CDN blocked), we simply keep the placeholder text.
+  try {
+    ChartManager?.loadSymbol?.(symbol);
+  } catch (e) {
+    console.warn("[Chart] loadSymbolIntoChart", e);
+  }
 }
 
 /* ================= SYMBOL TOOLTIP ================= */
@@ -2236,6 +2244,139 @@ btnCsOk?.addEventListener("click", () => {
 
 // applique au démarrage
 applyChartSettingsToUI();
+
+/* ================= CHART AREA (Phase A) =================
+   - Uses TradingView Lightweight Charts (via CDN).
+   - If the library can't load, the rest of the app keeps working.
+   - For now we render demo candle data so the UI is ready.
+*/
+
+const ChartManager = (() => {
+  const host = document.getElementById("tv-chart");
+  const placeholder = document.getElementById("chart-placeholder");
+  let chart = null;
+  let candleSeries = null;
+  let ro = null;
+
+  function hasEngine() {
+    return typeof window !== "undefined" && window.LightweightCharts && typeof window.LightweightCharts.createChart === "function";
+  }
+
+  function ensure() {
+    if (!host) return false;
+    if (!hasEngine()) {
+      // Keep placeholder visible if the engine is missing.
+      return false;
+    }
+    if (chart) return true;
+
+    // Create chart
+    chart = window.LightweightCharts.createChart(host, {
+      layout: {
+        background: { type: "solid", color: (chartSettings?.bgColor || "#000") },
+        textColor: "rgba(255,255,255,0.85)",
+      },
+      grid: {
+        vertLines: { color: "rgba(255,255,255,0.06)" },
+        horzLines: { color: "rgba(255,255,255,0.06)" },
+      },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.10)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.10)" },
+      crosshair: { mode: 1 },
+    });
+
+    candleSeries = chart.addCandlestickSeries({
+      upColor: "#22c55e",
+      downColor: "#ef4444",
+      borderUpColor: "#22c55e",
+      borderDownColor: "#ef4444",
+      wickUpColor: "#22c55e",
+      wickDownColor: "#ef4444",
+    });
+
+    // Auto-resize when the chart area changes (dragging splitters, window resize, etc.)
+    try {
+      ro = new ResizeObserver(() => {
+        if (!chart || !host) return;
+        const rect = host.getBoundingClientRect();
+        chart.resize(Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height)));
+      });
+      ro.observe(host);
+    } catch (e) {
+      // ResizeObserver not supported - ignore.
+    }
+
+    // Force initial size
+    const rect = host.getBoundingClientRect();
+    chart.resize(Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height)));
+
+    return true;
+  }
+
+  function hidePlaceholder() {
+    if (placeholder) placeholder.style.display = "none";
+  }
+
+  function showPlaceholder(msg) {
+    if (placeholder) placeholder.style.display = "grid";
+    if (chartSub && msg) chartSub.textContent = msg;
+  }
+
+  // Generate deterministic demo candles per symbol so it looks stable.
+  function demoCandles(symbol, bars = 220) {
+    const now = Math.floor(Date.now() / 1000);
+    const day = 24 * 60 * 60;
+    const seed = Array.from(String(symbol)).reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
+    let price = 50 + (seed % 150);
+    let rng = seed;
+    const rand = () => {
+      // simple LCG
+      rng = (rng * 1664525 + 1013904223) % 4294967296;
+      return rng / 4294967296;
+    };
+    const out = [];
+    for (let i = bars - 1; i >= 0; i--) {
+      const t = now - i * day;
+      const drift = (rand() - 0.5) * 2.2;
+      const vol = 1 + rand() * 2.8;
+      const open = price;
+      const close = Math.max(1, open + drift);
+      const high = Math.max(open, close) + rand() * vol;
+      const low = Math.max(1, Math.min(open, close) - rand() * vol);
+      price = close;
+      out.push({ time: t, open, high, low, close });
+    }
+    return out;
+  }
+
+  function loadSymbol(symbol) {
+    if (!symbol) return;
+    const ok = ensure();
+    if (!ok) {
+      showPlaceholder(`Loaded: ${symbol} (chart engine not available)`);
+      return;
+    }
+    hidePlaceholder();
+    const data = demoCandles(symbol, 240);
+    candleSeries.setData(data);
+    chart.timeScale().fitContent();
+  }
+
+  function applyThemeFromSettings() {
+    if (!chart) return;
+    chart.applyOptions({
+      layout: {
+        background: { type: "solid", color: (chartSettings?.bgColor || "#000") },
+      }
+    });
+  }
+
+  return {
+    ensure,
+    loadSymbol,
+    applyThemeFromSettings,
+  };
+})();
 
 
 
